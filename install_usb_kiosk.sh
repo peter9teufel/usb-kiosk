@@ -50,4 +50,4 @@ sudo cp /etc/xdg/lxsession/LXDE/autostart /etc/xdg/lxsession/LXDE/autostart.BAK;
 sudo echo '@xset s off' > /etc/xdg/lxsession/LXDE/autostart;
 sudo echo '@xset -dpms' >> /etc/xdg/lxsession/LXDE/autostart;
 sudo echo '@xset s noblank' >> /etc/xdg/lxsession/LXDE/autostart;
-sudo echo '@chromium --kiosk --incognito http://127.0.0.1/usp-kiosk/main.html' >> /etc/xdg/lxsession/LXDE/autostart
+sudo echo '@chromium --kiosk --incognito http://127.0.0.1/usb-kiosk/main.html' >> /etc/xdg/lxsession/LXDE/autostart
