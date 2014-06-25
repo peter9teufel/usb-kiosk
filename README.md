@@ -6,7 +6,7 @@ USB Kiosk for Raspberry Pi is a small html based standalone kiosk application fo
 Once installed USB Kiosk requires no network connection and is a complete standalone solution for Full HD info screens.
 Installation
 =====
-You do not need to copy all sources to your raspberry pi by hand. Simple download the 'install_usb_kiosk.sh' script, copy it to the home directory of your 'pi' user and execute it. The script will install all required packages, load the up-to-date usb kiosk sources from the repo and setup the autostart of the kiosk application.
+You do not need to copy all sources to your raspberry pi by hand. Simple download the 'install_usb_kiosk.sh' script, copy it to the home directory of your 'pi' user and execute it. The script will install all required packages, load the up-to-date usb kiosk sources from the repo and setup the autostart of the kiosk application. The installation script has been tested on a clean Raspian Installation (version from 2014-06-20), filesystem expansion, overclocking, memory split and password modifications are not done by the install script for now. This stuff may be added when the project proceeds and has a lot more to offer. :-)
 Usage
 =====
 The USB Kiosk can be filled with content with a USB flash drive.
