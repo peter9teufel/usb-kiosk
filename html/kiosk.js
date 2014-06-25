@@ -56,5 +56,5 @@ function ease_in(){
     var img_elem = document.getElementById("bg_img");
     img_elem.style.opacity = 100;
     img_elem.style.filter = 'alpha(opacity=100)'; // IE fallback
-    timeout = setTimeout("change_image()", 10000);
+    timeout = setTimeout("change_image()", 15000);
 }

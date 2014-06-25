@@ -50,7 +50,7 @@ sudo cp /etc/xdg/lxsession/LXDE/autostart /etc/xdg/lxsession/LXDE/autostart.BAK;
 sudo echo '@xset s off' > /etc/xdg/lxsession/LXDE/autostart;
 sudo echo '@xset -dpms' >> /etc/xdg/lxsession/LXDE/autostart;
 sudo echo '@xset s noblank' >> /etc/xdg/lxsession/LXDE/autostart;
-sudo echo '@chromium --kiosk --incognito http://127.0.0.1/usb-kiosk/main.html' >> /etc/xdg/lxsession/LXDE/autostart
+sudo echo '@chromium --kiosk --incognito --disable-translate http://127.0.0.1/usb-kiosk/main.html' >> /etc/xdg/lxsession/LXDE/autostart
 
 echo 'Setup complete!';
 echo 'Please prepare a usb stick with kiosk data for first boot.';
