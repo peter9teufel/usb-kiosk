@@ -54,6 +54,5 @@ sudo echo '@chromium --kiosk --incognito --disable-translate http://127.0.0.1/us
 
 echo 'Setup complete!';
 echo 'Please prepare a usb stick with kiosk data for first boot.';
-echo 'Shutting down in 10 seconds...';
-sleep(10);
+echo 'Shutting down...';
 sudo shutdown -h now;
