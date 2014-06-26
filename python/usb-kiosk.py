@@ -2,13 +2,14 @@
 
 import os, sys, subprocess, time, shutil, Image
 
+ROOT_PATH = "/home/pi/usb-kiosk"
+HTML_ROOT_PATH = ROOT_PATH + "/html"
 USB_PATH = "/media/usb0/"
 USB_LOG_PATH = USB_PATH + 'kiosk_log'
 USB_KIOSK_PATH = USB_PATH + 'kiosk'
 USB_BACKUP_PATH = USB_PATH + 'kiosk_backup'
-KIOSK_LOG_PATH = "/home/pi/usb-kiosk/log"
-KIOSK_IMG_PATH = "/home/pi/usb-kiosk/html/img"
-KIOSK_TXT_PATH = "/home/pi/usb-kiosk/html/txt"
+KIOSK_LOG_PATH = ROOT_PATH + "/log"
+KIOSK_PAGES_PATH = HTML_ROOT_PATH + "/pages"
 
 IMAGE_EXTENSION = ('.jpg', '.jpeg', '.JPG', '.JPEG', '.png', '.PNG')
 TEXT_EXTENSION = ('.txt', '.TXT')
@@ -45,18 +46,44 @@ def KioskFilesPresent():
     # check if usb contains kiosk directory
     if os.path.isdir(USB_KIOSK_PATH):
         WriteLog("USB Kiosk directory present")
+        pagesValid = USBPagesValid()
+        if pagesValid['allPagesInvalid']:
+            # data available but all page data folders are invalid
+            return False
+        else:
+            return True
+
+def PagesUSB():
+    pages = []
+    for file in os.listdir(USB_KIOSK_PATH):
+        if os.path.isdir(USB_KIOSK_PATH + '/' + file):
+            pages.append(file)
+    return pages
+
+def USBPagesValid():
+    pages = PagesUSB()
+    pagesValid = {}
+    allValid = True
+    allInvalid = True
+    for page in pages:
         txtPresent = False
         jpgPresent = False
         # check if at least one image and a txt with info text is present
-        for file in os.listdir(USB_KIOSK_PATH):
-            WriteLog("USB - kiosk: %s" % file)
+        for file in os.listdir(USB_KIOSK_PATH + '/' + page):
+            WriteLog("USB - kiosk | page: %s File: %s" % (page,file))
             if file.endswith((IMAGE_EXTENSION)):
                 jpgPresent = True
             elif file.endswith((TEXT_EXTENSION)):
                 txtPresent = True
-        return (txtPresent and jpgPresent)
-    else:
-        return False
+        pagesValid[page] = (txtPresent and jpgPresent)
+        if not (txtPresent and jpgPresent):
+            allValid = False
+        else:
+            allInvalid = False
+    pagesValid['allPagesValid'] = allValid
+    pagesValid['allPagesInvalid'] = allInvalid
+    return pagesValid
+
 
 def UpdateKioskFiles():
     # backup current files from player on USB stick
@@ -65,21 +92,27 @@ def UpdateKioskFiles():
     BackupKioskFilesFromPlayer(USB_BACKUP_PATH)
 
     # remove old files from player
-    DeleteAllFilesInDir(KIOSK_IMG_PATH)
-    DeleteAllFilesInDir(KIOSK_TXT_PATH)
+    DeleteAllFilesInDir(KIOSK_PAGES_PATH)
 
     WriteLog("Copying files from USB to kiosk player")
-    # copy new files from USB device to kiosk player
-    for file in os.listdir(USB_KIOSK_PATH):
-        srcFile = USB_KIOSK_PATH + '/' + file
-        dstFile = ""
-        if not file.startswith(".") and file.endswith((IMAGE_EXTENSION)):
-            dstFile = KIOSK_IMG_PATH + '/' + file
-            shutil.copyfile(srcFile, dstFile)
-            OptimizeImage(dstFile)
-        elif not file.startswith(".") and file.endswith((TEXT_EXTENSION)):
-            dstFile = KIOSK_TXT_PATH + '/' + file
-            shutil.copyfile(srcFile, dstFile)
+    pages = PagesUSB()
+    pagesValid = USBPagesValid()
+
+    for page in pages:
+        if pagesValid[page]:
+            # page is valid --> create page directories and proceed
+            os.mkdir(KIOSK_PAGES_PATH + '/' + page)
+            os.mkdir(KIOSK_PAGES_PATH + '/' + page + '/img')
+            os.mkdir(KIOSK_PAGES_PATH + '/' + page + '/txt')
+            for file in os.listdir(USB_KIOSK_PATH + '/' + page):
+                srcFile = USB_KIOSK_PATH + '/' + page + '/' + file
+                if not file.startswith(".") and file.endswith((IMAGE_EXTENSION)):
+                    dstFile = KIOSK_PAGES_PATH + '/' + page + '/img/' + file
+                    shutil.copyfile(srcFile, dstFile)
+                    OptimizeImage(dstFile)
+                elif not file.startswith(".") and file.endswith((TEXT_EXTENSION)):
+                    dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
+                    shutil.copyfile(srcFile, dstFile)
     WriteLog("File update done")
 
 def DeleteAllFilesInDir(dir_path):
@@ -92,17 +125,25 @@ def DeleteAllFilesInDir(dir_path):
             os.remove(fullPath)
 
 def BackupKioskFilesFromPlayer(destPath):
-    if not os.path.isdir(destPath):
-        WriteLog("Creating path for backup: %s" % destPath)
-        os.mkdir(destPath, 755)
-    WriteLog("Backing up textfiles")
-    for file in os.listdir(KIOSK_TXT_PATH):
-        filePath = KIOSK_TXT_PATH + '/' + file
-        shutil.copy(filePath, destPath)
-    WriteLog("Backing up images")
-    for file in os.listdir(KIOSK_IMG_PATH):
-        filePath = KIOSK_IMG_PATH + '/' + file
-        shutil.copy(filePath, destPath)
+    if os.path.isdir(destPath):
+        shutil.rmtree(destPath)
+    WriteLog("Creating path for backup: %s" % destPath)
+    os.mkdir(destPath, 755)
+    WriteLog("Backing up page folders")
+    for folder in os.listdir(KIOSK_PAGES_PATH):
+        os.mkdir(destPath + '/' + folder)
+
+        # backup img folder
+        curPath = KIOSK_PAGES_PATH + '/' + folder + '/img'
+        for file in os.listdir(curPath):
+            shutil.copyfile(curPath + '/' + file, destPath + '/' + file)
+
+        # backup txt folder
+        curPath = KIOSK_PAGES_PATH + '/' + folder + '/txt'
+        for file in os.listdir(curPath):
+            shutil.copyfile(curPath + '/' + file, destPath + '/' + file)
+    WriteLog("Data backup done in " + destPath)
+
 
 def OptimizeImage(imgPath):
     WriteLog("Optimizing Image: " + imgPath)
@@ -142,12 +183,9 @@ def StartKioskMode():
 
 # Main Method
 def StartupRoutine():
-    if not os.path.isdir(KIOSK_TXT_PATH):
-        WriteLog("Creating path for kiosk txt file: %s" % KIOSK_TXT_PATH)
-        os.mkdir(KIOSK_TXT_PATH, 755)
-    if not os.path.isdir(KIOSK_IMG_PATH):
-        WriteLog("Creating path for kiosk images: %s" % KIOSK_IMG_PATH)
-        os.mkdir(KIOSK_IMG_PATH, 755)
+    if not os.path.isdir(KIOSK_PAGES_PATH):
+        WriteLog("Creating path for kiosk pages: %s" % KIOSK_PAGES_PATH)
+        os.mkdir(KIOSK_PAGES_PATH, 755)
     if UsbDrivePresent():
         WriteLog("USB device present")
         if KioskFilesPresent():
