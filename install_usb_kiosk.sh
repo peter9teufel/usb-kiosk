@@ -25,10 +25,10 @@ sudo apt-get -y install usbmount
 echo "Cloning usb-kiosk source from github"
 # clone usb-kiosk sourcefiles to /home/pi/usb-kiosk
 cd /home/pi;
-git clone https://github.com/peter9teufel/usb-kiosk.git;
+su -l pi -c 'git clone https://github.com/peter9teufel/usb-kiosk.git';
 
 # prepare page directory
-sudo mkdir /home/pi/usb-kiosk/html/pages;
+su -l pi -c 'mkdir /home/pi/usb-kiosk/html/pages';
 
 # set symbolic link from webserver root to html dir of usb-kiosk
 sudo ln -s /home/pi/usb-kiosk/html /var/www/usb-kiosk;

@@ -185,7 +185,7 @@ def StartKioskMode():
 def StartupRoutine():
     if not os.path.isdir(KIOSK_PAGES_PATH):
         WriteLog("Creating path for kiosk pages: %s" % KIOSK_PAGES_PATH)
-        os.mkdir(KIOSK_PAGES_PATH, 755)
+        os.mkdir(KIOSK_PAGES_PATH, 744)
     if UsbDrivePresent():
         WriteLog("USB device present")
         if KioskFilesPresent():
