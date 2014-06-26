@@ -147,7 +147,7 @@ def BackupKioskFilesFromPlayer(destPath):
 
 
 def OptimizeImage(imgPath):
-    WriteLog("Optimizing Image: " + imgPath)
+    WriteLog("Resizing Image: " + imgPath)
     maxW = 1920
     maxH = 1080
     if imgPath.endswith((IMAGE_EXTENSION)):
