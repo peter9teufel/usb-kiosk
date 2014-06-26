@@ -27,9 +27,8 @@ echo "Cloning usb-kiosk source from github"
 cd /home/pi;
 git clone https://github.com/peter9teufel/usb-kiosk.git;
 
-# prepare txt and img directories
-sudo mkdir /home/pi/usb-kiosk/html/img;
-sudo mkdir /home/pi/usb-kiosk/html/txt;
+# prepare page directory
+sudo mkdir /home/pi/usb-kiosk/html/pages;
 
 # set symbolic link from webserver root to html dir of usb-kiosk
 sudo ln -s /home/pi/usb-kiosk/html /var/www/usb-kiosk;
@@ -50,7 +49,7 @@ sudo cp /etc/xdg/lxsession/LXDE/autostart /etc/xdg/lxsession/LXDE/autostart.BAK;
 sudo echo '@xset s off' > /etc/xdg/lxsession/LXDE/autostart;
 sudo echo '@xset -dpms' >> /etc/xdg/lxsession/LXDE/autostart;
 sudo echo '@xset s noblank' >> /etc/xdg/lxsession/LXDE/autostart;
-sudo echo '@chromium --kiosk --incognito --disable-translate http://127.0.0.1/usb-kiosk/main.html' >> /etc/xdg/lxsession/LXDE/autostart
+sudo echo '@chromium --kiosk --incognito --disable-translate http://127.0.0.1/usb-kiosk/infoscreen.html' >> /etc/xdg/lxsession/LXDE/autostart
 
 echo 'Setup complete!';
 echo 'Please prepare a usb stick with kiosk data for first boot.';
