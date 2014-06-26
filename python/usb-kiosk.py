@@ -137,12 +137,12 @@ def BackupKioskFilesFromPlayer(destPath):
         # backup img folder
         curPath = KIOSK_PAGES_PATH + '/' + folder + '/img'
         for file in os.listdir(curPath):
-            shutil.copyfile(curPath + '/' + file, destPath + '/' + file)
+            shutil.copyfile(curPath + '/' + file, destPath + '/' + folder + '/' + file)
 
         # backup txt folder
         curPath = KIOSK_PAGES_PATH + '/' + folder + '/txt'
         for file in os.listdir(curPath):
-            shutil.copyfile(curPath + '/' + file, destPath + '/' + file)
+            shutil.copyfile(curPath + '/' + file, destPath + '/' + folder + '/' + file)
     WriteLog("Data backup done in " + destPath)
 
 
