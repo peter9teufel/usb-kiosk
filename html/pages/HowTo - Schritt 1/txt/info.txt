@@ -1,0 +1,1 @@
+Dieses kurze HowTo erklärt Ihnen wie Sie Inhalte auf Ihren Player übertragen. Nehmen Sie dazu einen leeren USB Stick (optimalerweise FAT32 formatiert) auf welchem die Inhalte für den Player vorbereitet werden.

@@ -157,26 +157,27 @@ def OptimizeImage(imgPath):
         except IOError:
             WriteLog("IOError in loading PIL image while optimizing, filling up with grey pixels...")
         w,h = img.size
-        if w/h < 1.770:
-            width = maxW
-            height = maxW * h / w
-        else:
-            height = maxH
-            width = maxH * w / h
-        img.thumbnail((width, height))
+        if w > maxW or h > maxH:
+            if w/h < 1.770:
+                width = maxW
+                height = maxW * h / w
+            else:
+                height = maxH
+                width = maxH * w / h
+            img.thumbnail((width, height))
 
-        WriteLog("Imagesize %d x %d" % (width, height))
-        if width == 1920:
-            WriteLog("Cropping height")
-            # crop upper and lower part
-            diff = height - 1080
-            img = img.crop((0,diff/2,width,height-diff/2))
-        else:
-            WriteLog("Cropping width")
-            # crop left and right part
-            diff = width - 1920
-            img = img.crop((diff/2,0,width-diff/2,height))
-        img.save(imgPath, 'JPEG', quality=90)
+            WriteLog("Imagesize %d x %d" % (width, height))
+            if width == 1920:
+                WriteLog("Cropping height")
+                # crop upper and lower part
+                diff = height - 1080
+                img = img.crop((0,diff/2,width,height-diff/2))
+            else:
+                WriteLog("Cropping width")
+                # crop left and right part
+                diff = width - 1920
+                img = img.crop((diff/2,0,width-diff/2,height))
+            img.save(imgPath, 'JPEG', quality=90)
 
 
 def StartKioskMode():

@@ -1,0 +1,1 @@
+In jeden Seitenordner geben Sie nun Ihr gewünschtes Bild (JPG oder PNG) und eine Datei mit dem Namen „info.txt“. Achten Sie wieder auf die Schreibweise des Dateinamens. In der „info.txt“ schreiben Sie den Text für die jeweilige Seite als einzelne Zeile (ohne Enter) und speichern die Datei. Jede gültige Seite braucht eine „info.txt“ und 1 Bild!

@@ -1,5 +1,8 @@
 #!/bin/sh
 
+echo "Removing preparation script..."
+sudo rm prepare_raspian.sh;
+
 echo "Removing not used wolfram engine..."
 # remove not used wolfram-engine
 sudo apt-get -y remove wolfram-engine;

@@ -1,0 +1,1 @@
+Auf dem USB Stick erstellen Sie einen Ordner mit dem Namen „kiosk“ —> achten Sie auf die richtige Schreibweise sowie darauf dass der Ordnername klein geschrieben ist! Die Daten werden aufgeteilt in einzelne Seiten in diesem Ordner gespeichert (siehe nächster Schritt).

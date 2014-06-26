@@ -1,0 +1,1 @@
+Für jede Seite legen Sie im Ordner „kiosk“ einen Unterordner mit dem Seitennamen an. Dieser Seitenname wird als Überschrift verwendet. Dieses HowTo hat z.B. die Unterordner „HowTo - Schritt 1“, „HowTo - Schritt 2“ usw. 
