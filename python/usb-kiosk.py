@@ -70,11 +70,12 @@ def USBPagesValid():
         jpgPresent = False
         # check if at least one image and a txt with info text is present
         for file in os.listdir(USB_KIOSK_PATH + '/' + page):
-            WriteLog("USB - kiosk | page: %s File: %s" % (page,file))
-            if file.endswith((IMAGE_EXTENSION)):
-                jpgPresent = True
-            elif file.endswith((TEXT_EXTENSION)):
-                txtPresent = True
+            if not file.startswith("."):
+                WriteLog("USB - kiosk | page: %s File: %s" % (page,file))
+                if file.endswith((IMAGE_EXTENSION)):
+                    jpgPresent = True
+                elif file.endswith((TEXT_EXTENSION)):
+                    txtPresent = True
         pagesValid[page] = (txtPresent and jpgPresent)
         if not (txtPresent and jpgPresent):
             allValid = False
@@ -185,7 +186,8 @@ def StartKioskMode():
 def StartupRoutine():
     if not os.path.isdir(KIOSK_PAGES_PATH):
         WriteLog("Creating path for kiosk pages: %s" % KIOSK_PAGES_PATH)
-        os.mkdir(KIOSK_PAGES_PATH, 744)
+        # os.mkdir(KIOSK_PAGES_PATH, 744)
+        os.system("su -l pi -c 'mkdir /home/pi/usb-kiosk/html/pages'")
     if UsbDrivePresent():
         WriteLog("USB device present")
         if KioskFilesPresent():
