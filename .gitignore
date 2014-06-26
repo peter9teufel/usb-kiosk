@@ -51,7 +51,3 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
-
-# image and text files
-*.jpg
-*.txt
