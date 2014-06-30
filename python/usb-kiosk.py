@@ -11,6 +11,8 @@ USB_BACKUP_PATH = USB_PATH + 'kiosk_backup'
 KIOSK_LOG_PATH = ROOT_PATH + "/log"
 KIOSK_PAGES_PATH = HTML_ROOT_PATH + "/pages"
 
+USB_LOGGING = False
+
 IMAGE_EXTENSION = ('.jpg', '.jpeg', '.JPG', '.JPEG', '.png', '.PNG')
 TEXT_EXTENSION = ('.txt', '.TXT')
 
@@ -24,14 +26,15 @@ def WriteLog(logMsg):
         os.mkdir(KIOSK_LOG_PATH, 755)
     log = open(KIOSK_LOG_PATH + '/kiosk.log', 'a')
     log.write(msg)
-    try:
-        if not os.path.isdir(USB_LOG_PATH):
-            os.mkdir(USB_LOG_PATH, 755)
-        log_usb = open(USB_LOG_PATH + '/kiosk.log', 'a')
-        log_usb.write(msg)
-        log_usb.close()
-    except:
-        log.write("%s: USB Logfile can not be opened, only local log written." % now)
+    if USB_LOGGING:
+        try:
+            if not os.path.isdir(USB_LOG_PATH):
+                os.mkdir(USB_LOG_PATH, 755)
+            log_usb = open(USB_LOG_PATH + '/kiosk.log', 'a')
+            log_usb.write(msg)
+            log_usb.close()
+        except:
+            log.write("%s: USB Logfile can not be opened, only local log written." % now)
     log.close()
 
 def UsbDrivePresent():
