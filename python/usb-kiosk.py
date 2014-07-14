@@ -113,7 +113,7 @@ def UpdateKioskFiles():
                 if not file.startswith(".") and file.endswith((IMAGE_EXTENSION)):
                     dstFile = KIOSK_PAGES_PATH + '/' + page + '/img/' + file
                     shutil.copyfile(srcFile, dstFile)
-                    OptimizeImage(dstFile)
+                    # OptimizeImage(dstFile)
                 elif not file.startswith(".") and file.endswith((TEXT_EXTENSION)):
                     dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
                     shutil.copyfile(srcFile, dstFile)
