@@ -148,6 +148,19 @@ def BackupKioskFilesFromPlayer(destPath):
             shutil.copyfile(curPath + '/' + file, destPath + '/' + folder + '/' + file)
     WriteLog("Data backup done in " + destPath)
 
+def CheckForLogoUpdate():
+    if os.path.isdir(USB_KIOSK_PATH):
+        for file in os.listdir(USB_KIOSK_PATH):
+            if file.lower().startswith('logo'):
+                WriteLog("New Logo found on USB drive, copying to kiosk player")
+                shutil.copyfile(USB_KIOSK_PATH + '/' + file, HTML_ROOT_PATH + '/' + file)
+
+def CheckForBackgroundUpdate():
+    if os.path.isdir(USB_KIOSK_PATH):
+        for file in os.listdir(USB_KIOSK_PATH):
+            if file == 'bg.jpg':
+                WriteLog("New background found on USB drive, copying to kiosk player")
+                shutil.copyfile(USB_KIOSK_PATH + '/' + file, HTML_ROOT_PATH + '/' + file)
 
 def OptimizeImage(imgPath):
     WriteLog("Resizing Image: " + imgPath)
@@ -201,6 +214,10 @@ def StartupRoutine():
             WriteLog("No kiosk files found on USB device")
             WriteLog("Backing up current files from player on USB device")
             BackupKioskFilesFromPlayer(USB_KIOSK_PATH)
+
+        # check and update logo and background
+        CheckForLogoUpdate()
+        CheckForBackgroundUpdate()
     WriteLog("Startup routine finished, starting kiosk mode...")
     WriteLog("Bye bye...")
     StartKioskMode()
