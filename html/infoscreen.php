@@ -66,21 +66,40 @@ function images($folder){
 
 
 function infotext($folder){
-    //$f = fopen("./pages/".$folder."/txt/info.txt", "r");
-    // Liest eine Zeile aus der Textdatei und gibt deren Inhalt aus
-    //$text = fgets($f);
-    $text = file_get_contents("./pages/".$folder."/txt/info.txt");
-    $lines = explode(PHP_EOL, $text);
-    $result = '';
-    foreach ($lines as $line) {
-        $result .= $line;
-        $result .= '<br>';
+    // check for available txt files in page directory
+    $dir = "./pages/".$folder."/txt";
+    $txts = array();
+    $cnt = 0;
+    if($dir_list = opendir($dir)){
+        while(($filename = readdir($dir_list)) !== false){
+            // check for '.' '..' and '.htaccess'
+            if(!startsWith($filename, ".") && $filename != "." && $filename != ".." && $filename != ".htaccess"){
+                if(!is_dir($dir . '/' . $filename) && endsWith($filename, ".txt")){
+                    // $filename points to a txt file in txt dir
+                    $text = file_get_contents($dir . "/" . $filename);
+                    $lines = explode(PHP_EOL, $text);
+                    $result = '';
+                    foreach ($lines as $line) {
+                        $result .= $line;
+                        $result .= '<br>';
+                    }
+                    array_push($txts, $result);
+                    $cnt = $cnt + 1;
+                }
+            }
+        }
     }
-    return $result;
+    $data = json_encode($txts);
+    return $data;
 }
 
 function startsWith($haystack, $needle){
     return $needle === "" || strpos($haystack, $needle) === 0;
+}
+
+function endsWith($haystack, $needle)
+{
+    return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
 }
 
 ?>
