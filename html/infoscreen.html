@@ -6,13 +6,14 @@
         <title>Kiosk</title>
         <link rel="stylesheet" type="text/css" href="css/infoscreen.css">
         <script type="text/javascript" src="infoscreen.js" ></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
     </head>
 
     <body>
         <div id="main">
             <img id="bg_img" src="bg.jpg" />
             <div id="txt_bg"></div>
-            <div id="txt">
+            <div class="resize">
                 <p class="headline" id="txt_headline"></p>
                 <p class="text" id="txt_text"></p>
             </div>
@@ -27,8 +28,7 @@
 
         <script>
             setTimeout('load()', 3000);
-            //loadInfoText();
-            //change_image();
+            var autoSizeText;
         </script>
 
     </body>

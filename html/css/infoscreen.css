@@ -29,7 +29,7 @@ html, body {
     transition: opacity 0.3s ease-in-out;
 }
 
-#txt {
+.resize {
     position: absolute;
     left: 4%;
     top: 4%;
