@@ -66,10 +66,17 @@ function images($folder){
 
 
 function infotext($folder){
-    $f = fopen("./pages/".$folder."/txt/info.txt", "r");
+    //$f = fopen("./pages/".$folder."/txt/info.txt", "r");
     // Liest eine Zeile aus der Textdatei und gibt deren Inhalt aus
-    $text = fgets($f);
-    return $text;
+    //$text = fgets($f);
+    $text = file_get_contents("./pages/".$folder."/txt/info.txt");
+    $lines = explode(PHP_EOL, $text);
+    $result = '';
+    foreach ($lines as $line) {
+        $result .= $line;
+        $result .= '<br>';
+    }
+    return $result;
 }
 
 function startsWith($haystack, $needle){
