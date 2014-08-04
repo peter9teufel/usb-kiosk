@@ -50,6 +50,7 @@ function autoSizeText() {
   _results = [];
   for (_i = 0, _len = elements.length; _i < _len; _i++) {
     el = elements[_i];
+    $(el).css('font-size', '3em')
     _results.push((function(el) {
       var resizeText, _results1;
       resizeText = function() {
