@@ -8,7 +8,7 @@ passwd pi;
 # download the raspmedia installation script and make it executable
 cd /home/pi;
 wget https://raw.githubusercontent.com/peter9teufel/usb-kiosk/master/install_usb_kiosk.sh;
-sudo chmod +x install_raspmedia.sh;
+sudo chmod +x install_usb_kiosk.sh;
 
 #
 #
