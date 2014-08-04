@@ -1,0 +1,3 @@
+No need to configure anything, no special setup, just define your pages with text files and images and the kiosk will do the rest.
+
+According to the amount of text you want on a single page the kiosk scales down the text size to ensure all your text is visible and calculates the duration the page has to be shown to be able to read everything before the next page is shown.

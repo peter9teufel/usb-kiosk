@@ -1,0 +1,5 @@
+One image is nice, two images are nicer and three images - WOW!
+
+Put multiple images on one page, the kiosk will automatically switch between them. But always keep in mind that the duration of a page depends on the amount of text it has, that means less text results in a shorter page duration.
+
+All images share the complete page duration, thus it would not be intelligent to define a page with only one sentence but 10 images ;-)

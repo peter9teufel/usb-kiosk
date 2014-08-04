@@ -1,1 +1,0 @@
-Stecken Sie den Player aus, stecken Sie den USB Stick am Player an und stecken Sie den Player wieder an. Der Player startet nun und überträgt die neuen Daten. Wenn Sie Beispieldaten benötigen stecken Sie einen leeren USB Stick an den Player und starten Sie ihn, dadurch werden die Daten am Player im richtigen Format am USB Stick für Sie abgelegt.

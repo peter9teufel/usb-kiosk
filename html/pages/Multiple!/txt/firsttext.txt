@@ -1,0 +1,3 @@
+„Multiple“ is the keyword when it comes to the file handling of the USB Kiosk system.
+
+Throw in multiple image files in each page directory, the player will load the data from the USB drive, calculate the duration for a single image to be shown on each page depending on the duration of the page itself and will switch automatically between the images of a page.
