@@ -39,6 +39,9 @@ su -l pi -c 'mkdir /home/pi/usb-kiosk/html/pages';
 # set symbolic link from webserver root to html dir of usb-kiosk
 sudo ln -s /home/pi/usb-kiosk/html /var/www/usb-kiosk;
 
+echo "Writing boot config...";
+sudo cat /home/pi/usb-kiosk/rpi_usb_kiosk_boot_config.txt > /boot/config.txt;
+
 echo "Setting up automatic update and autostart of usb-kiosk startup script"
 # modify rc.local to start kiosk at boot
 sudo head -n -2 /etc/rc.local > /home/pi/usb-kiosk/rc.local.tmp;
