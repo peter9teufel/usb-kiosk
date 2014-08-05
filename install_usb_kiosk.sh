@@ -25,6 +25,9 @@ sudo apt-get -y install chromium x11-xserver-utils unclutter;
 # install usbmount
 sudo apt-get -y install usbmount
 
+# install netifaces
+sudo apt-get -y install python-netifaces;
+
 echo "Cloning usb-kiosk source from github"
 # clone usb-kiosk sourcefiles to /home/pi/usb-kiosk
 cd /home/pi;
@@ -36,10 +39,11 @@ su -l pi -c 'mkdir /home/pi/usb-kiosk/html/pages';
 # set symbolic link from webserver root to html dir of usb-kiosk
 sudo ln -s /home/pi/usb-kiosk/html /var/www/usb-kiosk;
 
-echo "Setting up autostart of usb-kiosk startup script"
+echo "Setting up automatic update and autostart of usb-kiosk startup script"
 # modify rc.local to start kiosk at boot
 sudo head -n -2 /etc/rc.local > /home/pi/usb-kiosk/rc.local.tmp;
 sudo cat /home/pi/usb-kiosk/rc.local.tmp > /etc/rc.local;
+sudo echo 'sudo /home/pi/usb-kiosk/update_player_sh' >> /etc/rc.local;
 sudo echo 'cd /home/pi/usb-kiosk/python' >> /etc/rc.local;
 sudo echo 'sudo python usb-kiosk.py' >> /etc/rc.local;
 sudo echo 'exit 0' >> /etc/rc.local;

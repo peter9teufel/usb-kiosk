@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import os, sys, subprocess, time, shutil, Image
+import urllib2
 
 ROOT_PATH = "/home/pi/usb-kiosk"
 HTML_ROOT_PATH = ROOT_PATH + "/html"
