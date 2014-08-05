@@ -43,7 +43,7 @@ echo "Setting up automatic update and autostart of usb-kiosk startup script"
 # modify rc.local to start kiosk at boot
 sudo head -n -2 /etc/rc.local > /home/pi/usb-kiosk/rc.local.tmp;
 sudo cat /home/pi/usb-kiosk/rc.local.tmp > /etc/rc.local;
-sudo echo 'sudo /home/pi/usb-kiosk/update_player_sh' >> /etc/rc.local;
+sudo echo 'sudo /home/pi/usb-kiosk/update_player.sh' >> /etc/rc.local;
 sudo echo 'cd /home/pi/usb-kiosk/python' >> /etc/rc.local;
 sudo echo 'sudo python usb-kiosk.py' >> /etc/rc.local;
 sudo echo 'exit 0' >> /etc/rc.local;
