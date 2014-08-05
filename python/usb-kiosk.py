@@ -148,6 +148,9 @@ def BackupKioskFilesFromPlayer(destPath):
         if os.path.isdir(curPath):
             for file in os.listdir(curPath):
                 shutil.copyfile(curPath + '/' + file, destPath + '/' + folder + '/' + file)
+    WriteLog("Backing up logo and background")
+    shutil.copyfile(HTML_ROOT_PATH + '/bg.jpg', destPath + '/bg.jpg')
+    shutil.copyfile(HTML_ROOT_PATH + '/logo.png', destPath + '/logo.png')
     WriteLog("Data backup done in " + destPath)
 
 def CheckForLogoUpdate():

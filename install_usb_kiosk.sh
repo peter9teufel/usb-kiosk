@@ -43,6 +43,8 @@ sudo cat /home/pi/usb-kiosk/rc.local.tmp > /etc/rc.local;
 sudo echo 'cd /home/pi/usb-kiosk/python' >> /etc/rc.local;
 sudo echo 'sudo python usb-kiosk.py' >> /etc/rc.local;
 sudo echo 'exit 0' >> /etc/rc.local;
+# remove temp file
+sudo rm /home/pi/usb-kiosk/rc.local.tmp;
 
 echo "Setting up autostart file for LXDE desktop"
 # modify autostart file for LXDE desktop
