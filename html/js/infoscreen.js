@@ -173,6 +173,7 @@ function change_image()
     change()
 }
 
+
 function ease_out(){
     var img_elem = document.getElementById("bg_img");
     img_elem.style.opacity = 0;
