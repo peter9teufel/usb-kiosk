@@ -64,11 +64,11 @@ html, body {
 .img_div {
     background-color:rgba(250,250,250,0.5);
     position: absolute;
+    overflow: hidden;
     right: 2%;
     top: 4%;
     width: 46%;
     max-height: 87%;
-    min-height: 25%;
     padding-left: 10px;
     padding-top: 10px;
     padding-right: 10px;
