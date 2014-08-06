@@ -52,11 +52,10 @@ html, body {
 
 .img_div {
     background-color:rgba(250,250,250,0.5);
-    position: absolute;
     overflow: hidden;
     right: 2%;
-    top: 4%;
-    width: 46%;
+    top: 2%;
+    max-width: 96%;
     padding-left: 10px;
     padding-top: 10px;
     padding-right: 10px;
@@ -70,20 +69,13 @@ html, body {
     border-radius: 10px;
 }
 
-.infotext {
-    position: absolute;
-    left: 2%;
-    top: 4%;
-    width: 48%;
-    height: 93%;
-    margin: 0px;
-    overflow: hidden
-}
-
 .text {
+    float: left;
     color: #333333;
     background-color:rgba(250,250,250,0.5);
-    width: 90%;
+    top: 2%;
+    left: 2%;
+    max-width: 46%;
     max-height: 79%;
     overflow: hidden;
     padding-left: 10px;
@@ -106,8 +98,12 @@ html, body {
 .headline {
     color: #333333;
     background-color:rgba(250,250,250,0.5);
-    width: 90%;
-    height: 9%;
+    top: 4%;
+    left: 2%;
+    right: 2%;
+    width: 96%;
+    max-height: 25%;
+    overflow: hidden;
     padding-left: 10px;
     padding-top: 10px;
     padding-right: 10px;

@@ -24,9 +24,9 @@ function switchPage(){
 
         var infotext = infoJSON[0];
         var imgList = httpGet('infoscreen.php?T=IMG&PAGE='+pages[pageNr]);
-        // split the result --> future version could provide functionality for multiple images
+
+        // split the result --> provides multiple images
         var images = imgList.split(";");
-        // by now we only show the first image if multiple images are returned for a page
         var img = images[0];
 
         // set new content
@@ -34,23 +34,39 @@ function switchPage(){
         textfield.innerHTML = infotext;
         image.src = img;
 
+        // set visibility of textfield
+        if(infoJSON.length == 0 || (infoJSON.length == 1 && infotext.split(' ') == 1)){
+            // no text to show
+            textfield.style.visibility = 'hidden';
+        }else{
+            textfield.style.visibility = 'visible';
+        }
+
         // auto size text to avoid overflow
         initTextSize()
         resize()
 
         // increment pageNr and set timeout for next page switch
         pageNr++;
-        var duration = pageDuration(infoJSON);
-        setTimeout("switchPage()", duration);
 
-        // calculate duration for each image and set timeout to start image change
+        // calculate page duration --> get minimum duration needed for texts
+        var duration = pageDuration(infoJSON);
+        // split available duration for images
         var imgDuration = (duration / images.length) * 0.95;
+        // each image should be visible at least for 5 seconds
+        if(duration == 0 || imgDuration < 5000){
+            imgDuration = 5000;
+            // adjust complete duration
+            duration = images.length * 5000;
+        }
+        // calculate duration for each text
+        var txtDuration = (duration / infoJSON.length);
+
+        // set timeouts for page switch, image change and text change
+        setTimeout("switchPage()", duration);
         setTimeout(function(){
             changeImage(images, 1, imgDuration);
         }, imgDuration);
-
-        // calculate duration for each text and set timeout to start text change
-        var txtDuration = (duration / infoJSON.length);
         setTimeout(function(){
             changeText(infoJSON, 1, txtDuration);
         }, txtDuration);
@@ -107,7 +123,7 @@ function initTextSize(){
     _results = [];
     for (_i = 0, _len = elements.length; _i < _len; _i++) {
         el = elements[_i];
-        $(el).css("font-size", "30px")
+        $(el).css("font-size", "50px")
     }
 }
 
@@ -153,50 +169,4 @@ function loadPages(){
     pages = list.split(";");
     pages.sort();
     numPages = pages.length;
-}
-
-function loadInfoText(){
-    var text = httpGet('infotext.php');
-    var txtElem = document.getElementById("info_line");
-    txtElem.innerHTML = text;
-}
-
-function readFilelist(){
-    var list = httpGet('filelist.php');
-    files = list.split(";");
-    numFiles = files.length;
-}
-function change_image()
-{
-    readFilelist();
-    // ease_out();
-    change()
-}
-
-
-function ease_out(){
-    var img_elem = document.getElementById("bg_img");
-    img_elem.style.opacity = 0;
-    img_elem.style.filter = 'alpha(opacity=0)'; // IE fallback
-    timeout = setTimeout("change()", 1000);
-}
-function change(){
-    if(i==numFiles)
-    {
-        i=0;
-    }
-
-    var img=files[i];
-    var img_elem = document.getElementById("bg_img");
-    img_elem.src=img;
-    i++;
-    //setTimeout("ease_in()",1000);
-    setTimeout("change()", 15000);
-}
-
-function ease_in(){
-    var img_elem = document.getElementById("bg_img");
-    img_elem.style.opacity = 100;
-    img_elem.style.filter = 'alpha(opacity=100)'; // IE fallback
-    timeout = setTimeout("change_image()", 15000);
 }
