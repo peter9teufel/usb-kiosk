@@ -113,8 +113,10 @@ def UpdateKioskFiles():
                 srcFile = USB_KIOSK_PATH + '/' + page + '/' + file
                 if not file.startswith(".") and file.endswith((IMAGE_EXTENSION)):
                     dstFile = KIOSK_PAGES_PATH + '/' + page + '/img/' + file
-                    shutil.copyfile(srcFile, dstFile)
+                    # shutil.copyfile(srcFile, dstFile)
                     # OptimizeImage(dstFile)
+                    # fileName, basePath, destPath
+                    OptimizeAndCopyImage(file, USB_KIOSK_PATH + '/' + page, KIOSK_PAGES_PATH + '/' + page + '/img')
                 elif not file.startswith(".") and file.endswith((TEXT_EXTENSION)):
                     dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
                     shutil.copyfile(srcFile, dstFile)
@@ -168,38 +170,28 @@ def CheckForBackgroundUpdate():
                 WriteLog("New background found on USB drive, copying to kiosk player")
                 shutil.copyfile(USB_KIOSK_PATH + '/' + file, HTML_ROOT_PATH + '/' + file)
 
-def OptimizeImage(imgPath):
-    WriteLog("Resizing Image: " + imgPath)
-    maxW = 1920
-    maxH = 1080
-    if imgPath.endswith((IMAGE_EXTENSION)):
-        img = Image.open(str(imgPath))
+def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080):
+    filePath = basePath + '/' + fileName
+    destFilePath = destPath + '/' + fileName
+    if filePath.endswith((IMAGE_EXTENSION)):
+        #print "Opening image " + filePath
+        img = Image.open(str(filePath))
         try:
             img.load()
         except IOError:
-            WriteLog("IOError in loading PIL image while optimizing, filling up with grey pixels...")
+            print "IOError in loading PIL image while optimizing, filling up with grey pixels..."
+        # check exif data if image was originally rotated
+        #img = _checkOrientation(img)
         w,h = img.size
-        if w > maxW or h > maxH:
-            if w/h < 1.770:
-                width = maxW
-                height = maxW * h / w
-            else:
-                height = maxH
-                width = maxH * w / h
-            img.thumbnail((width, height))
-
-            WriteLog("Imagesize %d x %d" % (width, height))
-            if width == 1920:
-                WriteLog("Cropping height")
-                # crop upper and lower part
-                diff = height - 1080
-                img = img.crop((0,diff/2,width,height-diff/2))
-            else:
-                WriteLog("Cropping width")
-                # crop left and right part
-                diff = width - 1920
-                img = img.crop((diff/2,0,width-diff/2,height))
-            img.save(imgPath, 'JPEG', quality=90)
+        if w/h > 1.770:
+            width = maxW
+            height = maxW * h / w
+        else:
+            height = maxH
+            width = maxH * w / h
+        img.thumbnail((width, height))
+        WriteLog("Saving optimized image: %d x %d at path %s" % (width,height,destFilePath))
+        img.save(destFilePath, 'JPEG', quality=90)
 
 
 def StartKioskMode():
