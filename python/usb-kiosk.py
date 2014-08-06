@@ -191,7 +191,10 @@ def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080):
             width = maxH * w / h
         img.thumbnail((width, height))
         WriteLog("Saving optimized image: %d x %d at path %s" % (width,height,destFilePath))
-        img.save(destFilePath, 'JPEG', quality=90)
+        if(fileName.endswith('.png') of fileName.endswith('.PNG')):
+            img.save(destFilePath, 'PNG')
+        else:
+            img.save(destFilePath, 'JPEG', quality=90)
 
 
 def StartKioskMode():
