@@ -32,14 +32,20 @@ function switchPage(){
         // set new content
         headline.innerHTML =  pages[pageNr];
         textfield.innerHTML = infotext;
+        // clear previous image and set new
+        image.src = '';
         image.src = img;
 
         // set visibility of textfield
         if(infoJSON.length == 0 || (infoJSON.length == 1 && infotext.split(' ') == 1)){
             // no text to show
-            textfield.style.visibility = 'hidden';
+            textfield.style.display = 'none';
+            image.style.maxWidth = '100%';
+            image.style.maxHeight = '79%';
         }else{
-            textfield.style.visibility = 'visible';
+            textfield.style.display = 'inline';
+            image.style.maxWidth = '47.5%'
+            image.style.maxHeight = '64%';
         }
 
         // auto size text to avoid overflow
