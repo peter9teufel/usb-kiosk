@@ -83,13 +83,18 @@ function infotext($folder){
                         $result .= $line;
                         $result .= '<br>';
                     }
-                    array_push($txts, $result);
+                    $txts[$filename] = $result;
                     $cnt = $cnt + 1;
                 }
             }
         }
     }
-    $data = json_encode($txts);
+    ksort($txts);
+    $returnArray = array();
+    foreach($txts as $txt){
+        array_push($returnArray, $txt);
+    }
+    $data = json_encode($returnArray);
     return $data;
 }
 

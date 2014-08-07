@@ -37,16 +37,27 @@ function switchPage(){
         image.src = '';
         image.src = img;
 
+        if(isHeadlineTwoLined(headline)){
+            txtMaxH = '72%';
+            imgMaxH = '57%';
+            imgMaxHNoTxt = '72%';
+        }else{
+            txtMaxH = '81%';
+            imgMaxH = '66%';
+            imgMaxHNoTxt = '81%';
+        }
+
         // set visibility of textfield
         if(infoJSON.length == 0 || (infoJSON.length == 1 && infotext.split(' ') == 1)){
             // no text to show
             textfield.style.display = 'none';
             image.style.maxWidth = '100%';
-            image.style.maxHeight = '79%';
+            image.style.maxHeight = imgMaxHNoTxt;
         }else{
             textfield.style.display = 'inline';
+            textfield.style.maxHeight = txtMaxH;
             image.style.maxWidth = '48%'
-            image.style.maxHeight = '64%';
+            image.style.maxHeight = imgMaxH;
         }
 
         // auto size text to avoid overflow
@@ -78,6 +89,14 @@ function switchPage(){
             changeText(infoJSON, 1, txtDuration);
         }, txtDuration);
     }
+}
+
+function isHeadlineTwoLined(headline){
+    var hHeight = headline.offsetHeight;
+    var sHeight = screen.height;
+
+    var pHeight = (hHeight / sHeight) * 100;
+    return (pHeight > 12);
 }
 
 function pageDuration(pageTxts){
@@ -112,6 +131,10 @@ function changeText(texts, index, duration){
         var txt_div = document.getElementById("txt_text");
         txt_div.innerHTML = txt;
         index++;
+
+        // auto size text to avoid overflow
+        initTextSize()
+        resize()
 
         // only set timeout for text change if further texts to show
         if(index < texts.length){
