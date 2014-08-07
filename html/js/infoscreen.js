@@ -63,8 +63,8 @@ function switchPage(){
         // each image should be visible at least for 5 seconds
         if(duration == 0 || imgDuration < 5000){
             imgDuration = 5000;
-            // adjust complete duration
-            duration = images.length * 5000;
+            // adjust complete duration --> duration for each image plus 1 sec loading time
+            duration = (images.length * 6000);
         }
         // calculate duration for each text
         var txtDuration = (duration / infoJSON.length);
