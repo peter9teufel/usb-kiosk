@@ -25,8 +25,9 @@ function switchPage(){
         var infotext = infoJSON[0];
         var imgList = httpGet('infoscreen.php?T=IMG&PAGE='+pages[pageNr]);
 
-        // split the result --> provides multiple images
+        // split the result and sort --> provides multiple images
         var images = imgList.split(";");
+        images.sort();
         var img = images[0];
 
         // set new content
