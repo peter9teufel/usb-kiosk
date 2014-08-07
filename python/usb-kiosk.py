@@ -170,7 +170,7 @@ def CheckForBackgroundUpdate():
                 WriteLog("New background found on USB drive, copying to kiosk player")
                 shutil.copyfile(USB_KIOSK_PATH + '/' + file, HTML_ROOT_PATH + '/' + file)
 
-def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080):
+def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, minW=400, minH=400):
     filePath = basePath + '/' + fileName
     destFilePath = destPath + '/' + fileName
     if filePath.endswith((IMAGE_EXTENSION)):
@@ -183,13 +183,23 @@ def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080):
         # check exif data if image was originally rotated
         #img = _checkOrientation(img)
         w,h = img.size
-        if w/h > 1.770:
-            width = maxW
-            height = maxW * h / w
-        else:
-            height = maxH
-            width = maxH * w / h
-        img.thumbnail((width, height))
+
+        if w > maxW || h > maxH:
+            if w/h > 1.770:
+                width = maxW
+                height = maxW * h / w
+            else:
+                height = maxH
+                width = maxH * w / h
+            img.thumbnail((width, height))
+        elif w < minW || h < minH:
+            if w/h > 1.770:
+                width = minW
+                height = minW * h / w
+            else:
+                height = minH
+                width = minH * w / h
+            img.thumbnail((width, height))
         WriteLog("Saving optimized image: %d x %d at path %s" % (width,height,destFilePath))
         if(fileName.endswith('.png') or fileName.endswith('.PNG')):
             img.save(destFilePath, 'PNG')

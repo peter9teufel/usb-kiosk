@@ -45,7 +45,7 @@ function switchPage(){
             image.style.maxHeight = '79%';
         }else{
             textfield.style.display = 'inline';
-            image.style.maxWidth = '47.5%'
+            image.style.maxWidth = '48%'
             image.style.maxHeight = '64%';
         }
 
@@ -130,7 +130,7 @@ function initTextSize(){
     _results = [];
     for (_i = 0, _len = elements.length; _i < _len; _i++) {
         el = elements[_i];
-        $(el).css("font-size", "60px")
+        $(el).css("font-size", "65px")
     }
 }
 
