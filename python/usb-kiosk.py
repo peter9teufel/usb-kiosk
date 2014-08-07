@@ -200,6 +200,9 @@ def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, min
                 height = minH
                 width = minH * w / h
             img.thumbnail((width, height))
+        else:
+            width = w
+            height = h
         WriteLog("Saving optimized image: %d x %d at path %s" % (width,height,destFilePath))
         if(fileName.endswith('.png') or fileName.endswith('.PNG')):
             img.save(destFilePath, 'PNG')
