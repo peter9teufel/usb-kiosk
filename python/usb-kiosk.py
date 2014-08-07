@@ -184,7 +184,7 @@ def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, min
         #img = _checkOrientation(img)
         w,h = img.size
 
-        if w > maxW || h > maxH:
+        if w > maxW or h > maxH:
             if w/h > 1.770:
                 width = maxW
                 height = maxW * h / w
@@ -192,7 +192,7 @@ def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, min
                 height = maxH
                 width = maxH * w / h
             img.thumbnail((width, height))
-        elif w < minW || h < minH:
+        elif w < minW or h < minH:
             if w/h > 1.770:
                 width = minW
                 height = minW * h / w
