@@ -93,7 +93,8 @@ html, body {
     margin-top: 10px;
     margin-left: 10px;
     margin-right: 10px;
-    font-size: 50px;
+    font-size: 60px;
+    font-weight: bolder;
     line-height: 1.2;
     text-align: justify;
     border-style: solid;
@@ -119,7 +120,7 @@ html, body {
     margin-left: 10px;
     margin-right: 10px;
     font-weight: bolder;
-    font-size: 3.5em;
+    font-size: 4em;
     border-style: solid;
     border-width: 5px;
     border-color: rgba(0,0,0,0.45);
