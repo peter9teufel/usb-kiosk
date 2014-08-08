@@ -38,13 +38,25 @@ function switchPage(){
         image.src = img;
 
         if(isHeadlineTwoLined(headline)){
-            txtMaxH = '72%';
-            imgMaxH = '57%';
-            imgMaxHNoTxt = '72%';
+            if(screen.height < 1000){
+                txtMaxH = '69%';
+                imgMaxH = '54%';
+                imgMaxHNoTxt = '69%';
+            }else{
+                txtMaxH = '72%';
+                imgMaxH = '57%';
+                imgMaxHNoTxt = '72%';
+            }
         }else{
-            txtMaxH = '81%';
-            imgMaxH = '66%';
-            imgMaxHNoTxt = '81%';
+            if(screen.height < 1000){
+                txtMaxH = '79%';
+                imgMaxH = '64%';
+                imgMaxHNoTxt = '79%';
+            }else{
+                txtMaxH = '81%';
+                imgMaxH = '66%';
+                imgMaxHNoTxt = '81%';
+            }
         }
 
         // set visibility of textfield
