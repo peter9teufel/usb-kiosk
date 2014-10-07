@@ -28,6 +28,9 @@ sudo apt-get -y install usbmount
 # install netifaces
 sudo apt-get -y install python-netifaces;
 
+# install mplayer for webradio playback
+sudo apt-get -y install mplayer;
+
 echo "Cloning usb-kiosk source from github"
 # clone usb-kiosk sourcefiles to /home/pi/usb-kiosk
 cd /home/pi;

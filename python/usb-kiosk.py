@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import os, sys, subprocess, time, shutil, Image
+import os, sys, subprocess, time, shutil, Image, threading
 import urllib2
 
 ROOT_PATH = "/home/pi/usb-kiosk"
@@ -16,6 +16,7 @@ USB_LOGGING = False
 
 IMAGE_EXTENSION = ('.jpg', '.jpeg', '.JPG', '.JPEG', '.png', '.PNG')
 TEXT_EXTENSION = ('.txt', '.TXT')
+STREAM_ENDING = ('.nsv', '.m3u', '.pls')
 
 def WriteLog(logMsg):
 
@@ -99,6 +100,12 @@ def UpdateKioskFiles():
     # remove old files from player
     DeleteAllFilesInDir(KIOSK_PAGES_PATH)
 
+    # remove old stream info if present
+    streamfile = HTML_ROOT_PATH + '/stream.txt'
+    if os.path.isfile(streamfile):
+        os.remove(streamfile)
+
+
     WriteLog("Copying files from USB to kiosk player")
     pages = PagesUSB()
     pagesValid = USBPagesValid()
@@ -118,7 +125,10 @@ def UpdateKioskFiles():
                     # fileName, basePath, destPath
                     OptimizeAndCopyImage(file, USB_KIOSK_PATH + '/' + page, KIOSK_PAGES_PATH + '/' + page + '/img')
                 elif not file.startswith(".") and file.endswith((TEXT_EXTENSION)):
-                    dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
+                    if file == 'stream.txt':
+                        dstFile = HTML_ROOT_PATH + '/' + file
+                    else:
+                        dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
                     shutil.copyfile(srcFile, dstFile)
     WriteLog("File update done")
 
@@ -151,7 +161,10 @@ def BackupKioskFilesFromPlayer(destPath):
         if os.path.isdir(curPath):
             for file in os.listdir(curPath):
                 shutil.copyfile(curPath + '/' + file, destPath + '/' + folder + '/' + file)
-    WriteLog("Backing up logo and background")
+    WriteLog("Backing up streamfile, logo and background")
+    streamfile = HTML_ROOT_PATH + '/stream.txt'
+    if os.path.isfile(streamfile):
+        shutil.copyfile(streamfile, destPath + '/stream.txt')
     shutil.copyfile(HTML_ROOT_PATH + '/bg.jpg', destPath + '/bg.jpg')
     shutil.copyfile(HTML_ROOT_PATH + '/logo.png', destPath + '/logo.png')
     WriteLog("Data backup done in " + destPath)
@@ -209,9 +222,35 @@ def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, min
         else:
             img.save(destFilePath, 'JPEG', quality=90)
 
+def GetStreamAddr():
+    streamAddr = ""
+    fname = KIOSK_PAGES_PATH + '/stream.txt'
+    if os.path.isfile(fname):
+        content = []
+        with open(fname) as f:
+            content = f.readlines()
+        for line in content:
+            if not line.startswith('#') and line.endswith((STREAM_ENDING)):
+                streamAddr = line
+    return streamAddr
 
 def StartKioskMode():
     os.system("su -l pi -c 'startx'")
+
+def StartWebradioStream():
+    streamAddr = GetStreamAddr()
+    print "Stream address from stream.txt: ",streamAddr
+    if len(streamAddr) > 0:
+        cmd = ""
+        if 'apasf.apa.at:8000' in streamAddr:
+            # ORF stream address, needs to be handled with omxplayer
+            cmd = "omxplayer " + streamAddr
+        elif streamAddr.endswith('pls') or streamAddr.endswith('m3u'):
+            # normal m3u or pls stream address, can be player using mplayer
+            cmd = "mplayer -playlist " + streamAddr
+
+        print "Starting live stream with command: ", cmd
+        os.system(cmd)
 
 # Main Method
 def StartupRoutine():
@@ -234,6 +273,11 @@ def StartupRoutine():
         CheckForBackgroundUpdate()
     WriteLog("Startup routine finished, starting kiosk mode...")
     WriteLog("Bye bye...")
+
+
+    # start webradio stream in separate thread
+    t = threading.Thread(target=StartWebradioStream)
+    t.start()
     StartKioskMode()
 
 
