@@ -125,11 +125,11 @@ def UpdateKioskFiles():
                     # fileName, basePath, destPath
                     OptimizeAndCopyImage(file, USB_KIOSK_PATH + '/' + page, KIOSK_PAGES_PATH + '/' + page + '/img')
                 elif not file.startswith(".") and file.endswith((TEXT_EXTENSION)):
-                    if file == 'stream.txt':
-                        dstFile = HTML_ROOT_PATH + '/' + file
-                    else:
-                        dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
+                    dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
                     shutil.copyfile(srcFile, dstFile)
+    if os.path.isfile(USB_KIOSK_PATH + '/stream.txt'):
+        print "Copying stream address file..."
+        dstFile = HTML_ROOT_PATH + '/' + file
     WriteLog("File update done")
 
 def DeleteAllFilesInDir(dir_path):
@@ -230,7 +230,7 @@ def GetStreamAddr():
         with open(fname) as f:
             content = f.readlines()
         for line in content:
-            if not line.startswith('#') and line.endswith((STREAM_ENDING)):
+            if len(line) > 0 and not line.startswith('#') and line.endswith((STREAM_ENDING)):
                 streamAddr = line
     return streamAddr
 
