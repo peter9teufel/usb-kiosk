@@ -46,6 +46,12 @@ class KioskNotebook(wx.Notebook):
         self.Show()
 
     def Close(self):
+        from os.path import expanduser
+        home = expanduser("~")
+        appPath = home + '/.usb_kiosk/'
+        tmpPath = appPath + 'tmp/'
+        if os.path.isdir(tmpPath):
+            shutil.rmtree(tmpPath)
         self.Destroy()
 
     def UpdatePageName(self, oldName, newName):
@@ -69,6 +75,11 @@ class KioskNotebook(wx.Notebook):
         newPage = editPanel.KioskEditorPanel(self,-1,"New Page",self.GetPageCount(),HOST_SYS)
         self.pages.append(newPage)
         self.AddPage(newPage, "New Page")
+
+    def AddKioskPage(self, title, texts, images):
+        page = editPanel.KioskEditorPanel(self,-1,title,self.GetPageCount(),HOST_SYS,texts,images)
+        self.pages.append(page)
+        self.AddPage(page, title)
 
     def OnPageChanged(self, event):
         global HOST_SYS

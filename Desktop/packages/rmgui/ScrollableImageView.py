@@ -24,6 +24,9 @@ class ScrollableImageView(scrolled.ScrolledPanel):
 
     def AddImage(self,imagePath):
         self.images.append(imagePath)
+        self.UpdateImages()
+
+    def UpdateImages(self):
         self.mainSizer.Clear(True)
         self.__LoadImages()
         self.LayoutAndScroll()
@@ -39,17 +42,30 @@ class ScrollableImageView(scrolled.ScrolledPanel):
         images = []
 
         # load images and determine needed height for sizer
+        cnt = 0
         for imgPath in self.images:
             # get resized version of current image and save it temporary
             curImg = self.__ScaleImage(imgPath, imgWidth)
             curImgCtrl = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(curImg))
-            # print "Adding image in scrollable view at position (%d,%d)" % (row,col)
+            curImgCtrl.Bind(wx.EVT_LEFT_DOWN, lambda event, index=cnt: self.ImageClicked(event,index))
             self.mainSizer.Add(curImgCtrl,(row,col), flag=wx.ALL, border=2)
 
             # position for next image
             col = (col + 1) % self.cols
             if col == 0:
                 row += 1
+
+    def ImageClicked(self, event, index):
+        wx.CallAfter(self.__ImageDeletion, index)
+
+
+    def __ImageDeletion(self, index):
+        dlg = wx.MessageDialog(self, "Delete image?", "Delete image?", style=wx.YES_NO|wx.ICON_QUESTION)
+        if dlg.ShowModal() == wx.ID_YES:
+            del self.images[index]
+            self.UpdateImages()
+            self.parent.ImageDeleted(index)
+
 
     def __ScaleImage(self, imgPath, width):
         #img = wx.Image(imgPath)

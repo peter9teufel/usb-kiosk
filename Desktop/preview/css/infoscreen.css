@@ -1,0 +1,127 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+*{
+    font-family: 'josefin_sansregular';
+    /*font-family: 'poiret_oneregular';*/
+    /*font-family: 'open_sanscondensed_light';*/
+}
+
+#main {
+    z-index: -1000;
+    width: 960px;
+    height: 540px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #FFFFFF;
+}
+
+#bg_img {
+    z-index: -999;
+    width: 960px;
+    height: 540px;
+    opacity: 1;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+
+#info_img_id {
+    max-width: 100%;
+    max-height: 100%;
+    /*border-radius: 10px;*/
+}
+
+#logo_div{
+    background-color: rgba(70,70,70,1);
+    width: 10%;
+    height: auto;
+    position: absolute;
+    right: 1%;
+    bottom: 1%;
+    padding: 0.3%;
+    border-radius: 8px;
+}
+
+#logo{
+    width: 100%;
+    height: auto;
+}
+
+.content_wrapper {
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+.img_div {
+    background-color:rgba(250,250,250,0.5);
+    overflow: hidden;
+    top: 2%;
+    max-width: 47%;
+    max-height: 64%;
+    margin-top: 1%;
+    margin-right: 1%;
+    margin-bottom: 10px;
+    border-style: solid;
+    border-width: 5px;
+    border-color: rgba(0,0,0,0.4);
+    border-radius: 20px;
+}
+
+.text {
+    float: left;
+    color: #333333;
+    background-color:rgba(250,250,250,0.7);
+    top: 2%;
+    left: 2%;
+    width: 45%;
+    max-height: 74%;
+    overflow: hidden;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    margin-top: 1%;
+    margin-left: 1%;
+    font-size: 32px;
+    font-weight: bolder;
+    line-height: 1.2;
+    text-align: justify;
+    border-style: solid;
+    border-width: 5px;
+    border-color: rgba(0,0,0,0.4);
+    border-radius: 20px;
+}
+
+.headline {
+    color: #333333;
+    background-color:rgba(250,250,250,0.7);
+    top: 4%;
+    left: 2%;
+    right: 2%;
+    width: 94%;
+    max-height: 20%;
+    overflow: hidden;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    margin-top: 1%;
+    margin-left: 1%;
+    margin-right: 1%;
+    font-weight: bolder;
+    font-size: 2em;
+    border-style: solid;
+    border-width: 5px;
+    border-color: rgba(0,0,0,0.4);
+    border-radius: 20px;
+}​
