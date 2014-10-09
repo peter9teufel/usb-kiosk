@@ -105,7 +105,6 @@ def UpdateKioskFiles():
     if os.path.isfile(streamfile):
         os.remove(streamfile)
 
-
     WriteLog("Copying files from USB to kiosk player")
     pages = PagesUSB()
     pagesValid = USBPagesValid()

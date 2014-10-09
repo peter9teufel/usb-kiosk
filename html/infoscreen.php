@@ -28,10 +28,12 @@ function pages(){
             // check for '.' '..''.htaccess'
             if(!startsWith($filename, ".") && $filename != "." && $filename != ".." && $filename != ".htaccess"){
                 if(is_dir($dir . '/' . $filename)){
+                    // page directory --> read headline.txt inside that directory
+                    $text = file_get_contents($dir . "/" . $filename . "/headline.txt");
                     if($cnt > 0){
                         $result .= ";";
                     }
-                    $result .= $filename;
+                    $result .= $text;
                     //array_push($files, $filename);
                     $cnt = $cnt + 1;
                 }

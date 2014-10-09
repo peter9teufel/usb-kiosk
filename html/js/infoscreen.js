@@ -49,13 +49,13 @@ function switchPage(){
             }
         }else{
             if(screen.height < 1000){
-                txtMaxH = '79%';
+                txtMaxH = '74%';
                 imgMaxH = '64%';
-                imgMaxHNoTxt = '79%';
+                imgMaxHNoTxt = '74%';
             }else{
-                txtMaxH = '81%';
-                imgMaxH = '66%';
-                imgMaxHNoTxt = '81%';
+                txtMaxH = '74%';
+                imgMaxH = '64%';
+                imgMaxHNoTxt = '74%';
             }
         }
 
