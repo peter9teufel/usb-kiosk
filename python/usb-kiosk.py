@@ -182,13 +182,9 @@ def CheckForBackgroundUpdate():
         for file in os.listdir(USB_KIOSK_PATH):
             if file == 'bg.jpg':
                 WriteLog("New background found on USB drive, copying to kiosk player")
-                OptimizeAndCopyImage(file, USB_KIOSK_PATH, HTML_ROOT_PATH, crop=True)
-                shutil.copyfile(USB_KIOSK_PATH + '/' + file, HTML_ROOT_PATH + '/' + file)
+                _optimizeCrop(file, USB_KIOSK_PATH, HTML_ROOT_PATH, 1920, 1080)
 
-
-
-
-def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, minW=400, minH=400, crop=False):
+def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, minW=400, minH=400):
     filePath = basePath + '/' + fileName
     destFilePath = destPath + '/' + fileName
     if filePath.endswith((IMAGE_EXTENSION)):
@@ -227,20 +223,45 @@ def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, min
         else:
             width = w
             height = h
-        if crop:
-            if width == maxW:
-                # crop upper and lower part
-                diff = height - maxH
-                img = img.crop((0,diff/2,width,height-diff/2))
-            else:
-                # crop left and right part
-                diff = width - maxW
-                img = img.crop((diff/2,0,width-diff/2,height))
         WriteLog("Saving optimized image: %d x %d at path %s" % (width,height,destFilePath))
         if(fileName.endswith('.png') or fileName.endswith('.PNG')):
             img.save(destFilePath, 'PNG')
         else:
             img.save(destFilePath, 'JPEG', quality=90)
+
+def _optimizeCrop(fileName, basePath, destPath, maxW, maxH):
+    filePath = basePath + '/' + fileName
+    destFilePath = destPath + '/' + fileName
+    if filePath.endswith((SUPPORTED_IMAGE_EXTENSIONS)):
+        #print "Opening image " + filePath
+        img = Image.open(str(filePath))
+        try:
+            img.load()
+        except IOError:
+            print "IOError in loading PIL image while optimizing, filling up with grey pixels..."
+        maxW = 1920
+        maxH = 1080
+        w,h = img.size
+        if w/h < 1.770:
+            width = maxW
+            height = maxW * h / w
+        else:
+            height = maxH
+            width = maxH * w / h
+        if width < w and height < h:
+            img.thumbnail((width,height), Image.ANTIALIAS)
+        else:
+            img = img.resize((width, height), Image.ANTIALIAS)
+        if width == 1920:
+            # crop upper and lower part
+            diff = height - 1080
+            img = img.crop((0,diff/2,width,height-diff/2))
+        else:
+            # crop left and right part
+            diff = width - 1920
+            img = img.crop((diff/2,0,width-diff/2,height))
+        img.save(destFilePath, quality=100)
+
 
 def GetStreamAddr():
     streamAddr = ""
