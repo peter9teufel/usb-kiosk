@@ -29,7 +29,7 @@ function pages(){
             if(!startsWith($filename, ".") && $filename != "." && $filename != ".." && $filename != ".htaccess"){
                 if(is_dir($dir . '/' . $filename)){
                     // page directory --> read headline.txt inside that directory
-                    $text = file_get_contents($dir . "/" . $filename . "/headline.txt");
+                    $text = file_get_contents($dir . "/" . $filename . "/txt/headline.txt");
                     if($cnt > 0){
                         $result .= ";";
                     }
@@ -76,7 +76,7 @@ function infotext($folder){
         while(($filename = readdir($dir_list)) !== false){
             // check for '.' '..' and '.htaccess'
             if(!startsWith($filename, ".") && $filename != "." && $filename != ".." && $filename != ".htaccess"){
-                if(!is_dir($dir . '/' . $filename) && endsWith($filename, ".txt")){
+                if(!is_dir($dir . '/' . $filename) && $filename != "headline.txt" &&  endsWith($filename, ".txt")){
                     // $filename points to a txt file in txt dir
                     $text = file_get_contents($dir . "/" . $filename);
                     $lines = explode(PHP_EOL, $text);

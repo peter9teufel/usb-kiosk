@@ -19,11 +19,11 @@ function switchPage(){
         var textfield = document.getElementById("txt_text");
         var image = document.getElementById("info_img");
 
-        var infotexts = httpGet('infoscreen.php?T=TXT&PAGE='+pages[pageNr]);
+        var infotexts = httpGet('infoscreen.php?T=TXT&PAGE=page'+(pageNr+1));
         var infoJSON = JSON.parse(infotexts);
 
         var infotext = infoJSON[0];
-        var imgList = httpGet('infoscreen.php?T=IMG&PAGE='+pages[pageNr]);
+        var imgList = httpGet('infoscreen.php?T=IMG&PAGE=page'+(pageNr+1));
 
         // split the result and sort --> provides multiple images
         var images = imgList.split(";");
