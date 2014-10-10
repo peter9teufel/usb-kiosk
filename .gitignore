@@ -57,3 +57,8 @@ docs/_build/
 *.png
 *.txt
 html/pages
+
+# MP3 directory and files
+html/mp3
+*.mp3
+
