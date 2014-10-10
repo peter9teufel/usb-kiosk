@@ -68,13 +68,17 @@ class KioskEditorPanel(wx.Panel):
             self.LoadData()
 
     def Initialize(self):
+
+        mainBox = wx.StaticBox(self,-1,"Setup texts and images")
+        mainBoxSizer = wx.StaticBoxSizer(mainBox, wx.VERTICAL)
+
         # page name entry
         nameLabel = wx.StaticText(self,-1,label="Page Headline")
         self.nameCtrl = wx.TextCtrl(self,-1,value=self.title,size=(350,22))
         # text definition
-        addText = wx.Button(self,-1,label="Add Text")
+        addText = wx.Button(mainBox,-1,label="Add Text")
         addText.SetName('add_txt')
-        self.textList = wx.ListCtrl(self,-1,size=(200,350),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.textList = wx.ListCtrl(mainBox,-1,size=(200,350),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         self.textList.SetName('txt_list')
         self.textList.Show(True)
         self.textList.InsertColumn(0,"Added texts", width = 180)
@@ -85,8 +89,8 @@ class KioskEditorPanel(wx.Panel):
             cnt += 1;
 
         # image definition
-        addImg = wx.Button(self,-1,label="Add Image")
-        self.imgPreview = siv.ScrollableImageView(self,-1,size=(300,350),images=[],cols=1)
+        addImg = wx.Button(mainBox,-1,label="Add Image")
+        self.imgPreview = siv.ScrollableImageView(mainBox,-1,size=(300,350),images=[],cols=1)
         for img in self.images:
             self.imgPreview.AddImage(img)
 
@@ -117,11 +121,10 @@ class KioskEditorPanel(wx.Panel):
         headlineSizer.Add(nameLabel, flag=wx.LEFT|wx.TOP, border=5)
         headlineSizer.Add(self.nameCtrl,flag=wx.LEFT|wx.RIGHT,border=5)
 
-        mainBox = wx.StaticBox(self,-1,"Setup texts and images")
-        mainBoxSizer = wx.StaticBoxSizer(mainBox, wx.VERTICAL)
+
 
         #mainBoxSizer.Add(headlineSizer,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.TOP, border = 10)
-        mainBoxSizer.Add(contentSizer,flag=wx.TOP|wx.ALIGN_CENTER_HORIZONTAL,border=20)
+        mainBoxSizer.Add(contentSizer,flag=wx.ALIGN_CENTER_HORIZONTAL)
         #mainBoxSizer.Add(preview,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
 
         self.mainSizer.Add(headlineSizer,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.TOP, border = 10)

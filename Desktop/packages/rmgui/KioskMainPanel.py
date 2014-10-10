@@ -70,23 +70,29 @@ class KioskMainPanel(wx.Panel):
 
     def Initialize(self):
 
+        imgBox = wx.StaticBox(self,-1,"Background and Logo")
+        imgSizer = wx.StaticBoxSizer(imgBox)
+
+        self.audioBox = wx.StaticBox(self,-1,"Background Music")
+        audioSizer = wx.StaticBoxSizer(self.audioBox,wx.VERTICAL)
+
         # Background selection
-        bg = wx.Button(self,-1,label="Background")
+        bg = wx.Button(imgBox,-1,label="Background")
         bgImg = wx.EmptyImage(200,200)
         # create bitmap with preview png
-        self.bgCtrl = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(bgImg))
+        self.bgCtrl = wx.StaticBitmap(imgBox, wx.ID_ANY, wx.BitmapFromImage(bgImg))
         self._SetImagePreview('img/preview.png')
 
         # Logo selection
-        logo = wx.Button(self,-1,label="Logo")
+        logo = wx.Button(imgBox,-1,label="Logo")
         logoImg = wx.EmptyImage(200,200)
-        self.logoCtrl = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(logoImg))
+        self.logoCtrl = wx.StaticBitmap(imgBox, wx.ID_ANY, wx.BitmapFromImage(logoImg))
         self._SetImagePreview('img/preview.png',logo=True)
 
         # background music
-        self.musicChk = wx.CheckBox(self,-1,label="Enable Background Music")
-        self.addSong = wx.Button(self,-1,label="Add Song(s)")
-        self.songList = wx.ListCtrl(self,-1,size=(500,300),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.musicChk = wx.CheckBox(self.audioBox,-1,label="Enable Background Music")
+        self.addSong = wx.Button(self.audioBox,-1,label="Add Song(s)")
+        self.songList = wx.ListCtrl(self.audioBox,-1,size=(500,300),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         self.songList.Show(True)
         self.songList.InsertColumn(0,tr("filename"), width = 200)
         self.songList.InsertColumn(1,"Path", width = 280)
@@ -102,28 +108,29 @@ class KioskMainPanel(wx.Panel):
         createUsb.Bind(wx.EVT_BUTTON, self.WaitForUSBForCreation)
         loadFromUsb.Bind(wx.EVT_BUTTON, self.WaitForUSBForLoading)
         exitBtn.Bind(wx.EVT_BUTTON, self.parent.parent.Close)
+        self.songList.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.SongItemRightClicked)
         self.musicChk.Bind(wx.EVT_CHECKBOX, self.MusicCheckboxToggled)
         self.addSong.Bind(wx.EVT_BUTTON, self.ShowSongSelection)
         self.MusicCheckboxToggled()
 
         # Create and add sizers to main sizer
         # Sizer for BACKGROUND and LOGO selection
-        imgBox = wx.StaticBox(self,-1,"Background and Logo")
-        imgSizer = wx.StaticBoxSizer(imgBox)
+
         bgSizer = wx.BoxSizer(wx.VERTICAL)
         logoSizer = wx.BoxSizer(wx.VERTICAL)
         bgSizer.Add(bg,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=5)
         bgSizer.Add(self.bgCtrl,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=5)
-        logoSizer.Add(logo,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=80)
-        logoSizer.Add(self.logoCtrl,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=80)
+        logoSizer.Add(logo,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=70)
+        logoSizer.Add(self.logoCtrl,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=70)
         imgSizer.Add(bgSizer)
         imgSizer.Add(logoSizer)
         # Sizer for AUDIO selection
-        audioBox = wx.StaticBox(self,-1,"Background Music")
-        audioSizer = wx.StaticBoxSizer(audioBox,wx.VERTICAL)
-        audioSizer.Add(self.musicChk,flag=wx.TOP|wx.LEFT,border=5)
-        audioSizer.Add(self.addSong,flag=wx.TOP|wx.LEFT,border=5)
-        audioSizer.Add(self.songList,flag=wx.TOP|wx.LEFT,border=5)
+        audioSizer.Add(self.musicChk,flag=wx.ALL,border=5)
+        audioSizer.Add(self.addSong,flag=wx.ALL,border=5)
+        audioSizer.Add(self.songList,flag=wx.ALL,border=5)
+
+        imgSizer.Layout()
+        audioSizer.Layout()
 
         # button sizer
         btnSizer = wx.BoxSizer()
@@ -133,9 +140,9 @@ class KioskMainPanel(wx.Panel):
 
         # add to main sizer
         contentSizer = wx.BoxSizer(wx.VERTICAL)
-        contentSizer.Add(imgSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
-        contentSizer.Add(audioSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
-        self.mainSizer.Add(contentSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=10)
+        contentSizer.Add(imgSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
+        contentSizer.Add(audioSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
+        self.mainSizer.Add(contentSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
         self.mainSizer.Add(btnSizer, flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
         self.SetSizer(self.mainSizer)
         #self.LayoutAndFit()
@@ -171,10 +178,38 @@ class KioskMainPanel(wx.Panel):
             self.musicChk.SetValue(checked)
         if checked:
             self.addSong.Enable()
-            self.songList.Enable()
+            #self.songList.Enable()
         else:
             self.addSong.Disable()
-            self.songList.Disable()
+            #self.songList.Disable()
+
+    def SongItemRightClicked(self, event):
+        global HOST_SYS
+        file = event.GetText()
+        menu = wx.Menu()
+        item = menu.Append(wx.NewId(), "Delete")
+        self.Bind(wx.EVT_MENU, self.DeleteSelectedSongItem, item)
+
+        boxRect = self.audioBox.GetRect()
+        rect = self.songList.GetRect()
+        origin = (boxRect[0]+rect[0],boxRect[1]+rect[1])
+        point = event.GetPoint()
+        if HOST_SYS == HOST_WIN:
+            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+20))
+        else:
+            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+40))
+        menu.Destroy()
+
+    def DeleteSelectedSongItem(self, event=None):
+        index = self.songList.GetFirstSelected()
+        while self.songList.GetItemCount() > 0:
+            self.songList.DeleteItem(0)
+        del self.songs[index]
+
+        for file in self.songs:
+            filename = os.path.basename(file)
+            idx = self.songList.InsertStringItem(self.songList.GetItemCount(), filename)
+            self.songList.SetStringItem(idx,1,file[:-len(filename)])
 
     def ShowSongSelection(self, event):
         songDialog = wx.FileDialog(self, "Select MP3 files", "", "", "MP3 files (*.mp3)|*.mp3", wx.FD_OPEN | wx.FD_MULTIPLE)
