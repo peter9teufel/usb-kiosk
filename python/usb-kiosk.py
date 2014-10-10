@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import os, sys, subprocess, time, shutil, Image, threading
+import os, sys, subprocess, time, shutil, Image, threading, random
 import urllib2
 
 ROOT_PATH = "/home/pi/usb-kiosk"
@@ -127,10 +127,17 @@ def UpdateKioskFiles():
                     dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
                     shutil.copyfile(srcFile, dstFile)
     if os.path.isfile(USB_KIOSK_PATH + '/stream.txt'):
-        print "Copying stream address file..."
         dstFile = HTML_ROOT_PATH + '/stream.txt'
 	srcFile = USB_KIOSK_PATH + '/stream.txt'
 	shutil.copyfile(srcFile, dstFile)
+    mp3Path = USB_KIOSK_PATH + '/mp3/'
+    if os.path.isdir(mp3Path):
+        mp3Dest = HTML_ROOT_PATH + '/mp3/'
+        if os.path.isdir(mp3Dest):
+            WriteLog("Cleaning up old MP3 files...")
+            shutil.rmtree(mp3Dest)
+        WriteLog("Copying MP3 directory to your player...")
+        shutil.copytree(mp3Path, mp3Dest)
     WriteLog("File update done")
 
 def DeleteAllFilesInDir(dir_path):
@@ -168,6 +175,11 @@ def BackupKioskFilesFromPlayer(destPath):
         shutil.copyfile(streamfile, destPath + '/stream.txt')
     shutil.copyfile(HTML_ROOT_PATH + '/bg.jpg', destPath + '/bg.jpg')
     shutil.copyfile(HTML_ROOT_PATH + '/logo.png', destPath + '/logo.png')
+    mp3Path = HTML_ROOT_PATH + '/mp3/'
+    if os.path.isdir(mp3Path):
+        WriteLog("Backing up MP3 directory...")
+        shutil.copytree(mp3Path, destPath + '/mp3/')
+
     WriteLog("Data backup done in " + destPath)
 
 def CheckForLogoUpdate():
@@ -296,6 +308,27 @@ def StartWebradioStream():
         print "Starting live stream with command: ", cmd
         os.system(cmd)
 
+def StartBackgroundMusicThread():
+    mp3Path = HTML_ROOT_PATH + '/mp3/'
+    if os.path.isdir(mp3Path) and len(os.listdir(mp3Path)) > 1:
+        # mp3 directory with files found -> use for background music service
+        mp3s = []
+        for f in os.listdir(mp3Path):
+            if f.endswith('.mp3'):
+                mp3s.append(f)
+        # shuffle the list of mp3 files
+        random.shuffle(mp3s)
+        # write playlist file for mplayer
+        playlist = open(mp3Path + 'playlist.pls', 'w')
+        for mp3 in mp3s:
+            playlist.write(mp3 + '\n')
+        playlist.close()
+        # play the playlist in endless loop
+        os.system("mplayer -playlist " + mp3Path + "playlist.pls -loop 0")
+    else:
+        # no mp3 directory, start webradio stream if address is set
+        StartWebradioStream()
+
 # Main Method
 def StartupRoutine():
     if not os.path.isdir(KIOSK_PAGES_PATH):
@@ -320,7 +353,7 @@ def StartupRoutine():
 
 
     # start webradio stream in separate thread
-    t = threading.Thread(target=StartWebradioStream)
+    t = threading.Thread(target=StartBackgroundMusicThread)
     t.start()
     StartKioskMode()
 
