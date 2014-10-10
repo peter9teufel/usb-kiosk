@@ -92,7 +92,7 @@ class KioskNotebook(wx.Notebook):
 
     def AddNewPage(self, event=None):
         newIndex = self.GetPageCount()
-        newPage = editPanel.KioskEditorPanel(self,-1,"New Page",newIndex,HOST_SYS)
+        newPage = editPanel.KioskEditorPanel(self,-1,"New Page",newIndex,HOST_SYS,[],[])
         self.pages.append(newPage)
         self.InsertPage(self.GetPageCount()-1,newPage, "New Page",select=True)
 
