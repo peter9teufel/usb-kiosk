@@ -244,7 +244,7 @@ def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, min
 def _optimizeCrop(fileName, basePath, destPath, maxW, maxH):
     filePath = basePath + '/' + fileName
     destFilePath = destPath + '/' + fileName
-    if filePath.endswith((SUPPORTED_IMAGE_EXTENSIONS)):
+    if filePath.endswith((IMAGE_EXTENSION)):
         #print "Opening image " + filePath
         img = Image.open(str(filePath))
         try:
