@@ -19,8 +19,12 @@ class AppFrame(wx.Frame):
         BASE_PATH = base_path
         self.Bind(wx.EVT_CLOSE, self.Close)
         self.SetupMenuBar()
+        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.notebook = kNotebook.KioskNotebook(self,-1,None)
+        self.mainSizer.Add(self.notebook, 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
+        self.SetSizerAndFit(self.mainSizer)
         self.Center()
+        self.Maximize()
         self.Show()
 
     def Close(self, event=None):

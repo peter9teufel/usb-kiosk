@@ -41,8 +41,12 @@ class KioskNotebook(wx.Notebook):
             self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
         elif HOST_SYS == HOST_MAC:
             self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.OnPageChanged)
+
+        wx.EVT_RIGHT_DOWN(self , self.OnNotebookRightClick)
+
         self.mainPage = None
         self.LoadMainPage()
+        self.LoadPlusTab()
         self.Show()
 
     def Close(self):
@@ -54,13 +58,24 @@ class KioskNotebook(wx.Notebook):
             shutil.rmtree(tmpPath)
         self.Destroy()
 
-    def UpdatePageName(self, oldName, newName):
-        for i in range(self.GetPageCount()):
-            page = self.GetPage(i)
-            label = page.GetLabel()
-            found = label == oldName
-            if found:
-                self.SetPageText(i, newName)
+    def OnNotebookRightClick(self, event):
+        index, type = self.HitTest(event.GetPosition())
+        if index > -1:
+            if index > 0 and index < self.GetPageCount() - 1:
+                print "Clicked on Page with Index: ", index
+                page = self.GetPage(index)
+                menu = wx.Menu()
+                item = menu.Append(wx.NewId(), "Delete")
+                #self.Bind(wx.EVT_MENU, self.DeleteSelectedTextItem, item)
+                self.Bind(wx.EVT_MENU, lambda event, index=index: self.DeletePage(event,index), item)
+                rect = self.GetRect()
+                point = event.GetPosition()
+                self.PopupMenu(menu, (rect[0]+point[0]+10,rect[1]+point[1]+10))
+                menu.Destroy()
+
+    def UpdatePageName(self, index, oldName, newName):
+        # use index -1 because page count wrong by 1 due to "+" tab
+        self.SetPageText(index - 1, newName)
 
     def LoadPageData(self, pageNumber):
         # print "Loading config and remote list for page ", pageNumber
@@ -71,18 +86,25 @@ class KioskNotebook(wx.Notebook):
         self.pages.append(self.mainPage)
         self.AddPage(self.mainPage, "Kiosk Main")
 
+    def LoadPlusTab(self):
+        self.plusTab = wx.Panel(self,-1)
+        self.AddPage(self.plusTab, "+")
+
     def AddNewPage(self, event=None):
         newIndex = self.GetPageCount()
         newPage = editPanel.KioskEditorPanel(self,-1,"New Page",newIndex,HOST_SYS)
         self.pages.append(newPage)
-        self.AddPage(newPage, "New Page")
-        # switch to new page
-        self.SetSelection(newIndex)
+        self.InsertPage(self.GetPageCount()-1,newPage, "New Page",select=True)
 
     def AddKioskPage(self, title, texts, images):
         page = editPanel.KioskEditorPanel(self,-1,title,self.GetPageCount(),HOST_SYS,texts,images)
         self.pages.append(page)
-        self.AddPage(page, title)
+        self.InsertPage(self.GetPageCount()-1,page, title)
+
+    def DeletePage(self, event, index):
+        self.SetSelection(0)
+        self.RemovePage(index)
+        del self.pages[index]
 
     def OnPageChanged(self, event):
         global HOST_SYS
@@ -92,4 +114,7 @@ class KioskNotebook(wx.Notebook):
             pass
         else:
             sel = event.GetSelection()
-            self.LoadPageData(sel)
+            if sel < self.GetPageCount() - 1:
+                self.LoadPageData(sel)
+            else:
+                self.AddNewPage()

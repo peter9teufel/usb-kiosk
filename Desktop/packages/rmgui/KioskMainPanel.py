@@ -35,6 +35,7 @@ class KioskMainPanel(wx.Panel):
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.bg = None
         self.logo = None
+        self.songs = []
         self.imgPath = self.DefaultPath()
         self.usbPath = None
         self.Initialize()
@@ -74,23 +75,23 @@ class KioskMainPanel(wx.Panel):
         bgImg = wx.EmptyImage(200,200)
         # create bitmap with preview png
         self.bgCtrl = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(bgImg))
-        self._SetImagePreview('img/clear.png')
+        self._SetImagePreview('img/preview.png')
 
         # Logo selection
         logo = wx.Button(self,-1,label="Logo")
         logoImg = wx.EmptyImage(200,200)
         self.logoCtrl = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(logoImg))
-        self._SetImagePreview('img/clear.png',logo=True)
+        self._SetImagePreview('img/preview.png',logo=True)
 
         # background music
-        musicChk = wx.CheckBox(self,-1,label="Background Music")
-        addSong = wx.Button(self,-1,label="Add Song(s)")
-        self.songList = wx.ListCtrl(self,-1,size=(300,300),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.musicChk = wx.CheckBox(self,-1,label="Enable Background Music")
+        self.addSong = wx.Button(self,-1,label="Add Song(s)")
+        self.songList = wx.ListCtrl(self,-1,size=(500,300),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         self.songList.Show(True)
-        self.songList.InsertColumn(0,tr("filename"), width = 280)
+        self.songList.InsertColumn(0,tr("filename"), width = 200)
+        self.songList.InsertColumn(1,"Path", width = 280)
 
         # crtls to add page, create usb etc
-        addPage = wx.Button(self,-1,label="Add Page")
         loadFromUsb = wx.Button(self,-1,label="Load from USB")
         createUsb = wx.Button(self,-1,label="Create USB")
         exitBtn = wx.Button(self,-1,label="Exit")
@@ -98,22 +99,30 @@ class KioskMainPanel(wx.Panel):
         # Bind elements TODO!
         bg.Bind(wx.EVT_BUTTON, self.ShowBackgroundSelection)
         logo.Bind(wx.EVT_BUTTON, self.ShowLogoSelection)
-        addPage.Bind(wx.EVT_BUTTON, self.parent.AddNewPage)
         createUsb.Bind(wx.EVT_BUTTON, self.WaitForUSBForCreation)
         loadFromUsb.Bind(wx.EVT_BUTTON, self.WaitForUSBForLoading)
         exitBtn.Bind(wx.EVT_BUTTON, self.parent.parent.Close)
+        self.musicChk.Bind(wx.EVT_CHECKBOX, self.MusicCheckboxToggled)
+        self.addSong.Bind(wx.EVT_BUTTON, self.ShowSongSelection)
+        self.MusicCheckboxToggled()
 
         # Create and add sizers to main sizer
         # Sizer for BACKGROUND and LOGO selection
-        imgSizer = wx.BoxSizer(wx.VERTICAL)
-        imgSizer.Add(bg,flag=wx.TOP|wx.LEFT,border=5)
-        imgSizer.Add(self.bgCtrl,flag=wx.TOP|wx.LEFT,border=5)
-        imgSizer.Add(logo,flag=wx.TOP|wx.LEFT,border=5)
-        imgSizer.Add(self.logoCtrl,flag=wx.TOP|wx.LEFT,border=5)
+        imgBox = wx.StaticBox(self,-1,"Background and Logo")
+        imgSizer = wx.StaticBoxSizer(imgBox)
+        bgSizer = wx.BoxSizer(wx.VERTICAL)
+        logoSizer = wx.BoxSizer(wx.VERTICAL)
+        bgSizer.Add(bg,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=5)
+        bgSizer.Add(self.bgCtrl,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=5)
+        logoSizer.Add(logo,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=80)
+        logoSizer.Add(self.logoCtrl,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=80)
+        imgSizer.Add(bgSizer)
+        imgSizer.Add(logoSizer)
         # Sizer for AUDIO selection
-        audioSizer = wx.BoxSizer(wx.VERTICAL)
-        audioSizer.Add(musicChk,flag=wx.TOP|wx.LEFT,border=5)
-        audioSizer.Add(addSong,flag=wx.TOP|wx.LEFT,border=5)
+        audioBox = wx.StaticBox(self,-1,"Background Music")
+        audioSizer = wx.StaticBoxSizer(audioBox,wx.VERTICAL)
+        audioSizer.Add(self.musicChk,flag=wx.TOP|wx.LEFT,border=5)
+        audioSizer.Add(self.addSong,flag=wx.TOP|wx.LEFT,border=5)
         audioSizer.Add(self.songList,flag=wx.TOP|wx.LEFT,border=5)
 
         # button sizer
@@ -121,19 +130,15 @@ class KioskMainPanel(wx.Panel):
         btnSizer.Add(exitBtn)
         btnSizer.Add(loadFromUsb)
         btnSizer.Add(createUsb)
-        btnSizer.Add(addPage)
 
         # add to main sizer
-        contentSizer = wx.BoxSizer()
-        contentSizer.Add(imgSizer)
-        contentSizer.Add(audioSizer,flag=wx.LEFT,border=30)
-        self.mainSizer.Add(contentSizer)
-        self.mainSizer.Add(btnSizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
-        self.SetSizerAndFit(self.mainSizer)
-
+        contentSizer = wx.BoxSizer(wx.VERTICAL)
+        contentSizer.Add(imgSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
+        contentSizer.Add(audioSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
+        self.mainSizer.Add(contentSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=10)
+        self.mainSizer.Add(btnSizer, flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
+        self.SetSizer(self.mainSizer)
         #self.LayoutAndFit()
-        self.Show(True)
-
 
     def ShowBackgroundSelection(self, event=None):
         dlg = imagebrowser.ImageDialog(None,self.imgPath)
@@ -156,6 +161,31 @@ class KioskMainPanel(wx.Panel):
             self._SetImagePreview(file,logo=True)
         if HOST_SYS == HOST_WIN:
             dlg.Destroy()
+
+    def MusicCheckboxToggled(self, event=None, checked=False):
+        if event != None:
+            # triggered by chk changing event
+            checked = self.musicChk.IsChecked()
+        else:
+            # manual trigger -> set checked state
+            self.musicChk.SetValue(checked)
+        if checked:
+            self.addSong.Enable()
+            self.songList.Enable()
+        else:
+            self.addSong.Disable()
+            self.songList.Disable()
+
+    def ShowSongSelection(self, event):
+        songDialog = wx.FileDialog(self, "Select MP3 files", "", "", "MP3 files (*.mp3)|*.mp3", wx.FD_OPEN | wx.FD_MULTIPLE)
+        if songDialog.ShowModal() != wx.ID_CANCEL:
+            files = songDialog.GetFilenames()
+            dir = songDialog.GetDirectory()
+            for file in files:
+                self.songs.append(dir + '/' + file)
+                idx = self.songList.InsertStringItem(self.songList.GetItemCount(), file)
+                self.songList.SetStringItem(idx,1,dir)
+
 
     def LayoutAndFit(self):
         self.mainSizer.Layout()
@@ -216,8 +246,13 @@ class KioskMainPanel(wx.Panel):
             util.UnixDriveDetector.waitForUSBDrive()
 
     def LoadFromUSB(self, path):
+        if self.usbPath == None:
+            self.prgDialog.UpdatePulse("Loading USB data...")
+        else:
+            self.prgDialog = wx.ProgressDialog(tr("loading"),"Creating USB Data, please wait...")
+            self.prgDialog.Pulse()
         self.usbPath = path
-        self.prgDialog.UpdatePulse("Loading USB data...")
+
         # create kiosk directory in temp path
         from os.path import expanduser
         home = expanduser("~")
@@ -242,6 +277,27 @@ class KioskMainPanel(wx.Panel):
             if os.path.isfile(srcFile):
                 shutil.copyfile(srcFile, destFile)
                 self.logo = destFile
+
+            # copy mp3 files if present
+            if os.path.isdir(usbPath + '/mp3/'):
+                self.MusicCheckboxToggled(checked=True)
+                mp3Usb = usbPath + '/mp3/'
+                destPath = tmpPath + 'mp3/'
+                os.mkdir(destPath)
+                with open(mp3Usb + 'filenames.bak', 'r') as f:
+                    data = f.read()
+                filenames = data.split("\n")
+                print "MP3 FILENAMES: ", filenames
+                fileNr = 0
+                for file in os.listdir(mp3Usb):
+                    if file.endswith('.mp3'):
+                        srcFile = mp3Usb + file
+                        destFile = destPath + filenames[fileNr]
+                        shutil.copyfile(srcFile,destFile)
+                        self.songs.append(destFile)
+                        idx = self.songList.InsertStringItem(self.songList.GetItemCount(), filenames[fileNr])
+                        self.songList.SetStringItem(idx, 1, destPath)
+                        fileNr += 1
 
             # copy data for single pages to page directories in temp dir
             usbPages = []
@@ -295,8 +351,14 @@ class KioskMainPanel(wx.Panel):
 
 
     def CreateUSB(self, path):
+        if self.usbPath == None:
+            self.prgDialog.UpdatePulse("Creating USB data...")
+        else:
+            self.prgDialog = wx.ProgressDialog(tr("loading"),"Creating USB Data, please wait...")
+            self.prgDialog.Pulse()
         self.usbPath = path
-        self.prgDialog.UpdatePulse("Creating USB data...")
+
+
         # create kiosk directory on usb drive
         usbPath = path + '/kiosk'
         if os.path.isdir(usbPath):
@@ -313,8 +375,27 @@ class KioskMainPanel(wx.Panel):
             dstFile = usbPath + '/logo.png'
             shutil.copyfile(self.logo, dstFile)
 
+        # copy MP3 files if background music enabled
+        if self.musicChk.IsChecked():
+            mp3Path = usbPath + '/mp3/'
+            os.mkdir(mp3Path)
+            fileNames = open(mp3Path + 'filenames.bak', 'w')
+            cnt = 0
+            for mp3 in self.songs:
+                nr = ""
+                if cnt < 100:
+                    if cnt < 10:
+                        nr = "00"
+                    else:
+                        nr = 0
+                    nr += str(cnt)
+                fileNames.write(os.path.basename(mp3).encode("utf-8") + "\n")
+                shutil.copyfile(mp3, mp3Path + 'BG_Music_Title_' + nr + '.mp3')
+                cnt += 1
+            fileNames.close()
+
         # copy data for single pages to page directories in kiosk directory on USB
-        for i in range(1,self.parent.GetPageCount()):
+        for i in range(1,self.parent.GetPageCount() - 1):
             page = self.parent.GetPage(i)
             pageDir = usbPath + '/page' + str(i) + '/'
             os.mkdir(pageDir)
@@ -342,7 +423,8 @@ class KioskMainPanel(wx.Panel):
         self.prgDialog.Update(100)
         if HOST_SYS == HOST_WIN:
             self.prgDialog.Destroy()
-
+        dlg = wx.MessageDialog(self, tr("done"), tr("done"), style = wx.OK)
+        dlg.ShowModal()
         wx.CallAfter(Publisher.unsubscribe, self.CreateUSB, 'usb_connected')
 
 # HELPER METHOD to get correct resource path for image file

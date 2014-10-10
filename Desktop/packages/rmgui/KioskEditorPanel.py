@@ -69,7 +69,7 @@ class KioskEditorPanel(wx.Panel):
 
     def Initialize(self):
         # page name entry
-        nameLabel = wx.StaticText(self,-1,label="Page Headline:")
+        nameLabel = wx.StaticText(self,-1,label="Page Headline")
         self.nameCtrl = wx.TextCtrl(self,-1,value=self.title,size=(350,22))
         # text definition
         addText = wx.Button(self,-1,label="Add Text")
@@ -113,10 +113,21 @@ class KioskEditorPanel(wx.Panel):
         contentSizer.Add(txtSizer)
         contentSizer.Add(imgSizer,flag=wx.LEFT,border=30)
 
-        self.mainSizer.Add(nameLabel, flag=wx.LEFT|wx.TOP, border=5)
-        self.mainSizer.Add(self.nameCtrl,flag=wx.LEFT|wx.RIGHT|wx.BOTTOM,border=5)
-        self.mainSizer.Add(contentSizer,flag=wx.TOP,border=20)
-        self.mainSizer.Add(preview,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.ALL,border=5)
+        headlineSizer = wx.BoxSizer()
+        headlineSizer.Add(nameLabel, flag=wx.LEFT|wx.TOP, border=5)
+        headlineSizer.Add(self.nameCtrl,flag=wx.LEFT|wx.RIGHT,border=5)
+
+        mainBox = wx.StaticBox(self,-1,"Setup texts and images")
+        mainBoxSizer = wx.StaticBoxSizer(mainBox, wx.VERTICAL)
+
+        #mainBoxSizer.Add(headlineSizer,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.TOP, border = 10)
+        mainBoxSizer.Add(contentSizer,flag=wx.TOP|wx.ALIGN_CENTER_HORIZONTAL,border=20)
+        #mainBoxSizer.Add(preview,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
+
+        self.mainSizer.Add(headlineSizer,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.TOP, border = 10)
+        #self.mainSizer.Add(contentSizer,flag=wx.TOP|wx.ALIGN_CENTER_HORIZONTAL,border=20)
+        self.mainSizer.Add(mainBoxSizer,flag=wx.TOP|wx.ALIGN_CENTER_HORIZONTAL,border=20)
+        self.mainSizer.Add(preview,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
 
         self.SetSizerAndFit(self.mainSizer)
 
@@ -134,7 +145,7 @@ class KioskEditorPanel(wx.Panel):
     def UpdatePageName(self, event=None):
         oldName = self.title
         newName = self.nameCtrl.GetValue()
-        self.parent.UpdatePageName(oldName, newName)
+        self.parent.UpdatePageName(self.index, oldName, newName)
         self.title = newName
 
     def TextItemRightClicked(self, event):
