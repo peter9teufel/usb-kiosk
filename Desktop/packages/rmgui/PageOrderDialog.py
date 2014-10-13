@@ -10,7 +10,7 @@ BASE_PATH = ""
 ################################################################################
 class PageOrderDialog(wx.Dialog):
     def __init__(self,parent,id,pages,base_path):
-        wx.Dialog.__init__(self,parent,id,"Edit Page Order")
+        wx.Dialog.__init__(self,parent,id,tr("edit_page_order"))
         global BASE_PATH
         BASE_PATH = base_path
         self.parent = parent
@@ -44,7 +44,7 @@ class PageOrderDialog(wx.Dialog):
         self.moveDown.Bind(wx.EVT_BUTTON, self.MoveSelectedItemDown)
 
         ok = wx.Button(self,wx.ID_OK,label="OK")
-        cancel = wx.Button(self,wx.ID_CANCEL,label="Cancel")
+        cancel = wx.Button(self,wx.ID_CANCEL,label=tr("cancel"))
 
         ok.Bind(wx.EVT_BUTTON, self.okClicked)
         cancel.Bind(wx.EVT_BUTTON, self.cancelClicked)

@@ -82,14 +82,14 @@ class KioskMainPanel(wx.Panel):
             self.LoadData()
 
     def Initialize(self):
-        imgBox = wx.StaticBox(self,-1,"Background and Logo")
+        imgBox = wx.StaticBox(self,-1,tr("bg_logo_box"))
         imgSizer = wx.StaticBoxSizer(imgBox)
 
-        self.audioBox = wx.StaticBox(self,-1,"Background Music")
+        self.audioBox = wx.StaticBox(self,-1,tr("bg_music"))
         audioSizer = wx.StaticBoxSizer(self.audioBox,wx.VERTICAL)
 
         # Background selection
-        bg = wx.Button(imgBox,-1,label="Background")
+        bg = wx.Button(imgBox,-1,label=tr("background"))
         bgImg = wx.EmptyImage(200,200)
         # create bitmap with preview png
         self.bgCtrl = wx.StaticBitmap(imgBox, wx.ID_ANY, wx.BitmapFromImage(bgImg))
@@ -102,12 +102,12 @@ class KioskMainPanel(wx.Panel):
         self._SetImagePreview('img/preview.png',logo=True)
 
         # background music
-        self.musicChk = wx.CheckBox(self.audioBox,-1,label="Enable Background Music")
-        self.addSong = wx.Button(self.audioBox,-1,label="Add Song(s)")
+        self.musicChk = wx.CheckBox(self.audioBox,-1,label=tr("enable_bg_music"))
+        self.addSong = wx.Button(self.audioBox,-1,label=tr("add_songs"))
         self.songList = wx.ListCtrl(self.audioBox,-1,size=(500,300),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         self.songList.Show(True)
         self.songList.InsertColumn(0,tr("filename"), width = 200)
-        self.songList.InsertColumn(1,"Path", width = 280)
+        self.songList.InsertColumn(1,tr("path"), width = 280)
 
         # Bind elements TODO!
         bg.Bind(wx.EVT_BUTTON, self.ShowBackgroundSelection)
@@ -186,7 +186,7 @@ class KioskMainPanel(wx.Panel):
         global HOST_SYS
         file = event.GetText()
         menu = wx.Menu()
-        item = menu.Append(wx.NewId(), "Delete")
+        item = menu.Append(wx.NewId(), tr("delete"))
         self.Bind(wx.EVT_MENU, self.DeleteSelectedSongItem, item)
 
         boxRect = self.audioBox.GetRect()
@@ -211,7 +211,7 @@ class KioskMainPanel(wx.Panel):
             self.songList.SetStringItem(idx,1,file[:-len(filename)])
 
     def ShowSongSelection(self, event):
-        songDialog = wx.FileDialog(self, "Select MP3 files", "", "", "MP3 files (*.mp3)|*.mp3", wx.FD_OPEN | wx.FD_MULTIPLE)
+        songDialog = wx.FileDialog(self, tr("select_mp3s"), "", "", "MP3 files (*.mp3)|*.mp3", wx.FD_OPEN | wx.FD_MULTIPLE)
         if songDialog.ShowModal() != wx.ID_CANCEL:
             files = songDialog.GetFilenames()
             dir = songDialog.GetDirectory()
@@ -285,7 +285,7 @@ class KioskMainPanel(wx.Panel):
         self.prgDialog.Update(100)
         if HOST_SYS == HOST_WIN:
             self.prgDialog.Destroy()
-        dlg = wx.MessageDialog(self, "Sorry, I was not able to detect your USB Drive, please unplug and try again.", "No USB Drive detected", style=wx.OK)
+        dlg = wx.MessageDialog(self, tr("msg_no_usb"), tr("title_no_usb"), style=wx.OK)
         dlg.ShowModal()
 
     def LoadFromUSB(self, path):
@@ -293,9 +293,9 @@ class KioskMainPanel(wx.Panel):
             # add colon to path under windows as path is only drive letter
             path += ":"
         if self.usbPath == None:
-            self.prgDialog.UpdatePulse("Loading USB data...")
+            self.prgDialog.UpdatePulse(tr("loading_usb_data"))
         else:
-            self.prgDialog = wx.ProgressDialog(tr("loading"),"Loading USB Data, please wait...")
+            self.prgDialog = wx.ProgressDialog(tr("loading"),tr("loading_usb_data"))
             self.prgDialog.Pulse()
         self.usbPath = path
 
@@ -386,7 +386,6 @@ class KioskMainPanel(wx.Panel):
             if not self.logo == None:
                 self._SetImagePreview(self.logo, logo=True)
 
-            print "USB Loading done!"
         self.prgDialog.Update(100)
         if HOST_SYS == HOST_WIN:
             self.prgDialog.Destroy()
@@ -402,9 +401,9 @@ class KioskMainPanel(wx.Panel):
             # add colon to path under windows as path is only drive letter
             path += ":"
         if self.usbPath == None:
-            self.prgDialog.UpdatePulse("Creating USB data...")
+            self.prgDialog.UpdatePulse(tr("creating_usb_data"))
         else:
-            self.prgDialog = wx.ProgressDialog(tr("loading"),"Creating USB Data, please wait...")
+            self.prgDialog = wx.ProgressDialog(tr("loading"),tr("creating_usb_data"))
             self.prgDialog.Pulse()
         self.usbPath = path
 
@@ -469,16 +468,17 @@ class KioskMainPanel(wx.Panel):
                     ending = ".png"
                 dstFile = pageDir + '/image' + str(j) + ending
                 shutil.copyfile(imgs[j], dstFile)
-        print "USB Preparation done!"
         self.prgDialog.Update(100)
         if HOST_SYS == HOST_WIN:
             self.prgDialog.Destroy()
-        dlg = wx.MessageDialog(self, tr("done"), tr("done"), style = wx.OK)
+        dlg = wx.MessageDialog(self, tr("msg_usb_done"), tr("done"), style = wx.OK)
         dlg.ShowModal()
         wx.CallAfter(Publisher.unsubscribe, self.CreateUSB, 'usb_connected')
         wx.CallAfter(Publisher.unsubscribe, self.CreateUSB, 'usb_search_timeout')
 
     def SaveConfiguration(self, path=None):
+        prgDlg = wx.ProgressDialog(tr("saving"), tr("msg_saving"))
+        prgDlg.Pulse()
         home = expanduser("~")
         appPath = home + '/.usb_kiosk/'
         tmpRoot = appPath + 'tmp/'
@@ -545,7 +545,7 @@ class KioskMainPanel(wx.Panel):
         #zipFile = zipfile.ZipFile(path, 'w')
         #self.zipdir(tmpPath, zipFile)
         self.make_zipfile(path, tmpPath)
-        dlg = wx.MessageDialog(self, tr("done"), tr("done"), style = wx.OK)
+        dlg = wx.MessageDialog(self, tr("msg_saving_done"), tr("done"), style = wx.OK)
         dlg.ShowModal()
 
     def OpenConfiguration(self, path):

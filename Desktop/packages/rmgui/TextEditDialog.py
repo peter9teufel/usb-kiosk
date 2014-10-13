@@ -20,7 +20,7 @@ class TextEditDialog(wx.Dialog):
     def __InitUI(self):
         self.textCtrl = wx.TextCtrl(self,-1,size=(400,300),style=wx.TE_MULTILINE,value=self.text)
         ok = wx.Button(self,wx.ID_OK,label="OK")
-        cancel = wx.Button(self,wx.ID_CANCEL,label="Cancel")
+        cancel = wx.Button(self,wx.ID_CANCEL,label=tr("cancel"))
 
         ok.Bind(wx.EVT_BUTTON, self.okClicked)
         cancel.Bind(wx.EVT_BUTTON, self.cancelClicked)

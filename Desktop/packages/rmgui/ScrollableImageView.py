@@ -1,6 +1,7 @@
 import wx, platform
 from PIL import Image
 import wx.lib.scrolledpanel as scrolled
+from packages.lang.Localizer import *
 import sys
 
 ################################################################################
@@ -61,7 +62,7 @@ class ScrollableImageView(scrolled.ScrolledPanel):
 
 
     def __ImageDeletion(self, index):
-        dlg = wx.MessageDialog(self, "Delete image?", "Delete image?", style=wx.YES_NO|wx.ICON_QUESTION)
+        dlg = wx.MessageDialog(self, tr("msg_delete_img"), tr("title_delete_img"), style=wx.YES_NO|wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
             del self.images[index]
             self.UpdateImages()

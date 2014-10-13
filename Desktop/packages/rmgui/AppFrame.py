@@ -60,13 +60,13 @@ class AppFrame(wx.Frame):
         editMenu = wx.Menu()
 
         # save and open configurations
-        openConfig = fileMenu.Append(wx.ID_OPEN, "&Open Kiosk" + "\tCTRL+O")
-        saveConfig = fileMenu.Append(wx.ID_SAVE, "&Save Kiosk" + "\tCTRL+S")
-        loadUsb = fileMenu.Append(wx.ID_ANY, "&Load Kiosk from USB" + "\tCTRL+L")
-        createUsb = fileMenu.Append(wx.ID_ANY, "&Create Kiosk USB-Stick" + "\tCTRL+R")
+        openConfig = fileMenu.Append(wx.ID_OPEN, "&"+tr("open_kiosk") + "\tCTRL+O")
+        saveConfig = fileMenu.Append(wx.ID_SAVE, "&"+tr("save_kiosk") + "\tCTRL+S")
+        loadUsb = fileMenu.Append(wx.ID_ANY, "&"+tr("load_from_usb") + "\tCTRL+L")
+        createUsb = fileMenu.Append(wx.ID_ANY, "&"+tr("create_usb") + "\tCTRL+R")
 
         # edit menu entrie(s)
-        pageOrder = editMenu.Append(wx.ID_ANY, "Edit page order" + "\tCTRL+E")
+        pageOrder = editMenu.Append(wx.ID_ANY, "&"+tr("edit_page_order") + "\tCTRL+E")
 
         self.Bind(wx.EVT_MENU, self.notebook.SaveConfiguration, saveConfig)
         self.Bind(wx.EVT_MENU, self.notebook.OpenConfiguration, openConfig)
@@ -86,14 +86,14 @@ class AppFrame(wx.Frame):
         # Menubar
         menuBar = wx.MenuBar()
         menuBar.Append(fileMenu, "&"+tr("file"))
-        menuBar.Append(editMenu, "&Edit")
+        menuBar.Append(editMenu, "&"+tr("edit"))
 
         self.SetMenuBar(menuBar)
 
     def ShowAbout(self, event):
         # message read from defined version info file in the future
         msg = "Kiosk Editor v1.0\n(c) 2014 by www.multimedia-installationen.at\nContact: software@multimedia-installationen.at\nAll rights reserved."
-        dlg = wx.MessageDialog(self, msg, "About", style=wx.OK)
+        dlg = wx.MessageDialog(self, msg, tr("about"), style=wx.OK)
         dlg.ShowModal()
 
 

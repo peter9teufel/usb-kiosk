@@ -69,19 +69,19 @@ class KioskEditorPanel(wx.Panel):
 
     def Initialize(self):
 
-        self.mainBox = wx.StaticBox(self,-1,"Setup texts and images")
+        self.mainBox = wx.StaticBox(self,-1,tr("txt_img_box"))
         mainBoxSizer = wx.StaticBoxSizer(self.mainBox, wx.VERTICAL)
 
         # page name entry
-        nameLabel = wx.StaticText(self,-1,label="Page Headline")
+        nameLabel = wx.StaticText(self,-1,label=tr("page_headline"))
         self.nameCtrl = wx.TextCtrl(self,-1,value=self.title,size=(350,22))
         # text definition
-        addText = wx.Button(self.mainBox,-1,label="Add Text")
+        addText = wx.Button(self.mainBox,-1,label=tr("add_text"))
         addText.SetName('add_txt')
         self.textList = wx.ListCtrl(self.mainBox,-1,size=(200,350),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         self.textList.SetName('txt_list')
         self.textList.Show(True)
-        self.textList.InsertColumn(0,"Added texts", width = 180)
+        self.textList.InsertColumn(0,tr("added_texts"), width = 180)
         cnt = 1
         for txt in self.texts:
             label = "Text " + str(cnt)
@@ -89,13 +89,13 @@ class KioskEditorPanel(wx.Panel):
             cnt += 1;
 
         # image definition
-        addImg = wx.Button(self.mainBox,-1,label="Add Image")
+        addImg = wx.Button(self.mainBox,-1,label=tr("add_image"))
         self.imgPreview = siv.ScrollableImageView(self.mainBox,-1,size=(300,350),images=[],dataSource=self,cols=1)
         for img in self.images:
             self.imgPreview.AddImage(img)
 
         # preview Button
-        preview = wx.Button(self,-1,label="Preview")
+        preview = wx.Button(self,-1,label=tr("preview"))
 
         # bind elements TODO!
         self.nameCtrl.Bind(wx.EVT_TEXT, self.UpdatePageName)
@@ -155,7 +155,7 @@ class KioskEditorPanel(wx.Panel):
         global HOST_SYS
         file = event.GetText()
         menu = wx.Menu()
-        item = menu.Append(wx.NewId(), "Delete")
+        item = menu.Append(wx.NewId(), tr("delete"))
         self.Bind(wx.EVT_MENU, self.DeleteSelectedTextItem, item)
 
         boxRect = self.mainBox.GetRect()
@@ -182,7 +182,7 @@ class KioskEditorPanel(wx.Panel):
 
     def ShowTextEdit(self, event):
         if event.GetEventObject().GetName() == 'add_txt':
-            dlg = txtDlg.TextEditDialog(self,-1,"Enter Text")
+            dlg = txtDlg.TextEditDialog(self,-1,tr("enter_text"))
             if dlg.ShowModal() == wx.ID_OK:
                 cnt = len(self.texts)+1
                 label = "Text " + str(cnt)

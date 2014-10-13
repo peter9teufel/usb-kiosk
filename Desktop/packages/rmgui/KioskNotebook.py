@@ -64,10 +64,9 @@ class KioskNotebook(wx.Notebook):
         index, type = self.HitTest(event.GetPosition())
         if index > -1:
             if index > 0 and index < self.GetPageCount() - 1:
-                print "Clicked on Page with Index: ", index
                 page = self.GetPage(index)
                 menu = wx.Menu()
-                item = menu.Append(wx.NewId(), "Delete")
+                item = menu.Append(wx.NewId(), tr("delete"))
                 #self.Bind(wx.EVT_MENU, self.DeleteSelectedTextItem, item)
                 self.Bind(wx.EVT_MENU, lambda event, index=index: self.DeletePage(event,index), item)
                 rect = self.GetRect()
@@ -84,9 +83,9 @@ class KioskNotebook(wx.Notebook):
         self.GetPage(pageNumber).LoadData()
 
     def LoadMainPage(self):
-        self.mainPage = mainPanel.KioskMainPanel(self,-1,"Kiosk Main",0,HOST_SYS,self.base_path)
+        self.mainPage = mainPanel.KioskMainPanel(self,-1,"Kiosk",0,HOST_SYS,self.base_path)
         self.pages.append(self.mainPage)
-        self.AddPage(self.mainPage, "Kiosk Main")
+        self.AddPage(self.mainPage, "Kiosk")
 
     def LoadPlusTab(self):
         self.plusTab = wx.Panel(self,-1)
@@ -94,9 +93,9 @@ class KioskNotebook(wx.Notebook):
 
     def AddNewPage(self, event=None):
         newIndex = self.GetPageCount()
-        newPage = editPanel.KioskEditorPanel(self,-1,"New Page",newIndex,HOST_SYS,[],[],self.base_path)
+        newPage = editPanel.KioskEditorPanel(self,-1,tr("new_page"),newIndex,HOST_SYS,[],[],self.base_path)
         self.pages.append(newPage)
-        self.InsertPage(self.GetPageCount()-1,newPage, "New Page",select=True)
+        self.InsertPage(self.GetPageCount()-1,newPage, tr("new_page"),select=True)
 
     def AddKioskPage(self, title, texts, images):
         page = editPanel.KioskEditorPanel(self,-1,title,self.GetPageCount(),HOST_SYS,texts,images,self.base_path)
@@ -109,7 +108,7 @@ class KioskNotebook(wx.Notebook):
         del self.pages[index]
 
     def SaveConfiguration(self, event=None):
-        dlg = wx.FileDialog(self, "Select where to save your Kiosk Configuration", "", "", "KIOSK files(*.kiosk)|*.kiosk*", wx.FD_SAVE)
+        dlg = wx.FileDialog(self, tr("save_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk*", wx.FD_SAVE)
 
         if dlg.ShowModal() == wx.ID_OK:
             save_path = dlg.GetPath() + ".kiosk"
@@ -119,7 +118,7 @@ class KioskNotebook(wx.Notebook):
     def OpenConfiguration(self, event=None):
         # clear notebook and temp data
         self.ClearNotebook()
-        dlg = wx.FileDialog(self, "Select your Kiosk Configuration", "", "", "KIOSK files(*.kiosk)|*.kiosk*", wx.FD_OPEN)
+        dlg = wx.FileDialog(self, tr("load_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk", wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             open_path = dlg.GetPath()
             self.mainPage.OpenConfiguration(open_path)
