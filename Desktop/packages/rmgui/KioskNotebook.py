@@ -109,7 +109,7 @@ class KioskNotebook(wx.Notebook):
         del self.pages[index]
 
     def SaveConfiguration(self, event=None):
-        dlg = wx.FileDialog(self, "Select where to save your Kiosk Configuration", "", "", "KIOSK files(*.kiosk)|*.*", wx.FD_SAVE)
+        dlg = wx.FileDialog(self, "Select where to save your Kiosk Configuration", "", "", "KIOSK files(*.kiosk)|*.kiosk*", wx.FD_SAVE)
 
         if dlg.ShowModal() == wx.ID_OK:
             save_path = dlg.GetPath() + ".kiosk"
@@ -119,7 +119,7 @@ class KioskNotebook(wx.Notebook):
     def OpenConfiguration(self, event=None):
         # clear notebook and temp data
         self.ClearNotebook()
-        dlg = wx.FileDialog(self, "Select your Kiosk Configuration", "", "", "KIOSK files(*.kiosk)|*.*", wx.FD_OPEN)
+        dlg = wx.FileDialog(self, "Select your Kiosk Configuration", "", "", "KIOSK files(*.kiosk)|*.kiosk*", wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             open_path = dlg.GetPath()
             self.mainPage.OpenConfiguration(open_path)

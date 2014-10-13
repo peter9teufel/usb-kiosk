@@ -251,6 +251,7 @@ class KioskMainPanel(wx.Panel):
             self.logoCtrl.SetBitmap(wx.BitmapFromImage(img))
         else:
             self.bgCtrl.SetBitmap(wx.BitmapFromImage(img))
+        self.mainSizer.Layout()
 
     def WaitForUSBForCreation(self, event):
         if self.usbPath == None or not os.path.isdir(self.usbPath):
@@ -389,6 +390,8 @@ class KioskMainPanel(wx.Panel):
         self.prgDialog.Update(100)
         if HOST_SYS == HOST_WIN:
             self.prgDialog.Destroy()
+
+        self.mainSizer.Layout()
 
         wx.CallAfter(Publisher.unsubscribe, self.LoadFromUSB, 'usb_connected')
         wx.CallAfter(Publisher.unsubscribe, self.LoadFromUSB, 'usb_search_timeout')
@@ -602,6 +605,7 @@ class KioskMainPanel(wx.Panel):
             elif dir == "logo.png":
                 self.logo = tmpPath + dir
                 self._SetImagePreview(self.logo, logo=True)
+        self.mainSizer.Layout()
 
     def unzip(self, zipPath, destPath):
         fh = open(zipPath, 'rb')
