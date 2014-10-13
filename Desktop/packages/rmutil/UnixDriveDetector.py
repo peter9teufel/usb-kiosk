@@ -23,11 +23,10 @@ def waitForUSBDrive():
     global volumes
     volumes = os.listdir(VOLUMES_PATH)
     global bg_thread
-    if bg_thread == None:
-        bg_thread = BackgroundUSBDetection()
-        bg_thread.daemon = True
-        bg_thread.start()
-        bg_thread.join()
+    bg_thread = BackgroundUSBDetection()
+    bg_thread.daemon = True
+    bg_thread.start()
+    bg_thread.join()
 
 # RESULT CALL --> wx.CallAfter(Publisher.sendMessage, 'usb_connected', path=drive_path)
 
