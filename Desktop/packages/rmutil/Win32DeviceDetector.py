@@ -1,6 +1,6 @@
 import win32api, win32con, win32gui
 from ctypes import *
-import threading, sys, platform
+import threading, sys, platform, time
 import wx
 if platform.system() == "Linux":
     from wx.lib.pubsub import setupkwargs
@@ -11,6 +11,7 @@ else:
 bg_thread = None
 bg_tid = None
 w = None
+drive_found = False
 
 #
 # Device change events (WM_DEVICECHANGE wParam)
@@ -64,11 +65,21 @@ def drive_from_mask (mask):
     else: n_drive += 1
 
 def waitForUSBDrive():
-  global bg_thread
-  if bg_thread == None:
-    bg_thread = BackgroundUSBDetection()
-    bg_thread.daemon = True
-    bg_thread.start()
+    global bg_thread
+    if bg_thread == None:
+        bg_thread = BackgroundUSBDetection()
+        bg_thread.daemon = True
+        bg_thread.start()
+
+    t = threading.Thread(target=Timeout)
+    t.daemon = True
+    t.start()
+
+def Timeout():
+    # wait 20 seconds for drive detection
+    time.sleep(20)
+    # trigger timeout as no usb device found within 20 seconds
+    wx.CallAfter(Publisher.sendMessage, 'usb_search_timeout')
 
 class Notification:
 
@@ -120,9 +131,9 @@ class Notification:
         drive_letter = drive_from_mask (dev_broadcast_volume.dbcv_unitmask)
         drive_path =  chr (ord ("A") + drive_letter)
         #print "in drive", drive_path
-
+        global drive_found
+        drive_found = True
         wx.CallAfter(Publisher.sendMessage, 'usb_connected', path=drive_path)
-
 
 ### THREAD FOR ASYNC USB DETECTION ###
 class BackgroundUSBDetection(threading.Thread):
@@ -138,7 +149,6 @@ class BackgroundUSBDetection(threading.Thread):
     global w
     w = Notification()
     win32gui.PumpMessages()
-
 
 if __name__=='__main__':
   w = Notification ()

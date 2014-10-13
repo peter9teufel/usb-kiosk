@@ -41,7 +41,8 @@ class BackgroundUSBDetection(threading.Thread):
     def run(self):
         print "Thread started..."
         global runFlag, volumes
-        while runFlag:
+        tries = 0
+        while runFlag and tries < 10:
             # check volumes
             curVols = os.listdir(VOLUMES_PATH)
             newVol = self.NewVolumes(volumes, curVols)
@@ -51,6 +52,10 @@ class BackgroundUSBDetection(threading.Thread):
                 wx.CallAfter(Publisher.sendMessage, 'usb_connected', path=VOLUMES_PATH + '/' + newVol[0])
                 runFlag = False
             time.sleep(2)
+            tries += 1
+        if tries == 10:
+            # not found --> send timout message
+            wx.CallAfter(Publisher.sendMessage, 'usb_search_timeout')
 
 
     def NewVolumes(self, oldVolumes, curVolumes):

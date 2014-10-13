@@ -21,12 +21,12 @@ BASE_PATH = None
 # RASP MEDIA ALL PLAYERS PANEL #################################################
 ################################################################################
 class KioskEditorPanel(wx.Panel):
-    def __init__(self,parent,id,title,index,host_sys,texts=[],images=[]):
+    def __init__(self,parent,id,title,index,host_sys,texts=[],images=[],base_path=""):
         #wx.Panel.__init__(self,parent,id,title)
         wx.Panel.__init__(self,parent,-1)
         global HOST_SYS, BASE_PATH
         HOST_SYS = host_sys
-        BASE_PATH = parent.parent.base_path
+        BASE_PATH = base_path
         self.title = title
         self.parent = parent
         self.index = index
@@ -69,16 +69,16 @@ class KioskEditorPanel(wx.Panel):
 
     def Initialize(self):
 
-        mainBox = wx.StaticBox(self,-1,"Setup texts and images")
-        mainBoxSizer = wx.StaticBoxSizer(mainBox, wx.VERTICAL)
+        self.mainBox = wx.StaticBox(self,-1,"Setup texts and images")
+        mainBoxSizer = wx.StaticBoxSizer(self.mainBox, wx.VERTICAL)
 
         # page name entry
         nameLabel = wx.StaticText(self,-1,label="Page Headline")
         self.nameCtrl = wx.TextCtrl(self,-1,value=self.title,size=(350,22))
         # text definition
-        addText = wx.Button(mainBox,-1,label="Add Text")
+        addText = wx.Button(self.mainBox,-1,label="Add Text")
         addText.SetName('add_txt')
-        self.textList = wx.ListCtrl(mainBox,-1,size=(200,350),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.textList = wx.ListCtrl(self.mainBox,-1,size=(200,350),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         self.textList.SetName('txt_list')
         self.textList.Show(True)
         self.textList.InsertColumn(0,"Added texts", width = 180)
@@ -89,8 +89,8 @@ class KioskEditorPanel(wx.Panel):
             cnt += 1;
 
         # image definition
-        addImg = wx.Button(mainBox,-1,label="Add Image")
-        self.imgPreview = siv.ScrollableImageView(mainBox,-1,size=(300,350),images=[],cols=1)
+        addImg = wx.Button(self.mainBox,-1,label="Add Image")
+        self.imgPreview = siv.ScrollableImageView(self.mainBox,-1,size=(300,350),images=[],cols=1)
         for img in self.images:
             self.imgPreview.AddImage(img)
 
@@ -158,12 +158,14 @@ class KioskEditorPanel(wx.Panel):
         item = menu.Append(wx.NewId(), "Delete")
         self.Bind(wx.EVT_MENU, self.DeleteSelectedTextItem, item)
 
+        boxRect = self.mainBox.GetRect()
         rect = self.textList.GetRect()
+        origin = (boxRect[0] + rect[0], boxRect[1] + rect[1])
         point = event.GetPoint()
         if HOST_SYS == HOST_WIN:
-            self.PopupMenu(menu, (rect[0]+point[0]+10,rect[1]+point[1]+10))
+            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+20))
         else:
-            self.PopupMenu(menu, (rect[0]+point[0]+10,rect[1]+point[1]+30))
+            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+40))
         menu.Destroy()
 
     def DeleteSelectedTextItem(self, event=None):
@@ -204,8 +206,8 @@ class KioskEditorPanel(wx.Panel):
             file = dlg.GetFile()
             self.images.append(file)
             self.imgPreview.AddImage(file)
-            print "IMAGES:"
-            print self.images
+            head, tail = os.path.split(file)
+            self.imgPath = head
         if HOST_SYS == HOST_WIN:
             dlg.Destroy()
 

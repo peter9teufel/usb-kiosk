@@ -1,5 +1,6 @@
 import wx
 import KioskNotebook as kNotebook
+import NotebookPanel as nPanel
 from packages.lang.Localizer import *
 import sys, os
 
@@ -18,11 +19,33 @@ class AppFrame(wx.Frame):
         global BASE_PATH
         BASE_PATH = base_path
         self.Bind(wx.EVT_CLOSE, self.Close)
-        self.SetupMenuBar()
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        self.notebook = kNotebook.KioskNotebook(self,-1,None)
+        self.notebook = kNotebook.KioskNotebook(self,-1,None,base_path)
         self.mainSizer.Add(self.notebook, 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
         self.SetSizerAndFit(self.mainSizer)
+
+
+        # Create an accelerator table for keyboard shortcuts
+        sc_open = wx.NewId()
+        sc_save = wx.NewId()
+        sc_create_usb = wx.NewId()
+        sc_load_usb = wx.NewId()
+        sc_edit_order = wx.NewId()
+        self.Bind(wx.EVT_MENU, self.notebook.OpenConfiguration, id=sc_open)
+        self.Bind(wx.EVT_MENU, self.notebook.SaveConfiguration, id=sc_save)
+        self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForLoading, id=sc_load_usb)
+        self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForCreation, id=sc_create_usb)
+        self.Bind(wx.EVT_MENU, self.notebook.EditPageOrder, id=sc_edit_order)
+
+        self.accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('o'), sc_open),
+                                              (wx.ACCEL_CTRL, ord('s'), sc_save),
+                                              (wx.ACCEL_CTRL, ord('r'), sc_create_usb),
+                                              (wx.ACCEL_CTRL, ord('l'), sc_load_usb),
+                                              (wx.ACCEL_CTRL, ord('e'), sc_edit_order)
+                                             ])
+        self.SetAcceleratorTable(self.accel_tbl)
+
+        self.SetupMenuBar()
         self.Center()
         self.Maximize()
         self.Show()
@@ -35,6 +58,23 @@ class AppFrame(wx.Frame):
     def SetupMenuBar(self):
         # menus
         fileMenu = wx.Menu()
+        editMenu = wx.Menu()
+
+        # save and open configurations
+        openConfig = fileMenu.Append(wx.ID_OPEN, "&Open Kiosk" + "\tCTRL+O")
+        saveConfig = fileMenu.Append(wx.ID_SAVE, "&Save Kiosk" + "\tCTRL+S")
+        loadUsb = fileMenu.Append(wx.ID_ANY, "&Load Kiosk from USB" + "\tCTRL+L")
+        createUsb = fileMenu.Append(wx.ID_ANY, "&Create Kiosk USB-Stick" + "\tCTRL+R")
+
+        # edit menu entrie(s)
+        pageOrder = editMenu.Append(wx.ID_ANY, "Edit page order" + "\tCTRL+E")
+
+        self.Bind(wx.EVT_MENU, self.notebook.SaveConfiguration, saveConfig)
+        self.Bind(wx.EVT_MENU, self.notebook.OpenConfiguration, openConfig)
+        self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForLoading, loadUsb)
+        self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForCreation, createUsb)
+
+        self.Bind(wx.EVT_MENU, self.notebook.EditPageOrder, pageOrder)
 
         # Help Menu
         about = fileMenu.Append(wx.ID_ANY, "&"+tr("about"))
@@ -46,7 +86,8 @@ class AppFrame(wx.Frame):
 
         # Menubar
         menuBar = wx.MenuBar()
-        menuBar.Append(fileMenu, "&"+tr("file")) # Adding the "filemenu" to the MenuBar
+        menuBar.Append(fileMenu, "&"+tr("file"))
+        menuBar.Append(editMenu, "&Edit")
 
         self.SetMenuBar(menuBar)
 

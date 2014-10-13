@@ -1,1 +1,1 @@
-import AppFrame, ScrollableImageView, KioskEditorPanel, KioskMainPanel, KioskNotebook, TextEditDialog
+import AppFrame, ScrollableImageView, KioskEditorPanel, KioskMainPanel, KioskNotebook, TextEditDialog, PageOrderDialog
