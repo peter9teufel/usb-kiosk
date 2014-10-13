@@ -127,6 +127,7 @@ class KioskNotebook(wx.Notebook):
     def EditPageOrder(self, event=None):
         dlg = poDlg.PageOrderDialog(self,-1,self.pages,self.base_path)
         if dlg.ShowModal() == wx.ID_OK:
+            self.SetSelection(0)
             self.pages = dlg.pages
             while self.GetPageCount() > 2:
                 self.RemovePage(1)

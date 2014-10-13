@@ -7,11 +7,12 @@ import sys
 # SCROLLABLE IMAGE VIEW ########################################################
 ################################################################################
 class ScrollableImageView(scrolled.ScrolledPanel):
-    def __init__(self,parent,id,size,images,cols=2):
+    def __init__(self,parent,id,size,images,dataSource,cols=2):
         scrolled.ScrolledPanel.__init__(self,parent,id,size=size)
         self.parent = parent
         self.size = size
         self.cols = cols
+        self.dataSource = dataSource
         self.mainSizer = wx.GridBagSizer()
         self.images = images
         self.__LoadImages()
@@ -64,7 +65,7 @@ class ScrollableImageView(scrolled.ScrolledPanel):
         if dlg.ShowModal() == wx.ID_YES:
             del self.images[index]
             self.UpdateImages()
-            self.parent.ImageDeleted(index)
+            self.dataSource.ImageDeleted(index)
 
 
     def __ScaleImage(self, imgPath, width):

@@ -78,8 +78,10 @@ def waitForUSBDrive():
 def Timeout():
     # wait 20 seconds for drive detection
     time.sleep(20)
-    # trigger timeout as no usb device found within 20 seconds
-    wx.CallAfter(Publisher.sendMessage, 'usb_search_timeout')
+    global drive_found
+    if not drive_found:
+      # trigger timeout as no usb device found within 20 seconds
+      wx.CallAfter(Publisher.sendMessage, 'usb_search_timeout')
 
 class Notification:
 

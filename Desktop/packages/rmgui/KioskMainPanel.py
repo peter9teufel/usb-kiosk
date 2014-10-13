@@ -194,9 +194,9 @@ class KioskMainPanel(wx.Panel):
         origin = (boxRect[0]+rect[0],boxRect[1]+rect[1])
         point = event.GetPoint()
         if HOST_SYS == HOST_WIN:
-            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+20))
+            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+15))
         else:
-            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+40))
+            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+45))
         menu.Destroy()
 
     def DeleteSelectedSongItem(self, event=None):
@@ -288,6 +288,9 @@ class KioskMainPanel(wx.Panel):
         dlg.ShowModal()
 
     def LoadFromUSB(self, path):
+        if HOST_SYS == HOST_WIN and not path.endswith(":"):
+            # add colon to path under windows as path is only drive letter
+            path += ":"
         if self.usbPath == None:
             self.prgDialog.UpdatePulse("Loading USB data...")
         else:
@@ -388,9 +391,13 @@ class KioskMainPanel(wx.Panel):
             self.prgDialog.Destroy()
 
         wx.CallAfter(Publisher.unsubscribe, self.LoadFromUSB, 'usb_connected')
+        wx.CallAfter(Publisher.unsubscribe, self.LoadFromUSB, 'usb_search_timeout')
 
 
     def CreateUSB(self, path):
+        if HOST_SYS == HOST_WIN and not path.endswith(":"):
+            # add colon to path under windows as path is only drive letter
+            path += ":"
         if self.usbPath == None:
             self.prgDialog.UpdatePulse("Creating USB data...")
         else:
@@ -466,6 +473,7 @@ class KioskMainPanel(wx.Panel):
         dlg = wx.MessageDialog(self, tr("done"), tr("done"), style = wx.OK)
         dlg.ShowModal()
         wx.CallAfter(Publisher.unsubscribe, self.CreateUSB, 'usb_connected')
+        wx.CallAfter(Publisher.unsubscribe, self.CreateUSB, 'usb_search_timeout')
 
     def SaveConfiguration(self, path=None):
         home = expanduser("~")
@@ -576,7 +584,6 @@ class KioskMainPanel(wx.Panel):
                 with open(mp3Tmp + 'filenames.bak', 'r') as f:
                     data = f.read()
                 filenames = data.split("\n")
-                print "MP3 FILENAMES: ", filenames
                 fileNr = 0
                 for file in os.listdir(mp3Tmp):
                     if file.endswith('.mp3'):

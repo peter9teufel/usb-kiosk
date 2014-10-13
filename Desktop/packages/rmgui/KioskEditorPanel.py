@@ -90,7 +90,7 @@ class KioskEditorPanel(wx.Panel):
 
         # image definition
         addImg = wx.Button(self.mainBox,-1,label="Add Image")
-        self.imgPreview = siv.ScrollableImageView(self.mainBox,-1,size=(300,350),images=[],cols=1)
+        self.imgPreview = siv.ScrollableImageView(self.mainBox,-1,size=(300,350),images=[],dataSource=self,cols=1)
         for img in self.images:
             self.imgPreview.AddImage(img)
 
@@ -160,12 +160,13 @@ class KioskEditorPanel(wx.Panel):
 
         boxRect = self.mainBox.GetRect()
         rect = self.textList.GetRect()
-        origin = (boxRect[0] + rect[0], boxRect[1] + rect[1])
+
+        origin = (boxRect[0]+rect[0],boxRect[1]+rect[1])
         point = event.GetPoint()
         if HOST_SYS == HOST_WIN:
-            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+20))
+            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+15))
         else:
-            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+40))
+            self.PopupMenu(menu, (origin[0]+point[0]+10,origin[1]+point[1]+45))
         menu.Destroy()
 
     def DeleteSelectedTextItem(self, event=None):

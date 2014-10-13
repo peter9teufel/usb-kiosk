@@ -1,6 +1,5 @@
 import wx
 import KioskNotebook as kNotebook
-import NotebookPanel as nPanel
 from packages.lang.Localizer import *
 import sys, os
 
