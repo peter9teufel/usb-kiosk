@@ -245,6 +245,5 @@ function httpGet(theUrl)
 function loadPages(){
     var list = httpGet('infoscreen.php?T=PAGES');
     pages = list.split(";");
-    pages.sort();
     numPages = pages.length;
 }
