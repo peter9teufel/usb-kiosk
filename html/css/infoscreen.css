@@ -89,7 +89,7 @@ html, body {
     top: 2%;
     left: 2%;
     width: 46%;
-    max-height: 74%;
+    height: 74%;
     overflow: hidden;
     padding-left: 10px;
     padding-top: 10px;
@@ -98,7 +98,7 @@ html, body {
     margin-top: 1%;
     margin-left: 1%;
     margin-right: 1%;
-    font-size: 65px;
+    font-size: 32px;
     font-weight: bolder;
     line-height: 1.2;
     text-align: justify;

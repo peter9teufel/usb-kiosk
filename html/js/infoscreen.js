@@ -38,25 +38,13 @@ function switchPage(){
         image.src = img;
 
         if(isHeadlineTwoLined(headline)){
-            if(screen.height < 1000){
-                txtMaxH = '69%';
-                imgMaxH = '54%';
-                imgMaxHNoTxt = '69%';
-            }else{
-                txtMaxH = '72%';
-                imgMaxH = '57%';
-                imgMaxHNoTxt = '72%';
-            }
+            txtMaxH = '66%';
+            imgMaxH = '54%';
+            imgMaxHNoTxt = '69%';
         }else{
-            if(screen.height < 1000){
-                txtMaxH = '74%';
-                imgMaxH = '64%';
-                imgMaxHNoTxt = '74%';
-            }else{
-                txtMaxH = '74%';
-                imgMaxH = '64%';
-                imgMaxHNoTxt = '74%';
-            }
+            txtMaxH = '74%';
+            imgMaxH = '62%';
+            imgMaxHNoTxt = '74%';
         }
 
         // set visibility of textfield
@@ -67,9 +55,22 @@ function switchPage(){
             image.style.maxHeight = imgMaxHNoTxt;
         }else{
             textfield.style.display = 'inline';
-            textfield.style.maxHeight = txtMaxH;
-            image.style.maxWidth = '48%'
+            textfield.style.height = txtMaxH;
+            image.style.maxWidth = '44%';
             image.style.maxHeight = imgMaxH;
+        }
+
+        // set visibility of image field
+        if(img == ""){
+            // empty string returned --> no images available for page --> split creates one
+            // element discovered here!
+            image.style.display = 'none';
+            textfield.style.width = '96.5%';
+            textfield.style.height = imgMaxH; // imgMaxH should not interfere with logo
+        }else{
+            image.style.display = 'inline';
+            textfield.style.width = '46%';
+            textfield.style.height = txtMaxH;
         }
 
         // auto size text to avoid overflow

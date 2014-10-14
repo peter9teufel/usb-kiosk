@@ -1,5 +1,0 @@
-And again - „Multiple!“
-
-Multiple text files that can have any filename, the kiosk reads all the txt files you saved for a page, calculates the corresponding duration for each text to allow people to easily read the text and switches automatically between the texts of a page.
-
-All done automatically without the need to configure anything.

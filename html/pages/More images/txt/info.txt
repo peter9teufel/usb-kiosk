@@ -1,5 +1,0 @@
-One image is nice, two images... gimme more! ...and three images - WOW!
-
-Put multiple images on one page, the kiosk will automatically switch between them. The duration for each image is calculated with the duration of the whole page.
-
-If a page has not a lot of text and thus a short duration, the kiosk ensures that each image is visible for at least five seconds.

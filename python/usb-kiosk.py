@@ -81,8 +81,8 @@ def USBPagesValid():
                     jpgPresent = True
                 elif file.endswith((TEXT_EXTENSION)):
                     txtPresent = True
-        pagesValid[page] = (jpgPresent)
-        if not (jpgPresent):
+        pagesValid[page] = (jpgPresent or txtPresent)
+        if not (jpgPresent or txtPresent):
             allValid = False
         else:
             allInvalid = False
