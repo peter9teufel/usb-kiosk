@@ -131,7 +131,9 @@ class KioskNotebook(wx.Notebook):
             while self.GetPageCount() > 2:
                 self.RemovePage(1)
             for i in range(1,len(self.pages)):
-                self.InsertPage(self.GetPageCount()-1,self.pages[i], self.pages[i].title)
+                page = self.pages[i]
+                page.index = i+1ermin
+                self.InsertPage(self.GetPageCount()-1, page, page.title)
 
     def ClearNotebook(self):
         # delete all notebook pages
