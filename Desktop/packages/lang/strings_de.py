@@ -30,6 +30,8 @@ strings = {
 	"filename": "Dateiname",
 	"path": "Dateipfad",
 	"select_mp3s": u"MP3 Dateien auswählen",
+	"searching": "Suche...",
+	"plug_usb": "Bitte USB-Stick jetzt anstecken!",
 	"title_no_usb": "Kein USB Laufwerk erkannt",
 	"msg_no_usb": "Es konnte kein USB Laufwerk erkannt werden. Bitte USB Stick trennen und erneut versuchen.",
 	"loading_usb_data": "Daten vom USB Stick werden geladen",

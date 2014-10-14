@@ -30,6 +30,8 @@ strings = {
 	"filename": "Filename",
 	"path": "Path",
 	"select_mp3s": "Select MP3 files",
+	"searching": "Searching...",
+	"plug_usb": "Please connect your USB-Stick now!",
 	"title_no_usb": "No USB Drive found",
 	"msg_no_usb": "No USB Drive detected, please unplug your USB Stick and try again.",
 	"loading_usb_data": "Loading data from USB Stick",

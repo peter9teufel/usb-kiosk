@@ -10,7 +10,7 @@ function load(){
 }
 
 function switchPage(){
-    if(numPages > 0){
+    if(numPages > 0 && pages[0] != ""){
         if(pageNr == numPages){
             pageNr = 0;
         }
@@ -112,24 +112,30 @@ function switchPage(){
         // no pages on player show demo page with description
         var headline = document.getElementById("txt_headline");
         var textfield = document.getElementById("txt_text");
+        var image = document.getElementById("info_img");
         image.style.display = 'none';
         noImg = true;
         textfield.style.width = '96.5%';
         textfield.style.height = '62%';
 
         title = "Welcome to your USB-Kiosk!";
-        msg = "How to get started:\n";
-        msg += " - Open the \"Kiosk Editor\" desktop application to setup your kiosk pages, background, logo and background music.\n";
-        msg += " - Kiosk Editor allows you to save your kiosk configuration in one single file to share it or edit it again.\n";
-        msg += " - Once you have all your pages setup, click on \"File - Create Kiosk USB-Stick\"\n";
-        msg += " - You will be prompted to connect a USB Stick and your pages will be copied as soon as you do so.\n";
-        msg += " - Connect the prepared USB Stick to the Kiosk player and power it on.\n";
-        msg += "\n";
-        msg += "THAT'S IT! Your data is copied to the player and the player starts the kiosk mode showing your pages."
-        msg += "For more information checkout the ReadMe at http://bit.do/usb-kiosk-readme"
+        msg = "How to get started:<br>";
+        msg += " - Open the \"Kiosk Editor\" desktop application to setup your kiosk pages, background, logo and background music.<br>";
+        msg += " - Kiosk Editor allows you to save your kiosk configuration in one single file to share it or edit it again.<br>";
+        msg += " - Once you have all your pages setup, click on \"File - Create Kiosk USB-Stick\"<br>";
+        msg += " - You will be prompted to connect a USB Stick and your pages will be copied as soon as you do so.<br>";
+        msg += " - Connect the prepared USB Stick to the Kiosk player and power it on.<br>";
+        msg += "<br>";
+        msg += "THAT'S IT! Your data is copied to the player and the player starts the kiosk mode.<br>";
+        msg += "<br>";
+        msg += "For more information checkout the ReadMe at http://bit.do/usb-kiosk-readme";
 
         headline.innerHTML = title
         textfield.innerHTML = msg
+
+        // auto size text to avoid overflow
+        initTextSize()
+        resize()
     }
 }
 
