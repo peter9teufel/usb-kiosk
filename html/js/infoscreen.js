@@ -92,10 +92,10 @@ function switchPage(){
         // split available duration for images
         var imgDuration = (duration / images.length) * 0.95;
         // each image should be visible at least for 5 seconds
-        if(duration == 0 || imgDuration < 5000){
-            imgDuration = 5000;
-            // adjust complete duration --> duration for each image plus 1 sec loading time
-            duration = (images.length * 6000);
+        if(duration == 0 || imgDuration < 8000){
+            imgDuration = 8000;
+            // adjust complete duration --> duration for each image plus some loading time
+            duration = (images.length * 8700);
         }
         // calculate duration for each text
         var txtDuration = (duration / infoJSON.length);
@@ -152,7 +152,7 @@ function pageDuration(pageTxts){
     for(var i = 0; i < pageTxts.length; i++){
         txt = pageTxts[i];
         var numWords = txt.split(' ').length;
-        duration += (numWords / 2) * 1000;
+        duration += (numWords / 1.5) * 1000;
     }
     return duration;
 }
