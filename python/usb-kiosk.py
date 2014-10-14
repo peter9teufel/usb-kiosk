@@ -218,9 +218,9 @@ def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, min
                 height = maxH
                 width = maxH * w / h
             if width < w and height < h:
-                img.thumbnail((width,height), Image.ANTIALIAS)
+                img.thumbnail((width,height))
             else:
-                img = img.resize((width, height), Image.ANTIALIAS)
+                img = img.resize((width, height))
         elif w < minW or h < minH:
             if w/h > 1.770:
                 width = minW
@@ -229,9 +229,9 @@ def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, min
                 height = minH
                 width = minH * w / h
             if width < w and height < h:
-                img.thumbnail((width,height), Image.ANTIALIAS)
+                img.thumbnail((width,height))
             else:
-                img = img.resize((width, height), Image.ANTIALIAS)
+                img = img.resize((width, height))
         else:
             width = w
             height = h
@@ -261,9 +261,9 @@ def _optimizeCrop(fileName, basePath, destPath, maxW, maxH):
             height = maxH
             width = maxH * w / h
         if width < w and height < h:
-            img.thumbnail((width,height), Image.ANTIALIAS)
+            img.thumbnail((width,height))
         else:
-            img = img.resize((width, height), Image.ANTIALIAS)
+            img = img.resize((width, height))
         if width == 1920:
             # crop upper and lower part
             diff = height - 1080
