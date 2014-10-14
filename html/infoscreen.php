@@ -23,22 +23,29 @@ function pages(){
     $files = array();
     $cnt = 0;
     $result = "";
+    $pagedirs = array();
     if ($dir_list = opendir($dir)){
         while(($filename = readdir($dir_list)) !== false){
             // check for '.' '..''.htaccess'
             if(!startsWith($filename, ".") && $filename != "." && $filename != ".." && $filename != ".htaccess"){
                 if(is_dir($dir . '/' . $filename)){
-                    // page directory --> read headline.txt inside that directory
-                    $text = file_get_contents($dir . "/" . $filename . "/txt/headline.txt");
+                    // page directory --> store page dir path
+                    $pagedirs[] = $dir . '/' . $filename;
+                }
+            }
+        }
+    }
+    // sort page directory paths
+    natsort($pagedirs);
+    // build result data
+    foreach($pagedirs as $pagedir){
+        $text = file_get_contents($pagedir . "/txt/headline.txt");
                     if($cnt > 0){
                         $result .= ";";
                     }
                     $result .= $text;
                     //array_push($files, $filename);
                     $cnt = $cnt + 1;
-                }
-            }
-        }
     }
     return $result;
 }
