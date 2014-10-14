@@ -222,6 +222,10 @@ class KioskEditorPanel(wx.Panel):
                 if i < len(self.texts) - 1:
                     txts += ";"
             url += "&TXTS=" + txts
+        if len(self.images) > 0:
+            url += "&IMG=1"
+        else:
+            url += "&IMG=0"
         webbrowser.open(url)
 
 # HELPER METHOD to get correct resource path for image file

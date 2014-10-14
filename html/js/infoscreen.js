@@ -173,7 +173,7 @@ function initTextSize(){
     _results = [];
     for (_i = 0, _len = elements.length; _i < _len; _i++) {
         el = elements[_i];
-        $(el).css("font-size", "65px")
+        $(el).css("font-size", "60px")
     }
 }
 

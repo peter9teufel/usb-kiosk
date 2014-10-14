@@ -30,7 +30,7 @@
 
                 -->
 
-                <img class="img_div" id="info_img" src="sample_img1.jpg"/>
+                <img class="img_div" id="info_img"/>
 
             </div>
             <!-- LOGO of customer -->
@@ -42,10 +42,12 @@
         <?php
             $name = (isset($_REQUEST['NAME']))? $_REQUEST['NAME']:'NA';
             $txts = (isset($_REQUEST['TXTS']))? $_REQUEST['TXTS']:'';
+            $img = (isset($_REQUEST['IMG']))? $_REQUEST['IMG']:0;
         ?>
 
         <input type="hidden" name="hl_hidden" id="headline_hidden" value="<?php echo $name ?>" >
         <input type="hidden" name="info_hidden" id="infotexts_hidden" value="<?php echo $txts ?>" >
+        <input type="hidden" name="img_hidden" id="image_hidden" value="<?php echo $img ?>" >
 
         <script>
             setTimeout('load()', 100);

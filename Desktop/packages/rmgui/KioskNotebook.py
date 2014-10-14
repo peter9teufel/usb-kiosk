@@ -108,10 +108,10 @@ class KioskNotebook(wx.Notebook):
         del self.pages[index]
 
     def SaveConfiguration(self, event=None):
-        dlg = wx.FileDialog(self, tr("save_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk*", wx.FD_SAVE)
+        dlg = wx.FileDialog(self, tr("save_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk", wx.FD_SAVE)
 
         if dlg.ShowModal() == wx.ID_OK:
-            save_path = dlg.GetPath() + ".kiosk"
+            save_path = dlg.GetPath()
             self.mainPage.SaveConfiguration(save_path)
             #print "You want to save your config to ", save_path
 

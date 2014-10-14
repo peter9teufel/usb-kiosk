@@ -545,6 +545,9 @@ class KioskMainPanel(wx.Panel):
         #zipFile = zipfile.ZipFile(path, 'w')
         #self.zipdir(tmpPath, zipFile)
         self.make_zipfile(path, tmpPath)
+        prgDlg.Update(100)
+        if HOST_SYS == HOST_WIN:
+            prgDlg.Destroy()
         dlg = wx.MessageDialog(self, tr("msg_saving_done"), tr("done"), style = wx.OK)
         dlg.ShowModal()
 

@@ -23,14 +23,21 @@ function showPage(){
     var headline_h = document.getElementById("headline_hidden");
     var textfield_h = document.getElementById("infotexts_hidden");
     var image = document.getElementById("info_img");
+    var image_h = document.getElementById("image_hidden");
+
+    var img_h_value = image_h.value;
+    img = ""
+    if(img_h_value == 1){
+        img = "sample_img1.jpg";
+    }
 
     var pageHeadline = headline_h.value;
-    headline.innerHTML =  pageHeadline;
     // var infotexts = textfield_h.innerHTML;
     var txts = textfield_h.value;
     var infoJSON = txts.split(";")
     var infotext = infoJSON[0];
     infotext = replaceAll("%22", "\"",infotext)
+    pageHeadline = replaceAll("%22", "\"",pageHeadline)
     // set new content
     headline.innerHTML =  pageHeadline;
     textfield.innerHTML = infotext;
@@ -57,19 +64,38 @@ function showPage(){
         }
     }
 
+    noImg = false;
+    noText = false;
+
     // set visibility of textfield
-    if(infoJSON.length == 0 || (infoJSON.length == 1 && infotext.length == 0)){
+    if(infoJSON.length == 0 || (infoJSON.length == 1 && infotext.split(' ') == 1)){
         // no text to show
         textfield.style.display = 'none';
+        noText = true;
         image.style.maxWidth = '100%';
         image.style.maxHeight = imgMaxHNoTxt;
     }else{
         textfield.style.display = 'inline';
-        textfield.style.maxHeight = txtMaxH;
-        image.style.maxWidth = '48%'
+        noText = false;
+        textfield.style.height = txtMaxH;
+        image.style.maxWidth = '44%';
         image.style.maxHeight = imgMaxH;
     }
 
+    // set visibility of image field
+    if(img == ""){
+        // empty string returned --> no images available for page --> split creates one
+        // element discovered here!
+        image.style.display = 'none';
+        noImg = true;
+        textfield.style.width = '95%';
+        textfield.style.height = imgMaxH; // imgMaxH should not interfere with logo
+    }else{
+        image.style.display = 'inline';
+        noImg = false;
+        textfield.style.width = '46%';
+        textfield.style.height = txtMaxH;
+    }
     // auto size text to avoid overflow
     initTextSize()
     resize()
@@ -85,12 +111,17 @@ function showPage(){
         duration = (12000);
     }
     var txtDuration = (duration / infoJSON.length);
-    setTimeout(function(){
-        changeImage();
-    }, imgDuration);
-    setTimeout(function(){
-        changeText(infoJSON, 1, txtDuration);
-    }, txtDuration);
+    if(noImg == false){
+        image.src= img;
+        setTimeout(function(){
+            changeImage();
+        }, imgDuration);
+    }
+    if(noText == false){
+        setTimeout(function(){
+            changeText(infoJSON, 1, txtDuration);
+        }, txtDuration);
+    }
 }
 
 function isHeadlineTwoLined(headline){
@@ -149,7 +180,7 @@ function initTextSize(){
     _results = [];
     for (_i = 0, _len = elements.length; _i < _len; _i++) {
         el = elements[_i];
-        $(el).css("font-size", "65px")
+        $(el).css("font-size", "30px")
     }
 }
 
