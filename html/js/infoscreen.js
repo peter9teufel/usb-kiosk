@@ -47,14 +47,19 @@ function switchPage(){
             imgMaxHNoTxt = '74%';
         }
 
+        var noText = false;
+        var noImg = false;
+
         // set visibility of textfield
         if(infoJSON.length == 0 || (infoJSON.length == 1 && infotext.split(' ') == 1)){
             // no text to show
             textfield.style.display = 'none';
+            noText = true;
             image.style.maxWidth = '100%';
             image.style.maxHeight = imgMaxHNoTxt;
         }else{
             textfield.style.display = 'inline';
+            noText = false;
             textfield.style.height = txtMaxH;
             image.style.maxWidth = '44%';
             image.style.maxHeight = imgMaxH;
@@ -65,10 +70,12 @@ function switchPage(){
             // empty string returned --> no images available for page --> split creates one
             // element discovered here!
             image.style.display = 'none';
+            noImg = true;
             textfield.style.width = '96.5%';
             textfield.style.height = imgMaxH; // imgMaxH should not interfere with logo
         }else{
             image.style.display = 'inline';
+            noImg = false;
             textfield.style.width = '46%';
             textfield.style.height = txtMaxH;
         }

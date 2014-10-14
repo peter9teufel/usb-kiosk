@@ -132,7 +132,7 @@ class KioskNotebook(wx.Notebook):
                 self.RemovePage(1)
             for i in range(1,len(self.pages)):
                 page = self.pages[i]
-                page.index = i+1ermin
+                page.index = i+1
                 self.InsertPage(self.GetPageCount()-1, page, page.title)
 
     def ClearNotebook(self):
