@@ -1,8 +1,5 @@
 #!/bin/sh
 
-echo "Removing preparation script..."
-sudo rm prepare_raspbian.sh;
-
 echo "Removing not used wolfram engine..."
 # remove not used wolfram-engine
 sudo apt-get -y remove wolfram-engine;
@@ -68,6 +65,8 @@ sudo echo '@xset s noblank' >> /etc/xdg/lxsession/LXDE/autostart;
 sudo echo '@chromium --kiosk --incognito --disable-translate http://127.0.0.1/usb-kiosk/infoscreen.html' >> /etc/xdg/lxsession/LXDE/autostart
 
 echo 'Setup complete!';
-echo 'Please prepare a usb stick with kiosk data for first boot.';
-echo 'Shutting down...';
-sudo shutdown -h now;
+echo 'Rebooting now...';
+sudo reboot;
+
+# install script deletes itself after completion
+rm -- "$0"
