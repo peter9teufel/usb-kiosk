@@ -124,7 +124,7 @@ class KioskEditorPanel(wx.Panel):
 
 
         #mainBoxSizer.Add(headlineSizer,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.TOP, border = 10)
-        mainBoxSizer.Add(contentSizer,flag=wx.ALIGN_CENTER_HORIZONTAL)
+        mainBoxSizer.Add(contentSizer,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.RIGHT|wx.BOTTOM, border=10)
         #mainBoxSizer.Add(preview,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
 
         self.mainSizer.Add(headlineSizer,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.TOP, border = 10)

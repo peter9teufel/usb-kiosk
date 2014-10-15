@@ -1,7 +1,7 @@
 import wx
 import KioskNotebook as kNotebook
 from packages.lang.Localizer import *
-import sys, os
+import sys, os, webbrowser
 
 from wx.lib.wordwrap import wordwrap
 
@@ -25,11 +25,13 @@ class AppFrame(wx.Frame):
 
 
         # Create an accelerator table for keyboard shortcuts
+        sc_new = wx.NewId()
         sc_open = wx.NewId()
         sc_save = wx.NewId()
         sc_create_usb = wx.NewId()
         sc_load_usb = wx.NewId()
         sc_edit_order = wx.NewId()
+        self.Bind(wx.EVT_MENU, self.notebook.NewConfiguration, id=sc_new)
         self.Bind(wx.EVT_MENU, self.notebook.OpenConfiguration, id=sc_open)
         self.Bind(wx.EVT_MENU, self.notebook.SaveConfiguration, id=sc_save)
         self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForLoading, id=sc_load_usb)
@@ -57,45 +59,62 @@ class AppFrame(wx.Frame):
     def SetupMenuBar(self):
         # menus
         fileMenu = wx.Menu()
+        usbMenu = wx.Menu()
         editMenu = wx.Menu()
+        helpMenu = wx.Menu()
 
-        # save and open configurations
+        # new, save and open configurations
+        newConfig = fileMenu.Append(wx.ID_ANY, "&"+tr("new_kiosk") + "\tCTRL+N")
+        fileMenu.AppendSeparator()
         openConfig = fileMenu.Append(wx.ID_OPEN, "&"+tr("open_kiosk") + "\tCTRL+O")
         saveConfig = fileMenu.Append(wx.ID_SAVE, "&"+tr("save_kiosk") + "\tCTRL+S")
-        loadUsb = fileMenu.Append(wx.ID_ANY, "&"+tr("load_from_usb") + "\tCTRL+L")
-        createUsb = fileMenu.Append(wx.ID_ANY, "&"+tr("create_usb") + "\tCTRL+R")
+        fileMenu.AppendSeparator()
+        importPages = fileMenu.Append(wx.ID_ANY, "&"+tr("import_pages"))
+        fileMenu.AppendSeparator()
+
+        # exit entry in file menu
+        menuExit = fileMenu.Append(wx.ID_EXIT, "&"+tr("exit"),tr("exit"))
+
+        # load and create USB
+        loadUsb = usbMenu.Append(wx.ID_ANY, "&"+tr("load_from_usb") + "\tCTRL+L")
+        createUsb = usbMenu.Append(wx.ID_ANY, "&"+tr("create_usb") + "\tCTRL+R")
 
         # edit menu entrie(s)
         pageOrder = editMenu.Append(wx.ID_ANY, "&"+tr("edit_page_order") + "\tCTRL+E")
 
+        # help menu entries
+        help = helpMenu.Append(wx.ID_ANY, "&"+tr("online_help"))
+        helpMenu.AppendSeparator()
+        about = helpMenu.Append(wx.ID_ANY, "&"+tr("about"))
+
+        self.Bind(wx.EVT_MENU, self.notebook.NewConfiguration, newConfig)
         self.Bind(wx.EVT_MENU, self.notebook.SaveConfiguration, saveConfig)
         self.Bind(wx.EVT_MENU, self.notebook.OpenConfiguration, openConfig)
+        self.Bind(wx.EVT_MENU, self.notebook.ImportPages, importPages)
+        self.Bind(wx.EVT_MENU, self.ShowAbout, about)
+        self.Bind(wx.EVT_MENU, self.Close, menuExit)
         self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForLoading, loadUsb)
         self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForCreation, createUsb)
-
         self.Bind(wx.EVT_MENU, self.notebook.EditPageOrder, pageOrder)
-
-        # Help Menu
-        about = fileMenu.Append(wx.ID_ANY, "&"+tr("about"))
-        self.Bind(wx.EVT_MENU, self.ShowAbout, about)
-
-        # File Menu
-        menuExit = fileMenu.Append(wx.ID_EXIT, "&"+tr("exit"),tr("exit"))
-        self.Bind(wx.EVT_MENU, self.Close, menuExit)
+        self.Bind(wx.EVT_MENU, self.OpenOnlineHelp, help)
 
         # Menubar
         menuBar = wx.MenuBar()
         menuBar.Append(fileMenu, "&"+tr("file"))
         menuBar.Append(editMenu, "&"+tr("edit"))
+        menuBar.Append(usbMenu, "&USB")
+        menuBar.Append(helpMenu, "&"+tr("help"))
 
         self.SetMenuBar(menuBar)
 
     def ShowAbout(self, event):
         # message read from defined version info file in the future
         msg = "Kiosk Editor v1.0\n(c) 2014 by www.multimedia-installationen.at\nContact: software@multimedia-installationen.at\nAll rights reserved."
-        dlg = wx.MessageDialog(self, msg, tr("about"), style=wx.OK)
+        dlg = wx.MessageDialog(self, msg, tr("about"), style=wx.OK|wx.ICON_INFORMATION)
         dlg.ShowModal()
 
+    def OpenOnlineHelp(self, event):
+        webbrowser.open("http://bit.do/usb-kiosk-readme")
 
 
 # HELPER METHOD to get correct resource path for image file

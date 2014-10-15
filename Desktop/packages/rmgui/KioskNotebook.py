@@ -107,6 +107,12 @@ class KioskNotebook(wx.Notebook):
         self.RemovePage(index)
         del self.pages[index]
 
+    def GetEditorPages(self):
+        return self.pages[1:]
+
+    def NewConfiguration(self, event=None):
+        self.ClearNotebook()
+
     def SaveConfiguration(self, event=None):
         dlg = wx.FileDialog(self, tr("save_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk", wx.FD_SAVE)
 
@@ -123,6 +129,12 @@ class KioskNotebook(wx.Notebook):
             open_path = dlg.GetPath()
             self.mainPage.OpenConfiguration(open_path)
 
+    def ImportPages(self, event):
+        dlg = wx.FileDialog(self, tr("load_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk", wx.FD_OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            open_path = dlg.GetPath()
+            self.mainPage.ImportPages(open_path)
+
     def EditPageOrder(self, event=None):
         dlg = poDlg.PageOrderDialog(self,-1,self.pages,self.base_path)
         if dlg.ShowModal() == wx.ID_OK:
@@ -134,6 +146,19 @@ class KioskNotebook(wx.Notebook):
                 page = self.pages[i]
                 page.index = i+1
                 self.InsertPage(self.GetPageCount()-1, page, page.title)
+
+    def NumberOfFiles(self):
+        total = 0
+        # image and text files from pages
+        for i in range(1,len(self.pages)):
+            page = self.pages[i]
+            total += len(page.images) + len(page.texts)
+        print "%d images and texts on pages" % total
+        # song files from main panel
+        total += len(self.pages[0].songs)
+        print "%d total files including MP3s" % total
+        print "BG, Logo and Streamfile ignored."
+        return total
 
     def ClearNotebook(self):
         # delete all notebook pages

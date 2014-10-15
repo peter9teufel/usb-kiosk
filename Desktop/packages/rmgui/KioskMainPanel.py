@@ -37,6 +37,8 @@ class KioskMainPanel(wx.Panel):
         self.bg = None
         self.logo = None
         self.songs = []
+        self.streams = []
+        self.streamAddr = None
         self.imgPath = self.DefaultPath()
         self.usbPath = None
         self.Initialize()
@@ -64,7 +66,10 @@ class KioskMainPanel(wx.Panel):
         self.songs = []
         while self.songList.GetItemCount() > 0:
             self.songList.DeleteItem(0)
-
+        self.streamCombo.SetSelection(-1)
+        self.streamAddr = None
+        self.musicRadioBox.SetSelection(0)
+        self.MusicRadioBoxChanged()
         # reset BG and Logo
         self.bg = None
         self.logo = None
@@ -82,11 +87,11 @@ class KioskMainPanel(wx.Panel):
             self.LoadData()
 
     def Initialize(self):
-        imgBox = wx.StaticBox(self,-1,tr("bg_logo_box"))
+        imgBox = wx.StaticBox(self,-1,tr("bg_logo_box"),size=(523,310))
         imgSizer = wx.StaticBoxSizer(imgBox)
 
         self.audioBox = wx.StaticBox(self,-1,tr("bg_music"))
-        audioSizer = wx.StaticBoxSizer(self.audioBox,wx.VERTICAL)
+        self.audioSizer = wx.StaticBoxSizer(self.audioBox,wx.VERTICAL)
 
         # Background selection
         bg = wx.Button(imgBox,-1,label=tr("background"))
@@ -102,47 +107,70 @@ class KioskMainPanel(wx.Panel):
         self._SetImagePreview('img/preview.png',logo=True)
 
         # background music
-        self.musicChk = wx.CheckBox(self.audioBox,-1,label=tr("enable_bg_music"))
+        self.musicRadioBox = wx.RadioBox(self.audioBox,-1,choices=[tr("no_music"), tr("mp3_files"), tr("webradio_stream")],size=(490,42))
         self.addSong = wx.Button(self.audioBox,-1,label=tr("add_songs"))
-        self.songList = wx.ListCtrl(self.audioBox,-1,size=(500,300),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.songList = wx.ListCtrl(self.audioBox,-1,size=(490,300),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         self.songList.Show(True)
         self.songList.InsertColumn(0,tr("filename"), width = 200)
         self.songList.InsertColumn(1,tr("path"), width = 280)
+        self.streams = util.StreamAddresses.GetStreamNames()
+        self.streamCombo = wx.ComboBox(self.audioBox, choices=self.streams)
+        self.streamCombo.SetSelection(-1)
 
-        # Bind elements TODO!
+        # Bind elements
         bg.Bind(wx.EVT_BUTTON, self.ShowBackgroundSelection)
         logo.Bind(wx.EVT_BUTTON, self.ShowLogoSelection)
         self.songList.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.SongItemRightClicked)
-        self.musicChk.Bind(wx.EVT_CHECKBOX, self.MusicCheckboxToggled)
+        self.musicRadioBox.Bind(wx.EVT_RADIOBUTTON, self.MusicRadioBoxChanged)
         self.addSong.Bind(wx.EVT_BUTTON, self.ShowSongSelection)
-        self.MusicCheckboxToggled()
+        self.streamCombo.Bind(wx.EVT_COMBOBOX, self.StreamComboSelected)
+        self.MusicRadioBoxChanged()
 
         # Create and add sizers to main sizer
         # Sizer for BACKGROUND and LOGO selection
-
         bgSizer = wx.BoxSizer(wx.VERTICAL)
         logoSizer = wx.BoxSizer(wx.VERTICAL)
-        bgSizer.Add(bg,flag=wx.LEFT|wx.ALIGN_CENTER_HORIZONTAL,border=10)
-        bgSizer.Add(self.bgCtrl,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=10)
+        bgSizer.Add(bg,flag=wx.wx.ALIGN_CENTER_HORIZONTAL)
+        bgSizer.Add(self.bgCtrl,flag=wx.TOP|wx.ALIGN_CENTER_HORIZONTAL,border=10)
         logoSizer.Add(logo,flag=wx.RIGHT|wx.ALIGN_CENTER_HORIZONTAL,border=10)
-        logoSizer.Add(self.logoCtrl,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=10)
-        imgSizer.Add(bgSizer)
-        imgSizer.Add(logoSizer)
+        logoSizer.Add(self.logoCtrl,flag=wx.TOP|wx.RIGHT|wx.ALIGN_CENTER_HORIZONTAL,border=10)
+        imgSizer.Add(bgSizer, 1, flag=wx.EXPAND)
+        imgSizer.Add(logoSizer, 1, flag=wx.EXPAND)
         # Sizer for AUDIO selection
-        audioSizer.Add(self.musicChk,flag=wx.ALL,border=5)
-        audioSizer.Add(self.addSong,flag=wx.ALL,border=5)
-        audioSizer.Add(self.songList,flag=wx.ALL,border=5)
+        self.audioSizer.Add(self.musicRadioBox,flag=wx.RIGHT|wx.BOTTOM,border=10)
+        self.audioSizer.Add(self.streamCombo,flag=wx.RIGHT|wx.BOTTOM|wx.ALIGN_CENTER_HORIZONTAL,border=10)
+        self.audioSizer.Add(self.addSong,flag=wx.RIGHT,border=10)
+        self.audioSizer.Add(self.songList,flag=wx.RIGHT|wx.BOTTOM,border=10)
 
         imgSizer.Layout()
-        audioSizer.Layout()
+        self.audioSizer.Layout()
 
         # add to main sizer
         contentSizer = wx.BoxSizer(wx.VERTICAL)
         contentSizer.Add(imgSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
-        contentSizer.Add(audioSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
+        contentSizer.Add(self.audioSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
         self.mainSizer.Add(contentSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
         self.SetSizer(self.mainSizer)
-        #self.LayoutAndFit()
+
+    def MusicRadioBoxChanged(self, event=None):
+        sel = self.musicRadioBox.GetSelection()
+        if sel == 0:
+            self.songList.Hide()
+            self.addSong.Hide()
+            self.streamCombo.Hide()
+        elif sel == 1:
+            self.songList.Show()
+            self.addSong.Show()
+            self.streamCombo.Hide()
+        elif sel == 2:
+            self.songList.Hide()
+            self.addSong.Hide()
+            self.streamCombo.Show()
+        self.mainSizer.Layout()
+
+    def StreamComboSelected(self, event):
+        name = self.streams[self.streamCombo.GetSelection()]
+        self.streamAddr = util.StreamAddresses.GetAddrForStream(self.streamCombo.GetSelection())
 
     def ShowBackgroundSelection(self, event=None):
         dlg = imagebrowser.ImageDialog(None,self.imgPath)
@@ -167,20 +195,6 @@ class KioskMainPanel(wx.Panel):
             self.imgPath = head
         if HOST_SYS == HOST_WIN:
             dlg.Destroy()
-
-    def MusicCheckboxToggled(self, event=None, checked=False):
-        if event != None:
-            # triggered by chk changing event
-            checked = self.musicChk.IsChecked()
-        else:
-            # manual trigger -> set checked state
-            self.musicChk.SetValue(checked)
-        if checked:
-            self.addSong.Enable()
-            #self.songList.Enable()
-        else:
-            self.addSong.Disable()
-            #self.songList.Disable()
 
     def SongItemRightClicked(self, event):
         global HOST_SYS
@@ -285,7 +299,7 @@ class KioskMainPanel(wx.Panel):
         self.prgDialog.Update(100)
         if HOST_SYS == HOST_WIN:
             self.prgDialog.Destroy()
-        dlg = wx.MessageDialog(self, tr("msg_no_usb"), tr("title_no_usb"), style=wx.OK)
+        dlg = wx.MessageDialog(self, tr("msg_no_usb"), tr("title_no_usb"), style=wx.OK|wx.ICON_ERROR)
         dlg.ShowModal()
 
     def LoadFromUSB(self, path):
@@ -308,6 +322,7 @@ class KioskMainPanel(wx.Panel):
             shutil.rmtree(tmpRoot)
         os.mkdir(tmpRoot)
         os.mkdir(tmpPath)
+        self.musicRadioBox.SetSelection(0)
 
         usbPath = path + '/kiosk'
         if os.path.isdir(usbPath):
@@ -325,7 +340,7 @@ class KioskMainPanel(wx.Panel):
 
             # copy mp3 files if present
             if os.path.isdir(usbPath + '/mp3/'):
-                self.MusicCheckboxToggled(checked=True)
+                self.musicRadioBox.SetSelection(1)
                 mp3Usb = usbPath + '/mp3/'
                 destPath = tmpPath + 'mp3/'
                 os.mkdir(destPath)
@@ -342,6 +357,14 @@ class KioskMainPanel(wx.Panel):
                         idx = self.songList.InsertStringItem(self.songList.GetItemCount(), filenames[fileNr])
                         self.songList.SetStringItem(idx, 1, destPath)
                         fileNr += 1
+
+            # copy stream.txt file if ppresent
+            if os.path.isfile(usbPath + '/stream.txt'):
+                shutil.copyfile(usbPath + '/stream.txt', tmpPath + 'stream.txt')
+                with open(tmpPath + 'stream.txt') as streamFile:
+                    self.streamAddr = streamFile.read()
+                    self.musicRadioBox.SetSelection(2)
+                    self.streamCombo.SetSelection(self.streams.index(util.StreamAddresses.GetNameForAddr(self.streamAddr)))
 
             # copy data for single pages to page directories in temp dir
             usbPages = []
@@ -385,6 +408,8 @@ class KioskMainPanel(wx.Panel):
                 self._SetImagePreview(self.bg)
             if not self.logo == None:
                 self._SetImagePreview(self.logo, logo=True)
+            self.MusicRadioBoxChanged()
+
 
         self.prgDialog.Update(100)
         if HOST_SYS == HOST_WIN:
@@ -401,78 +426,112 @@ class KioskMainPanel(wx.Panel):
             # add colon to path under windows as path is only drive letter
             path += ":"
         if self.usbPath == None:
-            self.prgDialog.UpdatePulse(tr("creating_usb_data"))
-        else:
-            self.prgDialog = wx.ProgressDialog(tr("loading"),tr("creating_usb_data"))
-            self.prgDialog.Pulse()
+            self.prgDialog.Update(100)
+            if HOST_SYS == HOST_WIN:
+                self.prgDialog.Destroy()
         self.usbPath = path
 
-
+        totalFiles = self.parent.NumberOfFiles()
+        numFiles = 0
         # create kiosk directory on usb drive
         usbPath = path + '/kiosk'
         if os.path.isdir(usbPath):
             shutil.rmtree(usbPath)
         os.mkdir(usbPath)
 
-        # copy background and icon if set
-        if not self.bg == None:
-            # TODO resize BG Image to 1920x1080 FIT MODE
-            dstFile = usbPath + '/bg.jpg'
-            shutil.copyfile(self.bg, dstFile)
-        if not self.logo == None:
-            # TODO convert to PNG!
-            dstFile = usbPath + '/logo.png'
-            shutil.copyfile(self.logo, dstFile)
+        # calc estimated size required with free space on USB
+        estimatedSize = self.EstimatedUSBDataSize()
+        estMB = estimatedSize/1024/1024
+        fs_info = os.statvfs(usbPath)
+        freeUSB = fs_info[1] * fs_info[3]
+        freeMB = freeUSB/1024/1024
 
-        # copy MP3 files if background music enabled
-        if self.musicChk.IsChecked():
-            mp3Path = usbPath + '/mp3/'
-            os.mkdir(mp3Path)
-            fileNames = open(mp3Path + 'filenames.bak', 'w')
-            cnt = 0
-            for mp3 in self.songs:
-                nr = ""
-                if cnt < 100:
-                    if cnt < 10:
-                        nr = "00"
-                    else:
-                        nr = 0
-                    nr += str(cnt)
-                fileNames.write(os.path.basename(mp3).encode("utf-8") + "\n")
-                shutil.copyfile(mp3, mp3Path + 'BG_Music_Title_' + nr + '.mp3')
-                cnt += 1
-            fileNames.close()
+        if estimatedSize < freeUSB:
+            self.prgDialog = wx.ProgressDialog(tr("loading"), tr("creating_usb_data"), maximum=totalFiles)
+            # copy background and icon if set
+            if not self.bg == None:
+                # TODO resize BG Image to 1920x1080 FIT MODE
+                dstFile = usbPath + '/bg.jpg'
+                shutil.copyfile(self.bg, dstFile)
+            if not self.logo == None:
+                # TODO convert to PNG!
+                dstFile = usbPath + '/logo.png'
+                shutil.copyfile(self.logo, dstFile)
 
-        # copy data for single pages to page directories in kiosk directory on USB
-        for i in range(1,self.parent.GetPageCount() - 1):
-            page = self.parent.GetPage(i)
-            pageDir = usbPath + '/page' + str(i) + '/'
-            os.mkdir(pageDir)
-            # page headline
-            fileName = pageDir + "headline.txt"
-            f = open(fileName, 'w')
-            f.write(page.title.encode("utf-8"))
-            f.close()
-            # page texts
-            texts = page.texts
-            for j in range(len(texts)):
-                fileName = pageDir + "Text" + str(j+1) + ".txt"
+            # copy MP3 files if background music enabled
+            if self.musicRadioBox.GetSelection() == 1:
+                mp3Path = usbPath + '/mp3/'
+                os.mkdir(mp3Path)
+                fileNames = open(mp3Path + 'filenames.bak', 'w')
+                cnt = 0
+                for mp3 in self.songs:
+                    nr = ""
+                    if cnt < 100:
+                        if cnt < 10:
+                            nr = "00"
+                        else:
+                            nr = "0"
+                        nr += str(cnt)
+                    fileNames.write(os.path.basename(mp3).encode("utf-8") + "\n")
+                    shutil.copyfile(mp3, mp3Path + 'BG_Music_Title_' + nr + '.mp3')
+                    numFiles += 1
+                    self.prgDialog.Update(numFiles)
+                    cnt += 1
+                fileNames.close()
+            elif self.musicRadioBox.GetSelection() == 2:
+                # write stream address to streamfile on usb drive
+                with open(usbPath + '/stream.txt', 'w') as streamFile:
+                    streamFile.write(self.streamAddr)
+
+            # copy data for single pages to page directories in kiosk directory on USB
+            for i in range(1,self.parent.GetPageCount() - 1):
+                page = self.parent.GetPage(i)
+                pageDir = usbPath + '/page' + str(i) + '/'
+                os.mkdir(pageDir)
+                # page headline
+                fileName = pageDir + "headline.txt"
                 f = open(fileName, 'w')
-                f.write(texts[j].encode("utf-8"))
+                f.write(page.title.encode("utf-8"))
                 f.close()
-            # page images
-            imgs = page.images
-            for j in range(len(imgs)):
-                ending = ".jpg"
-                if imgs[j].endswith(".png") or imgs[j].endswith(".PNG"):
-                    ending = ".png"
-                dstFile = pageDir + '/image' + str(j) + ending
-                shutil.copyfile(imgs[j], dstFile)
-        self.prgDialog.Update(100)
-        if HOST_SYS == HOST_WIN:
-            self.prgDialog.Destroy()
-        dlg = wx.MessageDialog(self, tr("msg_usb_done"), tr("done"), style = wx.OK)
-        dlg.ShowModal()
+                # page texts
+                texts = page.texts
+                for j in range(len(texts)):
+                    fileName = pageDir + "Text" + str(j+1) + ".txt"
+                    f = open(fileName, 'w')
+                    f.write(texts[j].encode("utf-8"))
+                    f.close()
+                    numFiles += 1
+                    self.prgDialog.Update(numFiles)
+                # page images
+                imgs = page.images
+                for j in range(len(imgs)):
+                    ending = ".jpg"
+                    if imgs[j].endswith(".png") or imgs[j].endswith(".PNG"):
+                        ending = ".png"
+                    dstFile = pageDir + '/image' + str(j) + ending
+                    shutil.copyfile(imgs[j], dstFile)
+                    numFiles += 1
+                    self.prgDialog.Update(numFiles)
+            if numFiles < totalFiles:
+                self.prgDialog.Update(totalFiles)
+            if HOST_SYS == HOST_WIN:
+                self.prgDialog.Destroy()
+            dlg = wx.MessageDialog(self, tr("msg_usb_done"), tr("done"), style = wx.OK|wx.ICON_INFORMATION)
+            dlg.ShowModal()
+        else:
+            free = ""
+            est = ""
+            if freeMB > 1024 and estMB > 1024:
+                free = str(freeMB/1024) + " GB"
+                est = str(estMB/1024) + " GB"
+            else:
+                free = str(freeMB) + " MB"
+                est = str(estMB) + " MB"
+
+            dlg = wx.MessageDialog(self, tr("msg_usb_no_space") % (free,est), tr("title_usb_no_space"), style = wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+
+
         wx.CallAfter(Publisher.unsubscribe, self.CreateUSB, 'usb_connected')
         wx.CallAfter(Publisher.unsubscribe, self.CreateUSB, 'usb_search_timeout')
 
@@ -499,7 +558,7 @@ class KioskMainPanel(wx.Panel):
             shutil.copyfile(self.logo, dstFile)
 
         # copy MP3 files if background music enabled
-        if self.musicChk.IsChecked():
+        if self.musicRadioBox.GetSelection() == 1:
             mp3Path = tmpPath + '/mp3/'
             os.mkdir(mp3Path)
             fileNames = open(mp3Path + 'filenames.bak', 'w')
@@ -516,6 +575,10 @@ class KioskMainPanel(wx.Panel):
                 shutil.copyfile(mp3, mp3Path + 'BG_Music_Title_' + nr + '.mp3')
                 cnt += 1
             fileNames.close()
+        elif self.musicRadioBox.GetSelection() == 2:
+            # write stream.txt file to tmp path with selected stream address
+            with open(tmpPath + '/stream.txt', 'w') as streamFile:
+                streamFile.write(self.streamAddr)
 
         # copy data for single pages to page directories in kiosk directory on USB
         for i in range(1,self.parent.GetPageCount() - 1):
@@ -548,18 +611,41 @@ class KioskMainPanel(wx.Panel):
         prgDlg.Update(100)
         if HOST_SYS == HOST_WIN:
             prgDlg.Destroy()
-        dlg = wx.MessageDialog(self, tr("msg_saving_done"), tr("done"), style = wx.OK)
+        dlg = wx.MessageDialog(self, tr("msg_saving_done"), tr("done"), style = wx.OK|wx.ICON_INFORMATION)
         dlg.ShowModal()
 
     def OpenConfiguration(self, path):
+        prgDialog = wx.ProgressDialog(tr("title_opening"), tr("msg_opening"))
+        prgDialog.Pulse()
         home = expanduser("~")
         appPath = home + '/.usb_kiosk/'
         tmpRoot = appPath + 'tmp/'
         self.unzip(path, tmpRoot)
         os.rename(tmpRoot + 'kiosk_config_save', tmpRoot + 'kiosk_config')
         self.LoadPagesFromTempData(tmpRoot + 'kiosk_config/')
+        prgDialog.Update(100)
+        if HOST_SYS == HOST_WIN:
+            prgDialog.Destroy()
+
+    def ImportPages(self, path):
+        prgDialog = wx.ProgressDialog(tr("loading"), tr("msg_importing"))
+        prgDialog.Pulse()
+        home = expanduser("~")
+        appPath = home + '/.usb_kiosk/'
+        tmpRoot = appPath + 'tmp/'
+        tmpPath = tmpRoot + 'tmp_import_' + os.path.basename(path) + '/'
+        if os.path.isdir(tmpPath):
+            shutil.rmtree(tmpPath)
+        os.mkdir(tmpPath)
+        self.unzip(path, tmpPath)
+        os.rename(tmpPath + 'kiosk_config_save', tmpPath + 'kiosk_config')
+        self.LoadPagesFromTempData(tmpPath + 'kiosk_config/')
+        prgDialog.Update(100)
+        if HOST_SYS == HOST_WIN:
+            prgDialog.Destroy()
 
     def LoadPagesFromTempData(self, tmpPath):
+        self.musicRadioBox.SetSelection(0)
         # parse loaded data, create pages and update UI
         for dir in os.listdir(tmpPath):
             if dir.startswith("page"):
@@ -582,7 +668,7 @@ class KioskMainPanel(wx.Panel):
                             title = f.read().decode("utf-8")
                 self.parent.AddKioskPage(title, txts, images)
             elif dir.startswith("mp3"):
-                self.MusicCheckboxToggled(checked=True)
+                self.musicRadioBox.SetSelection(1)
                 mp3Dir = tmpPath + 'mp3/'
                 mp3Tmp = tmpPath + 'mp3_tmp/'
                 os.rename(mp3Dir, mp3Tmp)
@@ -608,7 +694,49 @@ class KioskMainPanel(wx.Panel):
             elif dir == "logo.png":
                 self.logo = tmpPath + dir
                 self._SetImagePreview(self.logo, logo=True)
+            elif dir == "stream.txt":
+                with open(tmpPath + dir) as streamFile:
+                    self.streamAddr = streamFile.read()
+                self.musicRadioBox.SetSelection(2)
+                self.streamCombo.SetSelection(self.streams.index(util.StreamAddresses.GetNameForAddr(self.streamAddr)))
+        self.MusicRadioBoxChanged()
         self.mainSizer.Layout()
+
+    def AppendPagesFromTempData(self, tmpPath):
+        self.musicRadioBox.SetSelection(0)
+        # parse loaded data, create pages and update UI
+        for dir in os.listdir(tmpPath):
+            if dir.startswith("page"):
+                # page directory
+                pageDir = tmpPath + dir + '/'
+                images = []
+                txts = []
+                title = ""
+                for file in os.listdir(pageDir):
+                    if file.startswith("Text"):
+                        # page text
+                        with open(pageDir + file) as f:
+                            txts.append(f.read().decode("utf-8"))
+                    elif file.startswith("image"):
+                        # page image
+                        images.append(pageDir + file)
+                    elif file == "headline.txt":
+                        # page headline
+                        with open(pageDir + file) as f:
+                            title = f.read().decode("utf-8")
+                self.parent.AddKioskPage(title, txts, images)
+        self.mainSizer.Layout()
+
+    def EstimatedUSBDataSize(self):
+        total = 0
+        for song in self.songs:
+            total += os.stat(song).st_size
+        for page in self.parent.GetEditorPages():
+            for img in page.images:
+                total += os.stat(img).st_size
+            for txt in page.texts:
+                total += len(txt)
+        return total
 
     def unzip(self, zipPath, destPath):
         fh = open(zipPath, 'rb')
