@@ -281,13 +281,7 @@ def GetStreamAddr():
     if os.path.isfile(fname):
         content = []
         with open(fname) as f:
-            content = f.readlines()
-        for line in content:
-            # remove line break
-	    line = line[:-1]
-	    print "Checking stream.txt line: ", line
-	    if len(line) > 5 and not line.startswith('#') and line.endswith((STREAM_ENDING)):
-                streamAddr = line
+            streamAddr = f.read()
     return streamAddr
 
 def StartKioskMode():
