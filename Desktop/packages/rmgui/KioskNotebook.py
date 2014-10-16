@@ -30,6 +30,7 @@ class KioskNotebook(wx.Notebook):
         self.parent = parent
         self.pages = []
         self.activePageNr = 0
+        self.closed = True
         global HOST_SYS
         # check platform
         if platform.system() == 'Windows':
@@ -49,7 +50,6 @@ class KioskNotebook(wx.Notebook):
         self.mainPage = None
         self.LoadMainPage()
         self.LoadPlusTab()
-        self.Show()
 
     def Close(self):
         from os.path import expanduser
@@ -76,6 +76,8 @@ class KioskNotebook(wx.Notebook):
 
     def UpdatePageName(self, index, oldName, newName):
         # use index -1 because page count wrong by 1 due to "+" tab
+        if len(newName) > 11:
+            newName = newName[:12] + "..."
         self.SetPageText(index - 1, newName)
 
     def LoadPageData(self, pageNumber):
@@ -100,40 +102,70 @@ class KioskNotebook(wx.Notebook):
     def AddKioskPage(self, title, texts, images):
         page = editPanel.KioskEditorPanel(self,-1,title,self.GetPageCount(),HOST_SYS,texts,images,self.base_path)
         self.pages.append(page)
-        self.InsertPage(self.GetPageCount()-1,page, title)
+        tabTitle = title
+        if len(tabTitle) > 11:
+            tabTitle = tabTitle[:12] + "..."
+        self.InsertPage(self.GetPageCount()-1,page, tabTitle)
 
     def DeletePage(self, event, index):
+        targetIndex = 0
+        if self.activePageNr == index:
+            if self.activePageNr < self.GetPageCount() - 2:
+                targetIndex = index
+            else:
+                targetIndex = index - 1
+        elif self.activePageNr > index:
+            targetIndex = self.activePageNr - 1
         self.SetSelection(0)
         self.RemovePage(index)
         del self.pages[index]
+        if targetIndex != self.activePageNr:
+            self.SetSelection(targetIndex)
+
+    def DeleteCurrentPage(self, event):
+        if self.activePageNr > 0 and self.activePageNr < self.GetPageCount() - 1:
+            self.DeletePage(event, self.activePageNr)
 
     def GetEditorPages(self):
         return self.pages[1:]
 
     def NewConfiguration(self, event=None):
         self.ClearNotebook()
+        self.closed = False
+        self.Show()
 
     def SaveConfiguration(self, event=None):
-        dlg = wx.FileDialog(self, tr("save_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk", wx.FD_SAVE)
+        if not self.closed:
+            dlg = wx.FileDialog(self, tr("save_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk", wx.FD_SAVE)
 
-        if dlg.ShowModal() == wx.ID_OK:
-            save_path = dlg.GetPath()
-            self.mainPage.SaveConfiguration(save_path)
-            #print "You want to save your config to ", save_path
+            if dlg.ShowModal() == wx.ID_OK:
+                save_path = dlg.GetPath()
+                self.mainPage.SaveConfiguration(save_path)
 
     def OpenConfiguration(self, event=None):
-        # clear notebook and temp data
-        self.ClearNotebook()
         dlg = wx.FileDialog(self, tr("load_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk", wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             open_path = dlg.GetPath()
-            self.mainPage.OpenConfiguration(open_path)
+            if os.path.isfile(open_path) and open_path.endswith(".kiosk"):
+                # clear notebook and temp data
+                self.ClearNotebook()
+                self.Hide()
+                self.mainPage.OpenConfiguration(open_path)
+                self.closed = False
+                self.Show()
+
+    def CloseConfiguration(self, event):
+        self.ClearNotebook()
+        self.closed = True
+        self.Hide()
 
     def ImportPages(self, event):
         dlg = wx.FileDialog(self, tr("load_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk", wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             open_path = dlg.GetPath()
-            self.mainPage.ImportPages(open_path)
+            if os.path.isfile(open_path) and open_path.endswith(".kiosk"):
+                open_path = dlg.GetPath()
+                self.mainPage.ImportPages(open_path)
 
     def EditPageOrder(self, event=None):
         dlg = poDlg.PageOrderDialog(self,-1,self.pages,self.base_path)
@@ -145,7 +177,10 @@ class KioskNotebook(wx.Notebook):
             for i in range(1,len(self.pages)):
                 page = self.pages[i]
                 page.index = i+1
-                self.InsertPage(self.GetPageCount()-1, page, page.title)
+                tabTitle = page.title
+                if len(tabTitle) > 11:
+                    tabTitle = tabTitle[:12] + "..."
+                self.InsertPage(self.GetPageCount()-1, page, tabTitle)
 
     def NumberOfFiles(self):
         total = 0
@@ -153,19 +188,16 @@ class KioskNotebook(wx.Notebook):
         for i in range(1,len(self.pages)):
             page = self.pages[i]
             total += len(page.images) + len(page.texts)
-        print "%d images and texts on pages" % total
         # song files from main panel
         total += len(self.pages[0].songs)
-        print "%d total files including MP3s" % total
-        print "BG, Logo and Streamfile ignored."
         return total
 
     def ClearNotebook(self):
+        self.SetSelection(0)
         # delete all notebook pages
         while self.GetPageCount() > 2:
             self.RemovePage(1)
             del self.pages[1]
-        self.activePageNr = 0
         self.mainPage.ResetPage()
         # clear temp data from previously opened/saved kiosk
         home = os.path.expanduser("~")
@@ -178,10 +210,14 @@ class KioskNotebook(wx.Notebook):
         if os.path.isdir(kSaveDir):
             shutil.rmtree(kSaveDir)
 
+    def SwitchTab(self, event):
+        targetIndex = 0
+        if self.activePageNr < self.GetPageCount() -2:
+            targetIndex = self.activePageNr + 1
+        self.SetSelection(targetIndex)
 
     def OnPageChanged(self, event):
         global HOST_SYS
-        # print "ON PAGE CHANGED TRIGGER"
         self.activePageNr = event.GetSelection()
         if HOST_SYS == HOST_LINUX and event.GetOldSelection() == -1:
             pass

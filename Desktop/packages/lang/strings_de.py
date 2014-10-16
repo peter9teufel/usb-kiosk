@@ -9,6 +9,7 @@ strings = {
 	"new_kiosk": "Neues Kiosk",
 	"open_kiosk": u"Kiosk öffnen",
 	"save_kiosk": u"Kiosk speichern",
+	"close_kiosk": u"Kiosk schließen",
 	"load_from_usb": "Kiosk von USB laden",
 	"create_usb": "Kiosk USB-Stick erstellen",
 	"about": u"Über Kiosk Editor",

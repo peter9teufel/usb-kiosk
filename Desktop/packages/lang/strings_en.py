@@ -9,6 +9,7 @@ strings = {
 	"new_kiosk": "New Kiosk",
 	"open_kiosk": "Open Kiosk",
 	"save_kiosk": "Save Kiosk",
+	"close_kiosk": "Close Kiosk",
 	"load_from_usb": "Load Kiosk from USB",
 	"create_usb": "Create Kiosk USB-Stick",
 	"about": "About Kiosk Editor",

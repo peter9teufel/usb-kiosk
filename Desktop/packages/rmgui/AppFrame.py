@@ -28,21 +28,33 @@ class AppFrame(wx.Frame):
         sc_new = wx.NewId()
         sc_open = wx.NewId()
         sc_save = wx.NewId()
+        sc_close_kiosk = wx.NewId()
         sc_create_usb = wx.NewId()
         sc_load_usb = wx.NewId()
         sc_edit_order = wx.NewId()
+        sc_new_page = wx.NewId()
+        sc_del_current = wx.NewId()
+        sc_switch_tab = wx.NewId()
         self.Bind(wx.EVT_MENU, self.notebook.NewConfiguration, id=sc_new)
         self.Bind(wx.EVT_MENU, self.notebook.OpenConfiguration, id=sc_open)
         self.Bind(wx.EVT_MENU, self.notebook.SaveConfiguration, id=sc_save)
+        self.Bind(wx.EVT_MENU, self.notebook.CloseConfiguration, id=sc_close_kiosk)
         self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForLoading, id=sc_load_usb)
         self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForCreation, id=sc_create_usb)
         self.Bind(wx.EVT_MENU, self.notebook.EditPageOrder, id=sc_edit_order)
+        self.Bind(wx.EVT_MENU, self.notebook.AddNewPage, id=sc_new_page)
+        self.Bind(wx.EVT_MENU, self.notebook.DeleteCurrentPage, id=sc_del_current)
+        self.Bind(wx.EVT_MENU, self.notebook.SwitchTab, id=sc_switch_tab)
 
         self.accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('o'), sc_open),
                                               (wx.ACCEL_CTRL, ord('s'), sc_save),
+                                              (wx.ACCEL_CTRL|wx.ACCEL_SHIFT, ord('w'), sc_close_kiosk),
                                               (wx.ACCEL_CTRL, ord('r'), sc_create_usb),
                                               (wx.ACCEL_CTRL, ord('l'), sc_load_usb),
-                                              (wx.ACCEL_CTRL, ord('e'), sc_edit_order)
+                                              (wx.ACCEL_CTRL, ord('e'), sc_edit_order),
+                                              (wx.ACCEL_CTRL, ord('t'), sc_new_page),
+                                              (wx.ACCEL_CTRL, ord('w'), sc_del_current),
+                                              (wx.ACCEL_CTRL, ord('\t'), sc_switch_tab)
                                              ])
         self.SetAcceleratorTable(self.accel_tbl)
 
@@ -50,6 +62,7 @@ class AppFrame(wx.Frame):
         self.Center()
         self.Maximize()
         self.Show()
+        self.notebook.Hide()
 
     def Close(self, event=None):
         self.notebook.Close()
@@ -71,6 +84,8 @@ class AppFrame(wx.Frame):
         fileMenu.AppendSeparator()
         importPages = fileMenu.Append(wx.ID_ANY, "&"+tr("import_pages"))
         fileMenu.AppendSeparator()
+        closeConfig = fileMenu.Append(wx.ID_ANY, "&"+tr("close_kiosk") + "\tCTRL+SHIFT+W")
+        fileMenu.AppendSeparator()
 
         # exit entry in file menu
         menuExit = fileMenu.Append(wx.ID_EXIT, "&"+tr("exit"),tr("exit"))
@@ -91,6 +106,7 @@ class AppFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.notebook.SaveConfiguration, saveConfig)
         self.Bind(wx.EVT_MENU, self.notebook.OpenConfiguration, openConfig)
         self.Bind(wx.EVT_MENU, self.notebook.ImportPages, importPages)
+        self.Bind(wx.EVT_MENU, self.notebook.CloseConfiguration, closeConfig)
         self.Bind(wx.EVT_MENU, self.ShowAbout, about)
         self.Bind(wx.EVT_MENU, self.Close, menuExit)
         self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForLoading, loadUsb)

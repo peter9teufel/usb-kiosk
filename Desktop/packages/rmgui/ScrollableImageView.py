@@ -51,7 +51,7 @@ class ScrollableImageView(scrolled.ScrolledPanel):
             curImgCtrl = wx.StaticBitmap(self, wx.ID_ANY, wx.BitmapFromImage(curImg))
             curImgCtrl.Bind(wx.EVT_LEFT_DOWN, lambda event, index=cnt: self.ImageClicked(event,index))
             self.mainSizer.Add(curImgCtrl,(row,col), flag=wx.ALL, border=2)
-
+            cnt += 1
             # position for next image
             col = (col + 1) % self.cols
             if col == 0:

@@ -1,6 +1,5 @@
 import packages.rmutil as util
 from packages.rmgui import *
-import PlayerInfoDialog as playerDlg
 from packages.lang.Localizer import *
 import os, sys, platform, ast, time, threading, shutil, copy, zipfile
 from os.path import expanduser
@@ -123,6 +122,7 @@ class KioskMainPanel(wx.Panel):
         logo.Bind(wx.EVT_BUTTON, self.ShowLogoSelection)
         self.songList.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.SongItemRightClicked)
         self.musicRadioBox.Bind(wx.EVT_RADIOBUTTON, self.MusicRadioBoxChanged)
+        self.musicRadioBox.Bind(wx.EVT_RADIOBOX, self.MusicRadioBoxChanged)
         self.addSong.Bind(wx.EVT_BUTTON, self.ShowSongSelection)
         self.streamCombo.Bind(wx.EVT_COMBOBOX, self.StreamComboSelected)
         self.MusicRadioBoxChanged()
@@ -167,6 +167,7 @@ class KioskMainPanel(wx.Panel):
             self.songList.Hide()
             self.addSong.Hide()
             self.streamCombo.Show()
+        self.audioSizer.Layout()
         self.mainSizer.Layout()
 
     def StreamComboSelected(self, event):
@@ -269,11 +270,12 @@ class KioskMainPanel(wx.Panel):
         self.mainSizer.Layout()
 
     def WaitForUSBForCreation(self, event):
-        if self.usbPath == None or not os.path.isdir(self.usbPath):
-            self.usbPath = None
-            self.__WaitForUSB()
-        else:
-            self.CreateUSB(self.usbPath)
+        if not self.parent.closed:
+            if self.usbPath == None or not os.path.isdir(self.usbPath):
+                self.usbPath = None
+                self.__WaitForUSB()
+            else:
+                self.CreateUSB(self.usbPath)
 
     def WaitForUSBForLoading(self, event):
         if self.usbPath == None or not os.path.isdir(self.usbPath):
@@ -314,6 +316,9 @@ class KioskMainPanel(wx.Panel):
             self.prgDialog = wx.ProgressDialog(tr("load_from_usb"),tr("loading_usb_data"))
             self.prgDialog.Pulse()
         self.usbPath = path
+
+        self.parent.ClearNotebook()
+        self.parent.Hide()
 
         # create kiosk directory in temp path
         home = expanduser("~")
@@ -423,7 +428,7 @@ class KioskMainPanel(wx.Panel):
             self.prgDialog.Destroy()
 
         self.mainSizer.Layout()
-
+        self.parent.Show()
         wx.CallAfter(Publisher.unsubscribe, self.LoadFromUSB, 'usb_connected')
         wx.CallAfter(Publisher.unsubscribe, self.LoadFromUSB, 'usb_search_timeout')
 
@@ -449,8 +454,8 @@ class KioskMainPanel(wx.Panel):
         # calc estimated size required with free space on USB
         estimatedSize = self.EstimatedUSBDataSize()
         estMB = estimatedSize/1024/1024
-        fs_info = os.statvfs(usbPath)
-        freeUSB = fs_info[1] * fs_info[3]
+        fs_info = self.GetDiskUsageStats(path)
+        freeUSB = fs_info["free"]
         freeMB = freeUSB/1024/1024
 
         if estimatedSize < freeUSB:
@@ -754,6 +759,27 @@ class KioskMainPanel(wx.Panel):
             for txt in page.texts:
                 total += len(txt)
         return total
+
+    def GetDiskUsageStats(self, path):
+        if hasattr(os, 'statvfs'):  # POSIX
+            st = os.statvfs(path)
+            free = st.f_bavail * st.f_frsize
+            total = st.f_blocks * st.f_frsize
+            used = (st.f_blocks - st.f_bfree) * st.f_frsize
+            return {"total":total, "used": used, "free": free}
+        elif os.name == 'nt':       # Windows
+            import ctypes
+            import sys
+            _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), ctypes.c_ulonglong()
+            if sys.version_info >= (3,) or isinstance(path, unicode):
+                fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW
+            else:
+                fun = ctypes.windll.kernel32.GetDiskFreeSpaceExA
+            ret = fun(path, ctypes.byref(_), ctypes.byref(total), ctypes.byref(free))
+            if ret == 0:
+                raise ctypes.WinError()
+            used = total.value - free.value
+            return {"total":total.value, "used": used, "free": free.value}
 
     def unzip(self, zipPath, destPath):
         fh = open(zipPath, 'rb')
