@@ -97,7 +97,7 @@ class KioskEditorPanel(wx.Panel):
         # preview Button
         preview = wx.Button(self,-1,label=tr("preview"))
 
-        # bind elements TODO!
+        # bind elements
         self.nameCtrl.Bind(wx.EVT_TEXT, self.UpdatePageName)
         addText.Bind(wx.EVT_BUTTON, self.ShowTextEdit)
         self.textList.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.ShowTextEdit)

@@ -12,66 +12,25 @@ distPath="dist"
 
 ##### BUILD RASPMEDIA IMAGE TRANSFER #####
 echo ""
-echo "Compiling RaspMedia Image Transfer..."
-pyinstaller RMImageTransfer.spec
+echo "Compiling Kiosk Editor..."
+pyinstaller KioskEditor.spec
 
 # copy built version to tools directory
 echo ""
-echo "Making release file for RaspMedia Image Transfer..."
-distFile="$distPath/RaspMedia Image Transfer.app"
-destFile="$destPath/RaspMedia Image Transfer.app"
-cp -r "$distFile" "$destFile"
-
-
-# remove build directories
-echo "Cleaning up..."
-rm -rf build dist
-
-##### BUILD RASPMEDIA CONTROL #####
-echo ""
-echo "Compiling RaspMedia Control..."
-pyinstaller RaspMediaApp.spec
-
-# copy built version to tools directory
-echo ""
-echo "Making release file for RaspMedia Control..."
-distFile="$distPath/RaspMedia Control.app"
-destFile="$destPath/RaspMedia Control.app"
+echo "Making release file for Kiosk Editor..."
+distFile="$distPath/Kiosk Editor.app"
+destFile="$destPath/Kiosk Editor.app"
 cp -r "$distFile" "$destFile"
 
 # modify plist file of app to be foreground
-# echo "Updating Info.plist for RaspMedia Control Release..."
-# plist="$destFile/Contents/Info"
-# defaults write "$plist" LSBackgroundOnly -string NO
-# plist="$plist.plist"
-# plutil -convert xml1 "$plist"
+#echo "Updating Info.plist for RaspMedia Control Release..."
+#plist="$destFile/Contents/Info"
+#defaults write "$plist" LSBackgroundOnly -string NO
+#plist="$plist.plist"
+#plutil -convert xml1 "$plist"
 
 # remove build directories
 echo "Cleaning up..."
 rm -rf build dist
-
-##### BUILD RASPMEDIA COPY TOOL #####
-echo ""
-echo "Compiling RaspMedia Copy Tool..."
-pyinstaller RMCopyTool.spec
-
-# copy built version to tools directory
-echo ""
-echo "Making release file for RaspMedia Copy Tool..."
-distFile="$distPath/RaspMedia Copy Tool.app"
-destFile="$destPath/RaspMedia Copy Tool.app"
-cp -r "$distFile" "$destFile"
-
-# modify plist file of app to be foreground
-# echo "Updating Info.plist for RaspMedia Copy Tool Release..."
-# plist="$destFile/Contents/Info"
-# defaults write "$plist" LSBackgroundOnly -string NO
-# plist="$plist.plist"
-# plutil -convert xml1 "$plist"
-
-# remove build directories
-echo "Cleaning up..."
-rm -rf build dist
-
 
 echo "Build done, bye bye..."

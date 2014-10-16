@@ -4,6 +4,7 @@ import PlayerInfoDialog as playerDlg
 from packages.lang.Localizer import *
 import os, sys, platform, ast, time, threading, shutil, copy, zipfile
 from os.path import expanduser
+import Image
 
 if platform.system() == "Linux":
     from wx.lib.pubsub import setupkwargs
@@ -285,10 +286,11 @@ class KioskMainPanel(wx.Panel):
         print "Waiting for USB Drive..."
         if loading:
             Publisher.subscribe(self.LoadFromUSB, 'usb_connected')
+            self.prgDialog = wx.ProgressDialog(tr("load_from_usb"), tr("plug_usb"))
         else:
             Publisher.subscribe(self.CreateUSB, 'usb_connected')
+            self.prgDialog = wx.ProgressDialog(tr("create_usb"), tr("plug_usb"))
         Publisher.subscribe(self.NoUSBFound, 'usb_search_timeout')
-        self.prgDialog = wx.ProgressDialog(tr("searching"), tr("plug_usb"))
         self.prgDialog.Pulse()
         if HOST_SYS == HOST_WIN:
             util.Win32DeviceDetector.waitForUSBDrive()
@@ -309,7 +311,7 @@ class KioskMainPanel(wx.Panel):
         if self.usbPath == None:
             self.prgDialog.UpdatePulse(tr("loading_usb_data"))
         else:
-            self.prgDialog = wx.ProgressDialog(tr("loading"),tr("loading_usb_data"))
+            self.prgDialog = wx.ProgressDialog(tr("load_from_usb"),tr("loading_usb_data"))
             self.prgDialog.Pulse()
         self.usbPath = path
 
@@ -330,11 +332,13 @@ class KioskMainPanel(wx.Panel):
             srcFile = usbPath + '/bg.jpg'
             destFile = tmpPath + 'bg.jpg'
             if os.path.isfile(srcFile):
+                self.prgDialog.UpdatePulse(os.path.basename(destFile))
                 shutil.copyfile(srcFile, destFile)
                 self.bg = destFile
             srcFile = usbPath + '/logo.png'
             destFile = tmpPath + 'logo.png'
             if os.path.isfile(srcFile):
+                self.prgDialog.UpdatePulse(os.path.basename(destFile))
                 shutil.copyfile(srcFile, destFile)
                 self.logo = destFile
 
@@ -352,6 +356,7 @@ class KioskMainPanel(wx.Panel):
                     if file.endswith('.mp3'):
                         srcFile = mp3Usb + file
                         destFile = destPath + filenames[fileNr]
+                        self.prgDialog.UpdatePulse(os.path.basename(destFile))
                         shutil.copyfile(srcFile,destFile)
                         self.songs.append(destFile)
                         idx = self.songList.InsertStringItem(self.songList.GetItemCount(), filenames[fileNr])
@@ -360,6 +365,7 @@ class KioskMainPanel(wx.Panel):
 
             # copy stream.txt file if ppresent
             if os.path.isfile(usbPath + '/stream.txt'):
+                self.prgDialog.UpdatePulse('stream.txt')
                 shutil.copyfile(usbPath + '/stream.txt', tmpPath + 'stream.txt')
                 with open(tmpPath + 'stream.txt') as streamFile:
                     self.streamAddr = streamFile.read()
@@ -380,6 +386,7 @@ class KioskMainPanel(wx.Panel):
                 # page texts and images
                 for file in os.listdir(pageDir):
                     if file.startswith("Text") or file.startswith("image"):
+                        self.prgDialog.UpdatePulse(file)
                         shutil.copyfile(pageDir + file, tmpPage + file)
 
             # parse loaded data, create pages and update UI
@@ -447,16 +454,21 @@ class KioskMainPanel(wx.Panel):
         freeMB = freeUSB/1024/1024
 
         if estimatedSize < freeUSB:
-            self.prgDialog = wx.ProgressDialog(tr("loading"), tr("creating_usb_data"), maximum=totalFiles)
+            self.prgDialog = wx.ProgressDialog(tr("create_usb"), tr("creating_usb_data"), maximum=totalFiles)
             # copy background and icon if set
             if not self.bg == None:
-                # TODO resize BG Image to 1920x1080 FIT MODE
+                # background image is resized on player
                 dstFile = usbPath + '/bg.jpg'
                 shutil.copyfile(self.bg, dstFile)
             if not self.logo == None:
-                # TODO convert to PNG!
+                # resize and save --> PIL converts the image to PNG in case it is a JPG
+                logo = Image.open(self.logo)
+                w,h = logo.size
+                newW = 300
+                newH = newW * w/h
+                logo.thumbnail((newW, newH))
                 dstFile = usbPath + '/logo.png'
-                shutil.copyfile(self.logo, dstFile)
+                logo.save(dstFile, 'PNG')
 
             # copy MP3 files if background music enabled
             if self.musicRadioBox.GetSelection() == 1:
@@ -475,7 +487,7 @@ class KioskMainPanel(wx.Panel):
                     fileNames.write(os.path.basename(mp3).encode("utf-8") + "\n")
                     shutil.copyfile(mp3, mp3Path + 'BG_Music_Title_' + nr + '.mp3')
                     numFiles += 1
-                    self.prgDialog.Update(numFiles)
+                    self.prgDialog.Update(numFiles, os.path.basename(mp3))
                     cnt += 1
                 fileNames.close()
             elif self.musicRadioBox.GetSelection() == 2:
@@ -501,7 +513,7 @@ class KioskMainPanel(wx.Panel):
                     f.write(texts[j].encode("utf-8"))
                     f.close()
                     numFiles += 1
-                    self.prgDialog.Update(numFiles)
+                    self.prgDialog.Update(numFiles, os.path.basename(fileName))
                 # page images
                 imgs = page.images
                 for j in range(len(imgs)):
@@ -511,7 +523,7 @@ class KioskMainPanel(wx.Panel):
                     dstFile = pageDir + '/image' + str(j) + ending
                     shutil.copyfile(imgs[j], dstFile)
                     numFiles += 1
-                    self.prgDialog.Update(numFiles)
+                    self.prgDialog.Update(numFiles, os.path.basename(dstFile))
             if numFiles < totalFiles:
                 self.prgDialog.Update(totalFiles)
             if HOST_SYS == HOST_WIN:
@@ -553,9 +565,14 @@ class KioskMainPanel(wx.Panel):
             dstFile = tmpPath + '/bg.jpg'
             shutil.copyfile(self.bg, dstFile)
         if not self.logo == None:
-            # TODO convert to PNG!
+            # resize and save --> PIL converts the image to PNG in case it is a JPG
+            logo = Image.open(self.logo)
+            w,h = logo.size
+            newW = 300
+            newH = newW * w/h
+            logo.thumbnail((newW, newH))
             dstFile = tmpPath + '/logo.png'
-            shutil.copyfile(self.logo, dstFile)
+            logo.save(dstFile, 'PNG')
 
         # copy MP3 files if background music enabled
         if self.musicRadioBox.GetSelection() == 1:
