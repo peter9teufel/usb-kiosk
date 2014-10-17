@@ -59,12 +59,20 @@ class AppFrame(wx.Frame):
         self.SetAcceleratorTable(self.accel_tbl)
 
         self.SetupMenuBar()
+        # set icon
+        ic_main = wx.Icon(resource_path("img/ic_main.ico"), wx.BITMAP_TYPE_ICO)
+        self.SetIcon(ic_main)
+
         self.Center()
         self.Maximize()
         self.Show()
         self.notebook.Hide()
 
     def Close(self, event=None):
+        if not self.notebook.closed:
+            dlg = wx.MessageDialog(self, "Do you want to save your current Kiosk Configuration?", "Save before Exit?", style=wx.YES_NO)
+            if dlg.ShowModal() == wx.ID_YES:
+                self.notebook.SaveConfiguration()
         self.notebook.Close()
         self.Destroy()
         sys.exit(0)

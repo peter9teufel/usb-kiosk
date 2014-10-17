@@ -62,3 +62,9 @@ html/pages
 html/mp3
 *.mp3
 
+# build dist and release dirs
+build
+dist
+Release
+*.exe
+*.app

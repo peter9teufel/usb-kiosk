@@ -26,11 +26,13 @@ class KioskNotebook(wx.Notebook):
         wx.Notebook.__init__(self, parent, id, style=
                             wx.BK_DEFAULT
                             )
+        self.SetDoubleBuffered(True)
         self.base_path = base_path
         self.parent = parent
         self.pages = []
         self.activePageNr = 0
         self.closed = True
+        self.modified = False
         global HOST_SYS
         # check platform
         if platform.system() == 'Windows':
@@ -97,7 +99,11 @@ class KioskNotebook(wx.Notebook):
         newIndex = self.GetPageCount()
         newPage = editPanel.KioskEditorPanel(self,-1,tr("new_page"),newIndex,HOST_SYS,[],[],self.base_path)
         self.pages.append(newPage)
+        if HOST_SYS == HOST_WIN:
+            self.Hide()
         self.InsertPage(self.GetPageCount()-1,newPage, tr("new_page"),select=True)
+        self.Show()
+        self.modified = True
 
     def AddKioskPage(self, title, texts, images):
         page = editPanel.KioskEditorPanel(self,-1,title,self.GetPageCount(),HOST_SYS,texts,images,self.base_path)
@@ -106,6 +112,7 @@ class KioskNotebook(wx.Notebook):
         if len(tabTitle) > 11:
             tabTitle = tabTitle[:12] + "..."
         self.InsertPage(self.GetPageCount()-1,page, tabTitle)
+        self.modified = True
 
     def DeletePage(self, event, index):
         targetIndex = 0
@@ -114,13 +121,15 @@ class KioskNotebook(wx.Notebook):
                 targetIndex = index
             else:
                 targetIndex = index - 1
-        elif self.activePageNr > index:
-            targetIndex = self.activePageNr - 1
-        self.SetSelection(0)
+            self.SetSelection(targetIndex)
+        #elif self.activePageNr > index:
+            #targetIndex = self.activePageNr - 1
+        #self.SetSelection(0)
         self.RemovePage(index)
         del self.pages[index]
         if targetIndex != self.activePageNr:
             self.SetSelection(targetIndex)
+        self.modified = True
 
     def DeleteCurrentPage(self, event):
         if self.activePageNr > 0 and self.activePageNr < self.GetPageCount() - 1:
@@ -130,8 +139,13 @@ class KioskNotebook(wx.Notebook):
         return self.pages[1:]
 
     def NewConfiguration(self, event=None):
+        if not self.closed and self.modified:
+            dlg = wx.MessageDialog(self, "Do you want to save your current Kiosk Configuration?", "Save before Closing?", style=wx.YES_NO)
+            if dlg.ShowModal() == wx.ID_YES:
+                self.notebook.SaveConfiguration()
         self.ClearNotebook()
         self.closed = False
+        self.modified = False
         self.Show()
 
     def SaveConfiguration(self, event=None):
@@ -152,11 +166,17 @@ class KioskNotebook(wx.Notebook):
                 self.Hide()
                 self.mainPage.OpenConfiguration(open_path)
                 self.closed = False
+                self.modified = False
                 self.Show()
 
     def CloseConfiguration(self, event):
+        if self.modified:
+            dlg = wx.MessageDialog(self, "Do you want to save your current Kiosk Configuration?", "Save before Closing?", style=wx.YES_NO)
+            if dlg.ShowModal() == wx.ID_YES:
+                self.notebook.SaveConfiguration()
         self.ClearNotebook()
         self.closed = True
+        self.modified = False
         self.Hide()
 
     def ImportPages(self, event):
@@ -171,16 +191,22 @@ class KioskNotebook(wx.Notebook):
         dlg = poDlg.PageOrderDialog(self,-1,self.pages,self.base_path)
         if dlg.ShowModal() == wx.ID_OK:
             self.SetSelection(0)
-            self.pages = dlg.pages
-            while self.GetPageCount() > 2:
-                self.RemovePage(1)
-            for i in range(1,len(self.pages)):
-                page = self.pages[i]
-                page.index = i+1
-                tabTitle = page.title
-                if len(tabTitle) > 11:
-                    tabTitle = tabTitle[:12] + "..."
-                self.InsertPage(self.GetPageCount()-1, page, tabTitle)
+            changed = False
+            for i in range(len(self.pages)):
+                if dlg.pages[i].index != self.pages[i].index:
+                    changed = True
+            if changed:
+                self.pages = dlg.pages
+                while self.GetPageCount() > 2:
+                    self.RemovePage(1)
+                for i in range(1,len(self.pages)):
+                    page = self.pages[i]
+                    page.index = i+1
+                    tabTitle = page.title
+                    if len(tabTitle) > 11:
+                        tabTitle = tabTitle[:12] + "..."
+                    self.InsertPage(self.GetPageCount()-1, page, tabTitle)
+                self.modified = True
 
     def NumberOfFiles(self):
         total = 0
@@ -218,6 +244,7 @@ class KioskNotebook(wx.Notebook):
 
     def OnPageChanged(self, event):
         global HOST_SYS
+        prevSel = self.activePageNr
         self.activePageNr = event.GetSelection()
         if HOST_SYS == HOST_LINUX and event.GetOldSelection() == -1:
             pass

@@ -133,7 +133,6 @@ class KioskEditorPanel(wx.Panel):
         self.mainSizer.Add(preview,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
 
         self.SetSizerAndFit(self.mainSizer)
-
         #self.LayoutAndFit()
         self.Show(True)
 
@@ -150,6 +149,7 @@ class KioskEditorPanel(wx.Panel):
         newName = self.nameCtrl.GetValue()
         self.parent.UpdatePageName(self.index, oldName, newName)
         self.title = newName
+        self.parent.modified = True
 
     def TextItemRightClicked(self, event):
         global HOST_SYS
@@ -179,6 +179,7 @@ class KioskEditorPanel(wx.Panel):
             label = "Text " + str(cnt)
             self.textList.InsertStringItem(self.textList.GetItemCount(), label)
             cnt += 1;
+        self.parent.modified = True
 
     def ShowTextEdit(self, event):
         if event.GetEventObject().GetName() == 'add_txt':
@@ -188,6 +189,7 @@ class KioskEditorPanel(wx.Panel):
                 label = "Text " + str(cnt)
                 self.texts.append(dlg.text)
                 self.textList.InsertStringItem(self.textList.GetItemCount(), label)
+                self.parent.modified = True
             if HOST_SYS == HOST_WIN:
                 dlg.Destroy()
         elif event.GetEventObject().GetName() == 'txt_list':
@@ -196,7 +198,9 @@ class KioskEditorPanel(wx.Panel):
             txt = self.texts[index]
             dlg = txtDlg.TextEditDialog(self,-1,label,txt)
             if dlg.ShowModal() == wx.ID_OK:
-                self.texts[index] = dlg.text
+                if self.texts[index] != dlg.text:
+                    self.texts[index] = dlg.text
+                    self.parent.modified = True
             if HOST_SYS == HOST_WIN:
                 dlg.Destroy()
 
