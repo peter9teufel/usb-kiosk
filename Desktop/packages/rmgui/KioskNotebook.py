@@ -23,8 +23,6 @@ HOST_SYS = None
 class KioskNotebook(wx.Notebook):
     def __init__(self, parent, id, log, base_path):
         wx.Notebook.__init__(self, parent, id, style=wx.BK_DEFAULT)
-        if platform.system() == 'Windows':
-            self.SetDoubleBuffered(True)
         self.base_path = base_path
         self.parent = parent
         self.pages = []
