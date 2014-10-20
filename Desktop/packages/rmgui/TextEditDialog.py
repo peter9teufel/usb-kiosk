@@ -1,6 +1,5 @@
 import wx
-import sys, platform
-from wx.lib.wordwrap import wordwrap
+import sys
 from packages.lang.Localizer import *
 
 ################################################################################

@@ -23,7 +23,7 @@ destFile="$destPath/Kiosk Editor.app"
 cp -r "$distFile" "$destFile"
 
 # modify plist file of app to be foreground
-#echo "Updating Info.plist for RaspMedia Control Release..."
+#echo "Updating Info.plist for Kiosk Editor Release..."
 #plist="$destFile/Contents/Info"
 #defaults write "$plist" LSBackgroundOnly -string NO
 #plist="$plist.plist"

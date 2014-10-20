@@ -1,4 +1,5 @@
 from packages.rmgui import AppFrame as rm_app
+from packages.rmutil import Logger as logger
 import os, platform, shutil
 try:
     import wx
@@ -25,6 +26,10 @@ if os.path.isdir(tmpPath):
     shutil.rmtree(tmpPath)
 os.mkdir(tmpPath)
 
-frame = rm_app.AppFrame(None, -1, 'Kiosk Editor', base_path)
-
+try:
+    frame = rm_app.AppFrame(None, -1, 'Kiosk Editor', base_path)
+except Exception:
+    msg =  "Unexpected error: %s" % sys.exc_info()[0]
+    logger.write(msg)
+    raise Exception
 app.MainLoop()

@@ -19,9 +19,10 @@ class PageOrderDialog(wx.Dialog):
         self.__InitUI()
         self.ValidateSelection()
         self.SetSizerAndFit(self.mainSizer)
-        # set icon
-        ic_main = wx.Icon(resource_path("img/ic_main.ico"), wx.BITMAP_TYPE_ICO)
-        self.SetIcon(ic_main)
+        if platform.system() == 'Windows':
+            # set icon
+            ic_main = wx.Icon(resource_path("img/ic_main.ico"), wx.BITMAP_TYPE_ICO)
+            self.SetIcon(ic_main)
         self.Center()
 
     def __InitUI(self):

@@ -3,12 +3,11 @@ from packages.lang.Localizer import *
 import KioskMainPanel as mainPanel
 import KioskEditorPanel as editPanel
 import PageOrderDialog as poDlg
+from packages.rmutil import Logger as logger
 import os, sys, platform, ast, time, threading, shutil
 
 import wx
 from wx.lib.wordwrap import wordwrap
-from operator import itemgetter
-from packages.lang.Localizer import *
 
 playerCount = 0
 activePageNr = 0
@@ -23,16 +22,18 @@ HOST_SYS = None
 ################################################################################
 class KioskNotebook(wx.Notebook):
     def __init__(self, parent, id, log, base_path):
-        wx.Notebook.__init__(self, parent, id, style=
-                            wx.BK_DEFAULT
-                            )
-        self.SetDoubleBuffered(True)
+        wx.Notebook.__init__(self, parent, id, style=wx.BK_DEFAULT)
+        logger.write("Super constructor for notebook called...")
+        if platform.system() == 'Windows':
+            log.write("Windows --> setting double buffered mode to True...")
+            self.SetDoubleBuffered(True)
         self.base_path = base_path
         self.parent = parent
         self.pages = []
         self.activePageNr = 0
         self.closed = True
         self.modified = False
+        logger.write("Checking Host System...")
         global HOST_SYS
         # check platform
         if platform.system() == 'Windows':
@@ -42,6 +43,7 @@ class KioskNotebook(wx.Notebook):
         elif platform.system() == 'Linux':
             HOST_SYS = HOST_LINUX
 
+        logger.write("Binding Page Events...")
         if HOST_SYS == HOST_LINUX or HOST_SYS == HOST_WIN:
             self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
         elif HOST_SYS == HOST_MAC:
@@ -50,7 +52,9 @@ class KioskNotebook(wx.Notebook):
         wx.EVT_RIGHT_DOWN(self , self.OnNotebookRightClick)
 
         self.mainPage = None
+        logger.write("Loading main page...")
         self.LoadMainPage()
+        logger.write("Loading plus tab...")
         self.LoadPlusTab()
 
     def Close(self):

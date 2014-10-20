@@ -1,7 +1,8 @@
 import wx
 import KioskNotebook as kNotebook
 from packages.lang.Localizer import *
-import sys, os, webbrowser
+import sys, os, webbrowser, platform
+from packages.rmutil import Logger as log
 
 from wx.lib.wordwrap import wordwrap
 
@@ -13,17 +14,19 @@ BASE_PATH = None
 class AppFrame(wx.Frame):
     def __init__(self,parent,id,title,base_path):
         wx.Frame.__init__(self,parent,id,title,size=(600,600))
+        log.write("Initialized frame, setting up UI...")
         self.parent = parent
         self.base_path = base_path
         global BASE_PATH
         BASE_PATH = base_path
         self.Bind(wx.EVT_CLOSE, self.Close)
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
+        log.write("Initalizing KioskNotebook...")
         self.notebook = kNotebook.KioskNotebook(self,-1,None,base_path)
         self.mainSizer.Add(self.notebook, 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
         self.SetSizerAndFit(self.mainSizer)
 
-
+        log.write("Main sizer setup done, setting up accelerator table...")
         # Create an accelerator table for keyboard shortcuts
         sc_new = wx.NewId()
         sc_open = wx.NewId()
@@ -59,9 +62,10 @@ class AppFrame(wx.Frame):
         self.SetAcceleratorTable(self.accel_tbl)
 
         self.SetupMenuBar()
-        # set icon
-        ic_main = wx.Icon(resource_path("img/ic_main.ico"), wx.BITMAP_TYPE_ICO)
-        self.SetIcon(ic_main)
+        if platform.system() == 'Windows':
+            # set icon
+            ic_main = wx.Icon(resource_path("img/ic_main.ico"), wx.BITMAP_TYPE_ICO)
+            self.SetIcon(ic_main)
 
         self.Center()
         self.Maximize()

@@ -6,7 +6,6 @@ from packages.lang.Localizer import *
 import os, sys, platform, ast, time, threading, shutil, copy
 
 import webbrowser
-import json
 import wx
 from wx.lib import imagebrowser
 from wx.lib.wordwrap import wordwrap

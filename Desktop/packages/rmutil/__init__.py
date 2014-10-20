@@ -1,4 +1,4 @@
-import ImageUtil, platform, StreamAddresses
+import ImageUtil, platform, StreamAddresses, Logger
 
 if platform.system() == "Windows":
     import Win32DeviceDetector
