@@ -26,10 +26,5 @@ if os.path.isdir(tmpPath):
     shutil.rmtree(tmpPath)
 os.mkdir(tmpPath)
 
-try:
-    frame = rm_app.AppFrame(None, -1, 'Kiosk Editor', base_path)
-except Exception:
-    msg =  "Unexpected error: %s" % sys.exc_info()[0]
-    logger.write(msg)
-    raise Exception
+frame = rm_app.AppFrame(None, -1, 'Kiosk Editor', base_path)
 app.MainLoop()

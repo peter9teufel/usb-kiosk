@@ -90,14 +90,12 @@ class KioskMainPanel(wx.Panel):
             self.LoadData()
 
     def Initialize(self):
-        log.write("Initializing static boxes")
         imgBox = wx.StaticBox(self,-1,tr("bg_logo_box"),size=(523,310))
         imgSizer = wx.StaticBoxSizer(imgBox)
 
         self.audioBox = wx.StaticBox(self,-1,tr("bg_music"))
         self.audioSizer = wx.StaticBoxSizer(self.audioBox,wx.VERTICAL)
 
-        log.write("Initializing background selection...")
         # Background selection
         bg = wx.Button(imgBox,-1,label=tr("background"))
         bgImg = wx.EmptyImage(200,200)
@@ -105,31 +103,22 @@ class KioskMainPanel(wx.Panel):
         self.bgCtrl = wx.StaticBitmap(imgBox, wx.ID_ANY, wx.BitmapFromImage(bgImg))
         self._SetImagePreview('img/preview.png')
 
-        log.write("Initializing logo selection...")
         # Logo selection
         logo = wx.Button(imgBox,-1,label="Logo")
         logoImg = wx.EmptyImage(200,200)
         self.logoCtrl = wx.StaticBitmap(imgBox, wx.ID_ANY, wx.BitmapFromImage(logoImg))
         self._SetImagePreview('img/preview.png',logo=True)
 
-        log.write("Initializing background music settings box...")
         # background music
-        log.write("Creating RadioBox for music source selection...")
         self.musicRadioBox = wx.RadioBox(self.audioBox,-1,choices=[tr("no_music"), tr("mp3_files"), tr("webradio_stream")],size=(490,42))
-        log.write("Creating button to add songs...")
         self.addSong = wx.Button(self.audioBox,-1,label=tr("add_songs"))
-        log.write("Creating list control to show added songs...")
         self.songList = wx.ListCtrl(self.audioBox,-1,size=(490,300),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         self.songList.InsertColumn(0,tr("filename"), width = 200)
         self.songList.InsertColumn(1,tr("path"), width = 280)
-        log.write("Reading stream names from StreamAddresses.py...")
         self.streams = util.StreamAddresses.GetStreamNames()
-        log.write("Creating combo box for stream selection...")
         self.streamCombo = wx.ComboBox(self.audioBox, choices=self.streams)
-        log.write("Setting initial selection to NONE...")
         self.streamCombo.SetSelection(-1)
 
-        log.write("Initializing UI element bindings...")
         # Bind elements
         bg.Bind(wx.EVT_BUTTON, self.ShowBackgroundSelection)
         logo.Bind(wx.EVT_BUTTON, self.ShowLogoSelection)
@@ -140,7 +129,6 @@ class KioskMainPanel(wx.Panel):
         self.streamCombo.Bind(wx.EVT_COMBOBOX, self.StreamComboSelected)
         self.MusicRadioBoxChanged()
 
-        log.write("Initializing sizers and adding elements...")
         # Create and add sizers to main sizer
         # Sizer for BACKGROUND and LOGO selection
         bgSizer = wx.BoxSizer(wx.VERTICAL)
@@ -160,14 +148,12 @@ class KioskMainPanel(wx.Panel):
         imgSizer.Layout()
         self.audioSizer.Layout()
 
-        log.write("Adding sizers to content and main sizer...")
         # add to main sizer
         contentSizer = wx.BoxSizer(wx.VERTICAL)
         contentSizer.Add(imgSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
         contentSizer.Add(self.audioSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
         self.mainSizer.Add(contentSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
 
-        log.write("Setting main sizer as active sizer of panel...")
         self.SetSizer(self.mainSizer)
 
     def MusicRadioBoxChanged(self, event=None):
