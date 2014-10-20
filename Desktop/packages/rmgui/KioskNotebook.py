@@ -187,22 +187,17 @@ class KioskNotebook(wx.Notebook):
         dlg = poDlg.PageOrderDialog(self,-1,self.pages,self.base_path)
         if dlg.ShowModal() == wx.ID_OK:
             self.SetSelection(0)
-            changed = False
-            for i in range(len(self.pages)):
-                if dlg.pages[i].index != self.pages[i].index:
-                    changed = True
-            if changed:
-                self.pages = dlg.pages
-                while self.GetPageCount() > 2:
-                    self.RemovePage(1)
-                for i in range(1,len(self.pages)):
-                    page = self.pages[i]
-                    page.index = i+1
-                    tabTitle = page.title
-                    if len(tabTitle) > 11:
-                        tabTitle = tabTitle[:12] + "..."
-                    self.InsertPage(self.GetPageCount()-1, page, tabTitle)
-                self.modified = True
+            self.pages = dlg.pages
+            while self.GetPageCount() > 2:
+                self.RemovePage(1)
+            for i in range(1,len(self.pages)):
+                page = self.pages[i]
+                page.index = i+1
+                tabTitle = page.title
+                if len(tabTitle) > 11:
+                    tabTitle = tabTitle[:12] + "..."
+                self.InsertPage(self.GetPageCount()-1, page, tabTitle)
+            self.modified = True
 
     def NumberOfFiles(self):
         total = 0
