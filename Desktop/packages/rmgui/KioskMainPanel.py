@@ -676,7 +676,7 @@ class KioskMainPanel(wx.Panel):
             prgDialog.Destroy()
 
     def LoadPagesFromTempData(self, tmpPath, include_main=True):
-        self.musicRadioBox.SetSelection(0)
+        # self.musicRadioBox.SetSelection(0)
         # parse loaded data, create pages and update UI
         for dir in os.listdir(tmpPath):
             if dir.startswith("page"):
