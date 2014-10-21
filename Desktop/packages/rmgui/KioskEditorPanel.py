@@ -54,8 +54,14 @@ class KioskEditorPanel(wx.Panel):
     def LoadData(self):
         pass
 
+    def ImageAdded(self, imgPath):
+        #self.images.append(imgPath)
+        self.delAll.Enable()
+
     def ImageDeleted(self, index):
-        del self.images[index]
+        #del self.images[index]
+        if len(self.images) == 0:
+            self.delAll.Disable()
 
     def PageChanged(self, event):
         old = event.GetOldSelection()
@@ -90,9 +96,11 @@ class KioskEditorPanel(wx.Panel):
 
         # image definition
         addImg = wx.Button(self.mainBox,-1,label=tr("add_image"))
-        self.imgPreview = siv.ScrollableImageView(self.mainBox,-1,size=(300,350),images=[],dataSource=self,cols=1)
-        for img in self.images:
-            self.imgPreview.AddImage(img)
+        self.delAll = wx.Button(self.mainBox, -1, label=tr("delete_all"))
+        self.delAll.Disable()
+        self.imgPreview = siv.ScrollableImageView(self.mainBox,-1,size=(300,350),images=self.images,dataSource=self,cols=1)
+        #for img in self.images:
+        #    self.imgPreview.AddImage(img)
 
         # preview Button
         preview = wx.Button(self,-1,label=tr("preview"))
@@ -103,6 +111,7 @@ class KioskEditorPanel(wx.Panel):
         self.textList.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.ShowTextEdit)
         self.textList.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.TextItemRightClicked)
         addImg.Bind(wx.EVT_BUTTON, self.ShowImageSelection)
+        self.delAll.Bind(wx.EVT_BUTTON, self.imgPreview.ClearImageView)
         preview.Bind(wx.EVT_BUTTON, self.PreviewClicked)
 
         # create sizers, add content and add to main sizer
@@ -111,7 +120,10 @@ class KioskEditorPanel(wx.Panel):
         txtSizer.Add(addText,flag=wx.TOP|wx.LEFT,border=5)
         txtSizer.Add(self.textList,flag=wx.TOP|wx.LEFT,border=5)
         imgSizer = wx.BoxSizer(wx.VERTICAL)
-        imgSizer.Add(addImg,flag=wx.TOP|wx.LEFT,border=5)
+        imgBtnSizer = wx.BoxSizer()
+        imgBtnSizer.Add(addImg)
+        imgBtnSizer.Add(self.delAll)
+        imgSizer.Add(imgBtnSizer, flag=wx.TOP|wx.LEFT,border=5)
         imgSizer.Add(self.imgPreview,flag=wx.TOP|wx.LEFT,border=5)
 
         contentSizer.Add(txtSizer)
@@ -209,8 +221,9 @@ class KioskEditorPanel(wx.Panel):
 
         if dlg.ShowModal() == wx.ID_OK:
             file = dlg.GetFile()
-            self.images.append(file)
+            #self.images.append(file)
             self.imgPreview.AddImage(file)
+            #self.delAll.Enable()
             head, tail = os.path.split(file)
             self.imgPath = head
         if HOST_SYS == HOST_WIN:

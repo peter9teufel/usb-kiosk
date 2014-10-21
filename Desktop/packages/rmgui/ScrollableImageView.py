@@ -1,12 +1,24 @@
+# -*- coding: utf-8 -*-
 import wx, platform
 from PIL import Image
 import wx.lib.scrolledpanel as scrolled
 from packages.lang.Localizer import *
 import sys
 
+SUPPORTED_IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.JPG', '.JPEG', '.png', '.PNG')
+
 ################################################################################
 # SCROLLABLE IMAGE VIEW ########################################################
 ################################################################################
+class ImageDropTarget(wx.FileDropTarget):
+    def __init__(self, window):
+        wx.FileDropTarget.__init__(self)
+        self.window = window
+
+    def OnDropFiles(self, x, y, filenames):
+        for file in filenames:
+            self.window.AddImage(file)
+
 class ScrollableImageView(scrolled.ScrolledPanel):
     def __init__(self,parent,id,size,images,dataSource,cols=2):
         scrolled.ScrolledPanel.__init__(self,parent,id,size=size)
@@ -18,6 +30,8 @@ class ScrollableImageView(scrolled.ScrolledPanel):
         self.images = images
         self.__LoadImages()
         self.SetSizer(self.mainSizer)
+        dropTarget = ImageDropTarget(self)
+        self.SetDropTarget(dropTarget)
         self.LayoutAndScroll()
 
     def LayoutAndScroll(self):
@@ -25,8 +39,10 @@ class ScrollableImageView(scrolled.ScrolledPanel):
         self.SetupScrolling(scroll_x=False, scroll_y=True)
 
     def AddImage(self,imagePath):
-        self.images.append(imagePath)
-        self.UpdateImages()
+        if imagePath.endswith((SUPPORTED_IMAGE_EXTENSIONS)):
+            self.images.append(imagePath)
+            self.UpdateImages()
+            self.dataSource.ImageAdded(imagePath)
 
     def UpdateImages(self):
         self.mainSizer.Clear(True)
@@ -60,13 +76,21 @@ class ScrollableImageView(scrolled.ScrolledPanel):
     def ImageClicked(self, event, index):
         wx.CallAfter(self.__ImageDeletion, index)
 
+    def ClearImageView(self, event=None):
+        dlg = wx.MessageDialog(self.parent, tr("msg_delete_all"), tr("delete_all"), style=wx.YES_NO|wx.ICON_QUESTION)
+        if dlg.ShowModal() == wx.ID_YES:
+            for i in reversed(range(len(self.images))):
+                self.__DeleteImage(i)
 
     def __ImageDeletion(self, index):
         dlg = wx.MessageDialog(self, tr("msg_delete_img"), tr("title_delete_img"), style=wx.YES_NO|wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
-            del self.images[index]
-            self.UpdateImages()
-            self.dataSource.ImageDeleted(index)
+            self.__DeleteImage(index)
+
+    def __DeleteImage(self,index):
+        del self.images[index]
+        self.UpdateImages()
+        self.dataSource.ImageDeleted(index)
 
 
     def __ScaleImage(self, imgPath, width):

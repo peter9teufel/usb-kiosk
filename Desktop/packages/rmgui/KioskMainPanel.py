@@ -15,8 +15,6 @@ import wx
 from wx.lib import imagebrowser
 from wx.lib.wordwrap import wordwrap
 
-from packages.rmutil import Logger as log
-
 HOST_WIN = 1
 HOST_MAC = 2
 HOST_LINUX = 3
@@ -43,7 +41,6 @@ class KioskMainPanel(wx.Panel):
         self.streamAddr = None
         self.imgPath = self.DefaultPath()
         self.usbPath = None
-        log.write("Initializing UI for Main Panel...")
         self.Initialize()
 
 
@@ -101,12 +98,16 @@ class KioskMainPanel(wx.Panel):
         bgImg = wx.EmptyImage(200,200)
         # create bitmap with preview png
         self.bgCtrl = wx.StaticBitmap(imgBox, wx.ID_ANY, wx.BitmapFromImage(bgImg))
+        bgDrop = ImageCtrlDropTarget(self.bgCtrl, self._SetImagePreview)
+        self.bgCtrl.SetDropTarget(bgDrop)
         self._SetImagePreview('img/preview.png')
 
         # Logo selection
         logo = wx.Button(imgBox,-1,label="Logo")
         logoImg = wx.EmptyImage(200,200)
         self.logoCtrl = wx.StaticBitmap(imgBox, wx.ID_ANY, wx.BitmapFromImage(logoImg))
+        logoDrop = ImageCtrlDropTarget(self.logoCtrl, self._SetImagePreview, logo=True)
+        self.logoCtrl.SetDropTarget(logoDrop)
         self._SetImagePreview('img/preview.png',logo=True)
 
         # background music
@@ -184,11 +185,10 @@ class KioskMainPanel(wx.Panel):
 
         if dlg.ShowModal() == wx.ID_OK:
             file = dlg.GetFile()
-            self.bg = file
             self._SetImagePreview(file)
+            # save image path of previed image
             head, tail = os.path.split(file)
             self.imgPath = head
-            self.parent.modified = True
         if HOST_SYS == HOST_WIN:
             dlg.Destroy()
 
@@ -197,11 +197,10 @@ class KioskMainPanel(wx.Panel):
 
         if dlg.ShowModal() == wx.ID_OK:
             file = dlg.GetFile()
-            self.logo = file
             self._SetImagePreview(file,logo=True)
+            # save image path of previed image
             head, tail = os.path.split(file)
             self.imgPath = head
-            self.parent.modified = True
         if HOST_SYS == HOST_WIN:
             dlg.Destroy()
 
@@ -254,6 +253,11 @@ class KioskMainPanel(wx.Panel):
         self.parent.parent.Center()
 
     def _SetImagePreview(self, imagePath, logo=False):
+        if logo:
+            self.logo = imagePath
+        else:
+            self.bg = imagePath
+
         ## print "PREVIEW IMAGE PATH: " + imagePath
         path = resource_path(imagePath)
         #print "RESOURCE PATH: " + path
@@ -277,6 +281,7 @@ class KioskMainPanel(wx.Panel):
         else:
             self.bgCtrl.SetBitmap(wx.BitmapFromImage(img))
         self.mainSizer.Layout()
+        self.parent.modified = True
 
     def WaitForUSBForCreation(self, event):
         if not self.parent.closed:
@@ -641,9 +646,7 @@ class KioskMainPanel(wx.Panel):
         prgDlg.Update(100)
         if HOST_SYS == HOST_WIN:
             prgDlg.Destroy()
-        #dlg = wx.MessageDialog(self, tr("msg_saving_done"), tr("done"), style = wx.OK|wx.ICON_INFORMATION)
-        #dlg.ShowModal()
-
+        
     def OpenConfiguration(self, path):
         prgDialog = wx.ProgressDialog(tr("title_opening"), tr("msg_opening"))
         prgDialog.Pulse()
@@ -810,6 +813,18 @@ class KioskMainPanel(wx.Panel):
                     if os.path.isfile(filename): # regular files only
                         arcname = os.path.join(os.path.relpath(root, relroot), file)
                         zip.write(filename, arcname)
+
+
+class ImageCtrlDropTarget(wx.FileDropTarget):
+    def __init__(self, window, target, logo=False):
+        wx.FileDropTarget.__init__(self)
+        self.window = window
+        self.target = target
+        self.logo = logo
+
+    def OnDropFiles(self, x, y, filenames):
+        if len(filenames) == 1:
+            self.target(filenames[0], self.logo)
 
 # HELPER METHOD to get correct resource path for image file
 def resource_path(relative_path):

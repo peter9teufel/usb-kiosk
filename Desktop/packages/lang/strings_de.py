@@ -2,6 +2,7 @@
 strings = {
 	# COMMON
 	"cancel": "Abbrechen",
+	"loading": "Lädt...",
 	# MENU ITEMS
 	"file": "Datei",
 	"edit": "Bearbeiten",
@@ -59,5 +60,8 @@ strings = {
 	"load_selection": u"Kiosk Datei zum Laden auswählen",
 	# SCROLLABLE IMAGE VIEW
 	"title_delete_img": u"Löschen",
-	"msg_delete_img": u"Ausgewähltes Bild von der Seite löschen?"
+	"msg_delete_img": u"Ausgewähltes Bild von der Seite löschen?",
+	"adding_images": u"Füge Bilder zu Ihrem Kiosk hinzu...",
+	"delete_all": u"Alle Bilder löschen",
+	"msg_delete_all": "Alle Bilder der Seite löschen?"
 }

@@ -54,7 +54,7 @@ class AppFrame(wx.Frame):
                                               (wx.ACCEL_CTRL, ord('e'), sc_edit_order),
                                               (wx.ACCEL_CTRL, ord('t'), sc_new_page),
                                               (wx.ACCEL_CTRL, ord('w'), sc_del_current),
-                                              (wx.ACCEL_CTRL, ord('\t'), sc_switch_tab)
+                                              (wx.ACCEL_RAW_CTRL, ord('\t'), sc_switch_tab)
                                              ])
         self.SetAcceleratorTable(self.accel_tbl)
 
@@ -66,17 +66,21 @@ class AppFrame(wx.Frame):
 
         self.Center()
         self.Maximize()
-        self.Show()
         self.notebook.Hide()
+        self.Show()
 
     def Close(self, event=None):
+        cancel = False
         if not self.notebook.closed:
-            dlg = wx.MessageDialog(self, "Do you want to save your current Kiosk Configuration?", "Save before Exit?", style=wx.YES_NO)
-            if dlg.ShowModal() == wx.ID_YES:
+            dlg = wx.MessageDialog(self, "Do you want to save your current Kiosk Configuration?", "Save before Exit?", style=wx.YES_NO|wx.CANCEL)
+            result = dlg.ShowModal()
+            cancel = (result == wx.ID_CANCEL)
+            if result  == wx.ID_YES:
                 self.notebook.SaveConfiguration()
-        self.notebook.Close()
-        self.Destroy()
-        sys.exit(0)
+        if not cancel:
+            self.notebook.Close()
+            self.Destroy()
+            sys.exit(0)
 
     def SetupMenuBar(self):
         # menus

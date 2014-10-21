@@ -54,8 +54,11 @@ class KioskNotebook(wx.Notebook):
         home = expanduser("~")
         appPath = home + '/.usb_kiosk/'
         tmpPath = appPath + 'tmp/'
+        logPath = appPath + 'log/'
         if os.path.isdir(tmpPath):
             shutil.rmtree(tmpPath)
+        if os.path.isdir(logPath):
+            shutil.rmtree(logPath)
         self.Destroy()
 
     def OnNotebookRightClick(self, event):
@@ -92,14 +95,15 @@ class KioskNotebook(wx.Notebook):
         self.AddPage(self.plusTab, "+")
 
     def AddNewPage(self, event=None):
-        newIndex = self.GetPageCount()
-        newPage = editPanel.KioskEditorPanel(self,-1,tr("new_page"),newIndex,HOST_SYS,[],[],self.base_path)
-        self.pages.append(newPage)
-        if HOST_SYS == HOST_WIN:
-            self.Hide()
-        self.InsertPage(self.GetPageCount()-1,newPage, tr("new_page"),select=True)
-        self.Show()
-        self.modified = True
+        if not self.closed:
+            newIndex = self.GetPageCount()
+            newPage = editPanel.KioskEditorPanel(self,-1,tr("new_page"),newIndex,HOST_SYS,[],[],self.base_path)
+            self.pages.append(newPage)
+            if HOST_SYS == HOST_WIN:
+                self.Hide()
+            self.InsertPage(self.GetPageCount()-1,newPage, tr("new_page"),select=True)
+            self.Show()
+            self.modified = True
 
     def AddKioskPage(self, title, texts, images):
         page = editPanel.KioskEditorPanel(self,-1,title,self.GetPageCount(),HOST_SYS,texts,images,self.base_path)
@@ -151,8 +155,14 @@ class KioskNotebook(wx.Notebook):
             if dlg.ShowModal() == wx.ID_OK:
                 save_path = dlg.GetPath()
                 self.mainPage.SaveConfiguration(save_path)
+                self.modified = False
 
     def OpenConfiguration(self, event=None):
+        if not self.closed and self.modified:
+            dlg = wx.MessageDialog(self, "Do you want to save your current Kiosk Configuration?", "Save before Closing?", style=wx.YES_NO)
+            if dlg.ShowModal() == wx.ID_YES:
+                self.notebook.SaveConfiguration()
+                self.modified = False
         dlg = wx.FileDialog(self, tr("load_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk", wx.FD_OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             open_path = dlg.GetPath()
@@ -166,14 +176,18 @@ class KioskNotebook(wx.Notebook):
                 self.Show()
 
     def CloseConfiguration(self, event):
+        cancel = False
         if self.modified:
-            dlg = wx.MessageDialog(self, "Do you want to save your current Kiosk Configuration?", "Save before Closing?", style=wx.YES_NO)
-            if dlg.ShowModal() == wx.ID_YES:
-                self.notebook.SaveConfiguration()
-        self.ClearNotebook()
-        self.closed = True
-        self.modified = False
-        self.Hide()
+            dlg = wx.MessageDialog(self, "Do you want to save your current Kiosk Configuration?", "Save before Closing?", style=wx.YES_NO|wx.CANCEL)
+            result = dlg.ShowModal()
+            cancel = (result == wx.ID_CANCEL)
+            if result == wx.ID_YES:
+                self.SaveConfiguration()
+        if not cancel:
+            self.ClearNotebook()
+            self.closed = True
+            self.modified = False
+            self.Hide()
 
     def ImportPages(self, event):
         dlg = wx.FileDialog(self, tr("load_selection"), "", "", "KIOSK files(*.kiosk)|*.kiosk", wx.FD_OPEN)

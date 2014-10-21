@@ -2,6 +2,7 @@
 strings = {
 	# COMMON
 	"cancel": "Cancel",
+	"loading": "Loading...",
 	# MENU ITEMS
 	"file": "File",
 	"edit": "Edit",
@@ -59,5 +60,8 @@ strings = {
 	"load_selection": "Select a Kiosk file to be loaded",
 	# SCROLLABLE IMAGE VIEW
 	"title_delete_img": "Delete",
-	"msg_delete_img": "Delete selected image from the page?"
+	"msg_delete_img": "Delete selected image from the page?",
+	"adding_images": "Adding images to your Kiosk configuration...",
+	"delete_all": "Delete all Images",
+	"msg_delete_all": "Delete all images from page?"
 }
