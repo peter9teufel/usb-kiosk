@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import packages.rmutil as rmutil
 from packages.rmgui import *
 import TextEditDialog as txtDlg
@@ -229,7 +230,7 @@ class KioskEditorPanel(wx.Panel):
             url += "&IMG=1"
         else:
             url += "&IMG=0"
-        webbrowser.open(url)
+        webbrowser.open(url.decode('utf-8'))
 
 # HELPER METHOD to get correct resource path for image file
 def resource_path(relative_path):
