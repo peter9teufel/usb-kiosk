@@ -35,21 +35,16 @@ html, body {
 #info_img_id {
     max-width: 100%;
     max-height: 100%;
-    border-radius: 20px;
-    -moz-border-radius: 20px;
-    -khtml-border-radius: 20px;
-    -webkit-border-radius: 20px;
 }
 
 #logo_div{
-    background-color: rgba(70,70,70,1);
+    background-color: rgba(250,250,250,0.5);
     width: 10%;
     height: auto;
     position: absolute;
     right: 1%;
     bottom: 1%;
     padding: 0.3%;
-    border-radius: 8px;
 }
 
 #logo{
@@ -75,11 +70,7 @@ html, body {
     margin-bottom: 10px;
     border-style: solid;
     border-width: 5px;
-    border-color: rgba(0,0,0,0.4);
-    border-radius: 20px;
-    -moz-border-radius: 20px;
-    -khtml-border-radius: 20px;
-    -webkit-border-radius: 20px;
+    border-color: rgba(150,150,150,0.5);
 }
 
 .text {
@@ -102,10 +93,6 @@ html, body {
     font-weight: bolder;
     line-height: 1.2;
     text-align: justify;
-    border-style: solid;
-    border-width: 5px;
-    border-color: rgba(0,0,0,0.4);
-    border-radius: 20px;
 }
 
 .headline {
@@ -126,8 +113,4 @@ html, body {
     margin-right: 1%;
     font-weight: bolder;
     font-size: 4em;
-    border-style: solid;
-    border-width: 5px;
-    border-color: rgba(0,0,0,0.4);
-    border-radius: 20px;
 }​
