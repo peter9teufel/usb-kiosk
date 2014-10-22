@@ -3,7 +3,7 @@ import wx, platform
 from PIL import Image, ImageFilter
 import wx.lib.scrolledpanel as scrolled
 from packages.lang.Localizer import *
-import sys, math
+import sys, platform
 from threading import Timer
 
 SUPPORTED_IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.JPG', '.JPEG', '.png', '.PNG')
@@ -34,6 +34,8 @@ class ScrollableImageView(scrolled.ScrolledPanel):
         self.swapped = False
         self.ctrlSize = None
         self.imgWidth = 0
+        self.prevX = -1
+        self.delPath = 0
         self.imgCtrls = []
 
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -47,7 +49,6 @@ class ScrollableImageView(scrolled.ScrolledPanel):
     def OnLeftDown(self, event, ctrl):
         index = self.imgCtrls.index(ctrl)
         self.imgClicked = index
-        self.dragStart = event.GetPosition()
         self.draggedBmp = self.imgCtrls[index].GetBitmap()
         # blur preview of image that is beeing dragged
         img = self.__ScaleImage(self.images[index], self.imgWidth, blurred=True)
@@ -62,7 +63,6 @@ class ScrollableImageView(scrolled.ScrolledPanel):
         if self.dragDelete:
             self.__DeleteImage(self.imgClicked)
         self.imgClicked = -1
-        self.indexAdapt = 0
         self.draggedBmp = None
         self.ctrlSize = None
         self.swappedIndex = -1
@@ -72,26 +72,34 @@ class ScrollableImageView(scrolled.ScrolledPanel):
 
     def OnMotion(self, event, ctrl):
         index = self.imgCtrls.index(ctrl)
-        if self.imgClicked == index:
-            ctrl = self.imgCtrls[index]
+        if self.imgClicked != -1 and self.imgClicked in (index-1, index, index+1):
+            ctrl = self.imgCtrls[self.imgClicked]
             if self.ctrlSize == None:
                 self.ctrlSize = ctrl.GetSize()
             pos = ctrl.GetScreenPosition()
             size = ctrl.GetSize()
+            sizerOffsetClicked = (self.imgClicked * (size[1]+4))
+            sizerOffsetCursor = (index * (size[1]+4))
             upper = pos[1]
             lower = upper + size[1]
-            rightEdge = pos[0] + self.imgWidth
 
+            rightEdge = pos[0] + self.imgWidth
             evPosY = event.GetPosition()[1] + pos[1]
             evPosX = event.GetPosition()[0] + pos[0]
-            if evPosY < upper and index > 0:
+
+            if platform.system() == 'Windows':
+                upper += sizerOffsetClicked
+                lower += sizerOffsetClicked
+                evPosY += sizerOffsetCursor
+
+            if evPosY < upper and self.imgClicked > 0:
                 if not self.swapped:
-                    self.SwapImages(index, index-1)
+                    self.SwapImages(self.imgClicked, self.imgClicked-1)
                     self.swappedIndex = self.imgClicked - 1
                     self.swapped = True
-            elif evPosY > lower and index < len(self.images)-1:
+            elif evPosY > lower and self.imgClicked < len(self.images)-1:
                 if not self.swapped:
-                    self.SwapImages(index, index+1)
+                    self.SwapImages(self.imgClicked, self.imgClicked+1)
                     self.swappedIndex = self.imgClicked + 1
                     self.swapped = True
             elif evPosY < lower and evPosY > upper:
@@ -168,11 +176,13 @@ class ScrollableImageView(scrolled.ScrolledPanel):
             curImgCtrl.Bind(wx.EVT_LEFT_DOWN, lambda event, ctrl=curImgCtrl: self.OnLeftDown(event,ctrl))
             curImgCtrl.Bind(wx.EVT_LEFT_UP, lambda event, ctrl=curImgCtrl: self.OnLeftUp(event,ctrl))
             curImgCtrl.Bind(wx.EVT_MOTION, lambda event, ctrl=curImgCtrl: self.OnMotion(event,ctrl))
+            curImgCtrl.Bind(wx.EVT_LEFT_DCLICK, lambda event, ctrl=curImgCtrl: self.ImageDoubleClicked(event,ctrl))
 
             self.mainSizer.Add(curImgCtrl, flag=wx.ALL, border=2)
             self.imgCtrls.append(curImgCtrl)
 
-    def ImageClicked(self, event, index):
+    def ImageDoubleClicked(self, event, ctrl):
+        index = self.imgCtrls.index(ctrl)
         wx.CallAfter(self.__ImageDeletion, index)
 
     def ClearImageView(self, event=None):
@@ -182,9 +192,16 @@ class ScrollableImageView(scrolled.ScrolledPanel):
                 self.__DeleteImage(i)
 
     def __ImageDeletion(self, index):
+        selectedBmp = self.imgCtrls[index].GetBitmap()
+        # blur preview of image that is beeing dragged
+        img = self.__ScaleImage(self.images[index], self.imgWidth, blurred=True)
+        bmp = wx.BitmapFromImage(img)
+        self.imgCtrls[index].SetBitmap(bmp)
         dlg = wx.MessageDialog(self, tr("msg_delete_img"), tr("title_delete_img"), style=wx.YES_NO|wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
             self.__DeleteImage(index)
+        else:
+            self.imgCtrls[index].SetBitmap(selectedBmp)
 
     def __DeleteImage(self,index):
         del self.images[index]

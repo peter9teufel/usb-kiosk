@@ -19,6 +19,7 @@ class AppFrame(wx.Frame):
         global BASE_PATH
         BASE_PATH = base_path
         self.Bind(wx.EVT_CLOSE, self.Close)
+        self.Maximize()
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.notebook = kNotebook.KioskNotebook(self,-1,None,base_path)
         self.mainSizer.Add(self.notebook, 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
@@ -65,7 +66,6 @@ class AppFrame(wx.Frame):
             self.SetIcon(ic_main)
 
         self.Center()
-        self.Maximize()
         self.notebook.Hide()
         self.Show()
 
