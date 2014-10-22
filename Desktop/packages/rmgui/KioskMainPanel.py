@@ -253,10 +253,11 @@ class KioskMainPanel(wx.Panel):
         self.parent.parent.Center()
 
     def _SetImagePreview(self, imagePath, logo=False):
-        if logo:
-            self.logo = imagePath
-        else:
-            self.bg = imagePath
+        if not imagePath == "img/preview.png":
+            if logo:
+                self.logo = imagePath
+            else:
+                self.bg = imagePath
 
         ## print "PREVIEW IMAGE PATH: " + imagePath
         path = resource_path(imagePath)
@@ -646,7 +647,7 @@ class KioskMainPanel(wx.Panel):
         prgDlg.Update(100)
         if HOST_SYS == HOST_WIN:
             prgDlg.Destroy()
-        
+
     def OpenConfiguration(self, path):
         prgDialog = wx.ProgressDialog(tr("title_opening"), tr("msg_opening"))
         prgDialog.Pulse()

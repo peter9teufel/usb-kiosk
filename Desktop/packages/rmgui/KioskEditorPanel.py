@@ -98,7 +98,7 @@ class KioskEditorPanel(wx.Panel):
         addImg = wx.Button(self.mainBox,-1,label=tr("add_image"))
         self.delAll = wx.Button(self.mainBox, -1, label=tr("delete_all"))
         self.delAll.Disable()
-        self.imgPreview = siv.ScrollableImageView(self.mainBox,-1,size=(300,350),images=self.images,dataSource=self,cols=1)
+        self.imgPreview = siv.ScrollableImageView(self.mainBox,-1,size=(300,350),images=self.images,dataSource=self)
         #for img in self.images:
         #    self.imgPreview.AddImage(img)
 
@@ -243,7 +243,8 @@ class KioskEditorPanel(wx.Panel):
             url += "&IMG=1"
         else:
             url += "&IMG=0"
-        webbrowser.open(url.decode('utf-8'))
+
+        webbrowser.open(url)
 
 # HELPER METHOD to get correct resource path for image file
 def resource_path(relative_path):
