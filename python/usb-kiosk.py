@@ -129,7 +129,7 @@ def UpdateKioskFiles():
                     elif file == "custom_bg.jpg":
                         _optimizeCrop(file, USB_KIOSK_PATH + '/' + page, KIOSK_PAGES_PATH + '/' + page, 1920, 1080)
                 elif not file.startswith(".") and file.endswith((TEXT_EXTENSION)):
-                    if file.startswith("Text"):
+                    if file.startswith("Text") or file == "headline.txt":
                         dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
                         shutil.copyfile(srcFile, dstFile)
                     elif file == "style.txt":
