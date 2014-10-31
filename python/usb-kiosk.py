@@ -92,10 +92,12 @@ def USBPagesValid():
 
 
 def UpdateKioskFiles():
+    
     # backup current files from player on USB stick
     if not os.path.isdir(USB_BACKUP_PATH):
         os.mkdir(USB_BACKUP_PATH, 755)
     BackupKioskFilesFromPlayer(USB_BACKUP_PATH)
+    
 
     # remove old files from player
     DeleteAllFilesInDir(KIOSK_PAGES_PATH)
@@ -118,14 +120,21 @@ def UpdateKioskFiles():
             for file in os.listdir(USB_KIOSK_PATH + '/' + page):
                 srcFile = USB_KIOSK_PATH + '/' + page + '/' + file
                 if not file.startswith(".") and file.endswith((IMAGE_EXTENSION)):
-                    dstFile = KIOSK_PAGES_PATH + '/' + page + '/img/' + file
-                    # shutil.copyfile(srcFile, dstFile)
-                    # OptimizeImage(dstFile)
-                    # fileName, basePath, destPath
-                    OptimizeAndCopyImage(file, USB_KIOSK_PATH + '/' + page, KIOSK_PAGES_PATH + '/' + page + '/img')
+                    if file.startswith("image"):
+                        dstFile = KIOSK_PAGES_PATH + '/' + page + '/img/' + file
+                        # shutil.copyfile(srcFile, dstFile)
+                        # OptimizeImage(dstFile)
+                        # fileName, basePath, destPath
+                        OptimizeAndCopyImage(file, USB_KIOSK_PATH + '/' + page, KIOSK_PAGES_PATH + '/' + page + '/img')
+                    elif file == "custom_bg.jpg":
+                        _optimizeCrop(file, USB_KIOSK_PATH + '/' + page, KIOSK_PAGES_PATH + '/' + page, 1920, 1080)
                 elif not file.startswith(".") and file.endswith((TEXT_EXTENSION)):
-                    dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
-                    shutil.copyfile(srcFile, dstFile)
+                    if file.startswith("Text"):
+                        dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
+                        shutil.copyfile(srcFile, dstFile)
+                    elif file == "style.txt":
+                        dstFile = KIOSK_PAGES_PATH + '/' + page + '/' + file
+                        shutil.copyfile(srcFile, dstFile)
     if os.path.isfile(USB_KIOSK_PATH + '/stream.txt'):
         dstFile = HTML_ROOT_PATH + '/stream.txt'
 	srcFile = USB_KIOSK_PATH + '/stream.txt'
