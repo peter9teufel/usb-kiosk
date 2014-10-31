@@ -572,6 +572,7 @@ function updateTicker(ticker_txt, ticker_mov, enable_ticker){
     ticker_enabled = enable_ticker
     if(enable_ticker){
         document.getElementById("ticker").style.display = 'inline'
+        document.getElementById("logo_div").style.display = 'inline'
         if(ticker_txt != null && ticker_text != ticker_txt){
             // message changed
             ticker_text = ticker_txt;
@@ -582,11 +583,13 @@ function updateTicker(ticker_txt, ticker_mov, enable_ticker){
             ticker_moving = ticker_mov;
             if(move){
                 // reset ticker position and trigger movement
-                tickerPos = 1850;
+                tWidth = $("#ticker").width()
+                tickerPos = tWidth;
                 moveText();
             }
         }
     }else{
+        document.getElementById("logo_div").style.display = 'none'
         document.getElementById("ticker").style.display = 'none'
     }
 }
@@ -602,7 +605,9 @@ function moveText(){
     if(tickerPos > (tickerW * -1)){
         tickerPos-=1;
     } else {
-        tickerPos=1850;
+        // reset ticker position to right
+        tWidth = $("#ticker").width()
+        tickerPos = tWidth;
     }
     tickerStyle.left = tickerPos+'px';
     tickerLoop();
