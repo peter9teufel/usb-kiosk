@@ -91,8 +91,6 @@ function switchPage(){
             }
         }else{
             var image = document.getElementById(ids['img']);
-            // clear previous image and set new
-            image.src = '';
             image.src = img;
             image.onload = function(e){
                 sizeImage(ids['img'], ids['img_container'], imageMode);
@@ -175,10 +173,8 @@ function setupDefaultPage(){
     var logo = document.getElementById("logo_div");
 
     // hide unused elements
-    image_fullscreen.src = '';
     image_fullscreen_container.style.display = 'none';
     textfield_2.style.display = 'none';
-    image_2.src = '';
     image_2_container.style.display = 'none';
 
     // show page elements
@@ -209,10 +205,8 @@ function setupDefaultPageFlipped(){
     var logo = document.getElementById("logo_div");
 
     // hide unused elements
-    image_fullscreen.src = '';
     image_fullscreen_container.style.display = 'none';
     textfield.style.display = 'none';
-    image.src = '';
     image_container.style.display = 'none';
 
     // show page elements
@@ -243,11 +237,8 @@ function setupTextOnlyPage(){
     var logo = document.getElementById("logo_div");
 
     // hide unused elements
-    image_fullscreen.src = '';
     image_fullscreen_container.style.display = 'none';
-    image_2.src = '';
     image_2_container.style.display = 'none';
-    image.src = '';
     image_container.style.display = 'none';
     textfield_2.style.display = 'none';
 
@@ -277,9 +268,7 @@ function setupImageOnlyPage(){
     var logo = document.getElementById("logo_div");
 
     // hide unused elements
-    image_fullscreen.src = '';
     image_fullscreen_container.style.display = 'none';
-    image.src = '';
     image_container.style.display = 'none';
     textfield.style.display = 'none';
     textfield_2.style.display = 'none';
@@ -310,7 +299,6 @@ function setupDoubleImagePage(){
     var logo = document.getElementById("logo_div");
 
     // hide unused elements
-    image_fullscreen.src = '';
     image_fullscreen_container.style.display = 'none';
     textfield.style.display = 'none';
     textfield_2.style.display = 'none';
@@ -344,9 +332,7 @@ function setupFullscreenImagePage(){
     var logo = document.getElementById("logo_div");
 
     // hide unused elements
-    image_2.src = '';
     image_2_container.style.display = 'none';
-    image.src = '';
     image_container.style.display = 'none';
     textfield.style.display = 'none';
     textfield_2.style.display = 'none';
@@ -385,8 +371,6 @@ function changeImage(images, index, duration, targetID, targetContainer, style, 
             var img2 = images[targetIndex+1];
             index++;
 
-            image1.src = '';
-            image2.src = '';
             image1.src = img1;
             image2.src = img2;
 
@@ -412,8 +396,6 @@ function changeImage(images, index, duration, targetID, targetContainer, style, 
             var image = document.getElementById(targetID);
             index++;
 
-            // clear previous image and set new
-            image.src = '';
             image.src = img;
 
             image.onload = function(e){
