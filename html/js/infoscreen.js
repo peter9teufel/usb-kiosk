@@ -578,7 +578,7 @@ function loadPages(){
 
 function updateBackground(customBG){
     if(customBG){
-        background = SITE_ROOT + 'pages/page' + pageNr + '/custom_bg.jpg'
+        background = SITE_ROOT + 'pages/page' + String(pageNr+1) + '/custom_bg.jpg'
     }else{
         background = SITE_ROOT + 'bg.jpg'
     }
