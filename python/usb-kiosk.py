@@ -128,7 +128,7 @@ def UpdateKioskFiles():
                         WriteLog("Optimizing and copying custom background...")
                         _optimizeCrop(file, USB_KIOSK_PATH + '/' + page, KIOSK_PAGES_PATH + '/' + page, 1920, 1080)
                 elif not file.startswith(".") and file.endswith((TEXT_EXTENSION)):
-                        WriteLog("Copying text file %s" % file)
+                    WriteLog("Copying text file %s" % file)
                     if file.startswith("Text") or file == "headline.txt":
                         dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
                         shutil.copyfile(srcFile, dstFile)
