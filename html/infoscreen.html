@@ -10,6 +10,8 @@
         <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
     </head>
 
+    <body onload="moveText()">
+
     <body>
         <div id="main">
             <img id="bg_img" src="bg.jpg" />
@@ -18,22 +20,28 @@
             <div class="headline" id="txt_headline"></div>
 
             <!-- START OF CONTENT OF PAGE -->
-            <div class="content_wrapper">
 
-                <!-- CONTENT TEXT of page -->
-                <div class="text" id="txt_text"></div>
+            <!-- CONTENT TEXT of page -->
+            <div class="text" id="txt_text"></div>
 
-                <!-- IMAGE
-                <div class="img_div">
-                    <img id="info_img"/>
-                </div>
-
-                -->
-
-                <img class="img_div" id="info_img"/>
-
+            <div class="img_div_2" id="img_container_2">
+                <img id="info_img_2"/>
             </div>
+
+            <div class="img_div" id="img_container">
+                <img id="info_img"/>
+            </div>
+
+            <div class="img_div_fullscreen" id="img_container_fullscreen">
+                <img id="info_img_fullscreen"/>
+            </div>
+
+            <div class="text_2" id="txt_text_2"></div>
+
             <!-- LOGO of customer -->
+            <div class="ticker_div" id="ticker">
+                <div id="ticker_txt"></div>
+            </div>
             <div id="logo_div">
                 <img id="logo" src="logo.png" />
             </div>

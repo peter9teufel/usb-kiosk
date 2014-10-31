@@ -63,5 +63,17 @@ strings = {
 	"msg_delete_img": "Delete selected image from the page?",
 	"adding_images": "Adding images to your Kiosk configuration...",
 	"delete_all": "Delete all Images",
-	"msg_delete_all": "Delete all images from page?"
+	"msg_delete_all": "Delete all images from page?",
+	# KIOSK PAGES PANEL
+	"pages": "Kiosk Pages",
+	"add_page": "Add Page",
+	"setup": "Page Settings",
+	"ticker_setup": "Ticker Settings",
+	"custom_ticker_text": "Custom ticker text for page",
+	"ticker_enabled": "Ticker enabled",
+	"ticker_moving": "Ticker moving",
+	"site_style": "Page Layout",
+	"custom_bg": "Custom Background",
+	"custom_bg_enabled": "Enable custom background",
+	"custom_bg_select": "Select custom background"
 }

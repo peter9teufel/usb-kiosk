@@ -13,18 +13,17 @@ BASE_PATH = None
 ################################################################################
 class AppFrame(wx.Frame):
     def __init__(self,parent,id,title,base_path):
-        wx.Frame.__init__(self,parent,id,title,size=(600,600))
+        wx.Frame.__init__(self,parent,id,title,size=(1180,650),style=wx.MINIMIZE_BOX | wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX | wx.CLIP_CHILDREN)
         self.parent = parent
         self.base_path = base_path
         global BASE_PATH
         BASE_PATH = base_path
         self.Bind(wx.EVT_CLOSE, self.Close)
-        self.Maximize()
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.notebook = kNotebook.KioskNotebook(self,-1,None,base_path)
         self.mainSizer.Add(self.notebook, 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
         self.SetSizerAndFit(self.mainSizer)
-
+        self.SetSize((1180,650))
         # Create an accelerator table for keyboard shortcuts
         sc_new = wx.NewId()
         sc_open = wx.NewId()
@@ -33,9 +32,6 @@ class AppFrame(wx.Frame):
         sc_create_usb = wx.NewId()
         sc_load_usb = wx.NewId()
         sc_edit_order = wx.NewId()
-        sc_new_page = wx.NewId()
-        sc_del_current = wx.NewId()
-        sc_switch_tab = wx.NewId()
         self.Bind(wx.EVT_MENU, self.notebook.NewConfiguration, id=sc_new)
         self.Bind(wx.EVT_MENU, self.notebook.OpenConfiguration, id=sc_open)
         self.Bind(wx.EVT_MENU, self.notebook.SaveConfiguration, id=sc_save)
@@ -43,19 +39,13 @@ class AppFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForLoading, id=sc_load_usb)
         self.Bind(wx.EVT_MENU, self.notebook.mainPage.WaitForUSBForCreation, id=sc_create_usb)
         self.Bind(wx.EVT_MENU, self.notebook.EditPageOrder, id=sc_edit_order)
-        self.Bind(wx.EVT_MENU, self.notebook.AddNewPage, id=sc_new_page)
-        self.Bind(wx.EVT_MENU, self.notebook.DeleteCurrentPage, id=sc_del_current)
-        self.Bind(wx.EVT_MENU, self.notebook.SwitchTab, id=sc_switch_tab)
 
         self.accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('o'), sc_open),
                                               (wx.ACCEL_CTRL, ord('s'), sc_save),
                                               (wx.ACCEL_CTRL|wx.ACCEL_SHIFT, ord('w'), sc_close_kiosk),
                                               (wx.ACCEL_CTRL, ord('r'), sc_create_usb),
                                               (wx.ACCEL_CTRL, ord('l'), sc_load_usb),
-                                              (wx.ACCEL_CTRL, ord('e'), sc_edit_order),
-                                              (wx.ACCEL_CTRL, ord('t'), sc_new_page),
-                                              (wx.ACCEL_CTRL, ord('w'), sc_del_current),
-                                              (wx.ACCEL_RAW_CTRL, ord('\t'), sc_switch_tab)
+                                              (wx.ACCEL_CTRL, ord('e'), sc_edit_order)
                                              ])
         self.SetAcceleratorTable(self.accel_tbl)
 

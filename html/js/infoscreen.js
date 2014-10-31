@@ -1,12 +1,20 @@
+var SITE_ROOT = "http://localhost/usb-kiosk/";
 var pageNr=0;
 var numPages = 0;
 var pages = [];
 var timeout;
 var second = false;
+var tickerPos=1850;
+var tickerW = -1;
+var ticker_text = "";
+var ticker_moving = true;
+var ticker_enabled = true;
+var background = "";
 
 function load(){
     loadPages();
     switchPage();
+    moveText();
 }
 
 function switchPage(){
@@ -16,10 +24,21 @@ function switchPage(){
         }
 
         var headline = document.getElementById("txt_headline");
-        var textfield = document.getElementById("txt_text");
-        var image = document.getElementById("info_img");
 
         var infotexts = httpGet('infoscreen.php?T=TXT&PAGE=page'+(pageNr+1));
+
+        var styleStr = httpGet('infoscreen.php?T=STYLE&PAGE=page'+(pageNr+1));
+        var styleJSON = JSON.parse(styleStr);
+        var style = 'style' in styleJSON ? parseInt(styleJSON['style']) : 0;
+        var imageMode = 'img_mode' in styleJSON ? styleJSON['img_mode'] : 'image_fit';
+        var ticker_txt = 'ticker_text' in styleJSON ? styleJSON['ticker_text'] : null;
+        var enable_ticker = 'ticker_enabled' in styleJSON ? styleJSON['ticker_enabled'] == "1" : true;
+        var ticker_mov = 'ticker_moving' in styleJSON ? styleJSON['ticker_moving'] == 1 : null;
+        var fontFam = 'font_family' in styleJSON ? styleJSON['font_family'] : null;
+        var customBg = 'custom_bg' in styleJSON ? styleJSON['custom_bg'] == "1" : false;
+        updateBackground(customBg);
+        updateTicker(ticker_txt, ticker_mov, enable_ticker);
+
         var infoJSON = JSON.parse(infotexts);
 
         var infotext = infoJSON[0];
@@ -30,59 +49,59 @@ function switchPage(){
         images.sort();
         var img = images[0];
 
+        var ids = new Array()
+        switch(style){
+            case 0: // HL, Ticker, IMG left, TXT right
+                ids = setupDefaultPage();
+                break;
+            case 1:
+                ids = setupDefaultPageFlipped();
+                break;
+            case 2:
+                ids = setupDoubleImagePage();
+                break;
+            case 3:
+                ids = setupTextOnlyPage();
+                break;
+            case 4:
+                ids = setupImageOnlyPage();
+                break;
+            case 5:
+                ids = setupFullscreenImagePage();
+                break;
+        }
+
+        var textfield = document.getElementById(ids['txt']);
+
         // set new content
         headline.innerHTML =  pages[pageNr];
         textfield.innerHTML = infotext;
-        // clear previous image and set new
-        image.src = '';
-        image.src = img;
 
-        if(isHeadlineTwoLined(headline)){
-            txtMaxH = '66%';
-            imgMaxH = '54%';
-            imgMaxHNoTxt = '69%';
+        if(style == 2){
+            var image1 = document.getElementById(ids['img'][0]);
+            var image2 = document.getElementById(ids['img'][1]);
+            image1.src = images[0];
+            image2.src = images[1];
+
+            image1.onload = function(e){
+                sizeImage(ids['img'][0], ids['img_container'][0], imageMode)
+            }
+            image2.onload = function(e){
+                sizeImage(ids['img'][1], ids['img_container'][1], imageMode)
+            }
         }else{
-            txtMaxH = '74%';
-            imgMaxH = '62%';
-            imgMaxHNoTxt = '74%';
-        }
-
-        var noText = false;
-        var noImg = false;
-
-        // set visibility of textfield
-        if(infoJSON.length == 0 || (infoJSON.length == 1 && infotext.split(' ') == 1)){
-            // no text to show
-            textfield.style.display = 'none';
-            noText = true;
-            image.style.maxWidth = '100%';
-            image.style.maxHeight = imgMaxHNoTxt;
-        }else{
-            textfield.style.display = 'inline';
-            noText = false;
-            textfield.style.height = txtMaxH;
-            image.style.maxWidth = '44%';
-            image.style.maxHeight = imgMaxH;
-        }
-
-        // set visibility of image field
-        if(img == ""){
-            // empty string returned --> no images available for page --> split creates one
-            // element discovered here!
-            image.style.display = 'none';
-            noImg = true;
-            textfield.style.width = '96.5%';
-            textfield.style.height = imgMaxH; // imgMaxH should not interfere with logo
-        }else{
-            image.style.display = 'inline';
-            noImg = false;
-            textfield.style.width = '46%';
-            textfield.style.height = txtMaxH;
+            var image = document.getElementById(ids['img']);
+            // clear previous image and set new
+            image.src = '';
+            image.src = img;
+            image.onload = function(e){
+                sizeImage(ids['img'], ids['img_container'], imageMode);
+            }
         }
 
         // auto size text to avoid overflow
-        initTextSize()
-        resize()
+        initTextSize();
+        resize();
 
         // increment pageNr and set timeout for next page switch
         pageNr++;
@@ -91,6 +110,10 @@ function switchPage(){
         var duration = pageDuration(infoJSON);
         // split available duration for images
         var imgDuration = (duration / images.length) * 0.95;
+        if(style == 2){
+            // two images at once
+            imgDuration *= 2;
+        }
         // each image should be visible at least for 5 seconds
         if(duration == 0 || imgDuration < 8000){
             imgDuration = 8000;
@@ -103,23 +126,23 @@ function switchPage(){
         // set timeouts for page switch, image change and text change
         setTimeout("switchPage()", duration);
         setTimeout(function(){
-            changeImage(images, 1, imgDuration);
+            changeImage(images, 1, imgDuration, ids['img'], ids['img_container'], style, imageMode);
         }, imgDuration);
         setTimeout(function(){
-            changeText(infoJSON, 1, txtDuration);
+            changeText(infoJSON, 1, txtDuration, ids['txt']);
         }, txtDuration);
     } else {
         // no pages on player show demo page with description
-        var headline = document.getElementById("txt_headline");
-        var textfield = document.getElementById("txt_text");
-        var image = document.getElementById("info_img");
+        headline = document.getElementById("txt_headline");
+        textfield = document.getElementById("txt_text");
+        image = document.getElementById("info_img");
         image.style.display = 'none';
         noImg = true;
         textfield.style.width = '96.5%';
         textfield.style.height = '62%';
 
-        title = "Welcome to your USB-Kiosk!";
-        msg = "How to get started:<br>";
+        var title = "Welcome to your USB-Kiosk!";
+        var msg = "How to get started:<br>";
         msg += " - Open the \"Kiosk Editor\" desktop application to setup your kiosk pages, background, logo and background music.<br>";
         msg += " - Kiosk Editor allows you to save your kiosk configuration in one single file to share it or edit it again.<br>";
         msg += " - Once you have all your pages setup, click on \"File - Create Kiosk USB-Stick\"<br>";
@@ -139,12 +162,205 @@ function switchPage(){
     }
 }
 
-function isHeadlineTwoLined(headline){
-    var hHeight = headline.offsetHeight;
-    var sHeight = screen.height;
+function setupDefaultPage(){
+    var headline = document.getElementById("txt_headline");
+    var textfield = document.getElementById("txt_text");
+    var image = document.getElementById("info_img");
+    var image_container = document.getElementById("img_container");
+    var textfield_2 = document.getElementById("txt_text_2");
+    var image_2 = document.getElementById("info_img_2");
+    var image_2_container = document.getElementById("img_container_2");
+    var image_fullscreen = document.getElementById("info_img_fullscreen");
+    var image_fullscreen_container = document.getElementById("img_container_fullscreen");
+    var logo = document.getElementById("logo_div");
 
-    var pHeight = (hHeight / sHeight) * 100;
-    return (pHeight > 12);
+    // hide unused elements
+    image_fullscreen.src = '';
+    image_fullscreen_container.style.display = 'none';
+    textfield_2.style.display = 'none';
+    image_2.src = '';
+    image_2_container.style.display = 'none';
+
+    // show page elements
+    headline.style.display = 'inline';
+    textfield.style.display = 'inline';
+    textfield.style.width = '48%';
+    image_container.style.display = 'inline';
+    image_container.style.width = '48%';
+    logo.style.display = 'inline';
+
+    ids = new Array()
+    ids['txt'] = "txt_text";
+    ids['img'] = "info_img";
+    ids['img_container'] = "img_container";
+    return ids;
+}
+
+function setupDefaultPageFlipped(){
+    var headline = document.getElementById("txt_headline");
+    var textfield = document.getElementById("txt_text");
+    var image = document.getElementById("info_img");
+    var textfield_2 = document.getElementById("txt_text_2");
+    var image_2 = document.getElementById("info_img_2");
+    var image_container = document.getElementById("img_container");
+    var image_2_container = document.getElementById("img_container_2");
+    var image_fullscreen = document.getElementById("info_img_fullscreen");
+    var image_fullscreen_container = document.getElementById("img_container_fullscreen");
+    var logo = document.getElementById("logo_div");
+
+    // hide unused elements
+    image_fullscreen.src = '';
+    image_fullscreen_container.style.display = 'none';
+    textfield.style.display = 'none';
+    image.src = '';
+    image_container.style.display = 'none';
+
+    // show page elements
+    headline.style.display = 'inline';
+    textfield_2.style.display = 'inline';
+    textfield_2.style.width = '48%';
+    image_2_container.style.display = 'inline';
+    image_2_container.style.width = '48%';
+    logo.style.display = 'inline';
+
+    ids = new Array()
+    ids['txt'] = "txt_text_2";
+    ids['img'] = "info_img_2";
+    ids['img_container'] = "img_container_2";
+    return ids;
+}
+
+function setupTextOnlyPage(){
+    var headline = document.getElementById("txt_headline");
+    var textfield = document.getElementById("txt_text");
+    var image = document.getElementById("info_img");
+    var textfield_2 = document.getElementById("txt_text_2");
+    var image_2 = document.getElementById("info_img_2");
+    var image_container = document.getElementById("img_container");
+    var image_2_container = document.getElementById("img_container_2");
+    var image_fullscreen = document.getElementById("info_img_fullscreen");
+    var image_fullscreen_container = document.getElementById("img_container_fullscreen");
+    var logo = document.getElementById("logo_div");
+
+    // hide unused elements
+    image_fullscreen.src = '';
+    image_fullscreen_container.style.display = 'none';
+    image_2.src = '';
+    image_2_container.style.display = 'none';
+    image.src = '';
+    image_container.style.display = 'none';
+    textfield_2.style.display = 'none';
+
+    // show page elements
+    headline.style.display = 'inline';
+    textfield.style.display = 'inline';
+    textfield.style.width = '98%';
+    logo.style.display = 'inline';
+
+    ids = new Array()
+    ids['txt'] = "txt_text";
+    ids['img'] = "info_img";
+    ids['img_container'] = "img_container";
+    return ids;
+}
+
+function setupImageOnlyPage(){
+    var headline = document.getElementById("txt_headline");
+    var textfield = document.getElementById("txt_text");
+    var image = document.getElementById("info_img");
+    var textfield_2 = document.getElementById("txt_text_2");
+    var image_2 = document.getElementById("info_img_2");
+    var image_container = document.getElementById("img_container");
+    var image_2_container = document.getElementById("img_container_2");
+    var image_fullscreen = document.getElementById("info_img_fullscreen");
+    var image_fullscreen_container = document.getElementById("img_container_fullscreen");
+    var logo = document.getElementById("logo_div");
+
+    // hide unused elements
+    image_fullscreen.src = '';
+    image_fullscreen_container.style.display = 'none';
+    image.src = '';
+    image_container.style.display = 'none';
+    textfield.style.display = 'none';
+    textfield_2.style.display = 'none';
+    logo.style.display = 'inline';
+
+    // show page elements
+    headline.style.display = 'inline';
+    image_2_container.style.display = 'inline';
+    image_2_container.style.width = '98%';
+    
+    ids = new Array()
+    ids['txt'] = "txt_text";
+    ids['img'] = "info_img_2";
+    ids['img_container'] = "img_container_2";
+    return ids;
+}
+
+function setupDoubleImagePage(){
+    var headline = document.getElementById("txt_headline");
+    var textfield = document.getElementById("txt_text");
+    var image = document.getElementById("info_img");
+    var textfield_2 = document.getElementById("txt_text_2");
+    var image_2 = document.getElementById("info_img_2");
+    var image_container = document.getElementById("img_container");
+    var image_2_container = document.getElementById("img_container_2");
+    var image_fullscreen = document.getElementById("info_img_fullscreen");
+    var image_fullscreen_container = document.getElementById("img_container_fullscreen");
+    var logo = document.getElementById("logo_div");
+
+    // hide unused elements
+    image_fullscreen.src = '';
+    image_fullscreen_container.style.display = 'none';
+    textfield.style.display = 'none';
+    textfield_2.style.display = 'none';
+
+    // show page elements
+    headline.style.display = 'inline';
+    image_container.style.display = 'inline';
+    image_container.style.width = '48%';
+    image_2_container.style.display = 'inline';
+    image_2_container.style.width = '48%';
+    logo.style.display = 'inline';
+
+    // info_img is right and info_img_2 left --> fix order with order of IDs
+    ids = new Array()
+    ids['txt'] = "txt_text";
+    ids['img'] = ["info_img_2", "info_img"];
+    ids['img_container'] = ["img_container_2", "img_container"];
+    return ids;
+}
+
+function setupFullscreenImagePage(){
+    var headline = document.getElementById("txt_headline");
+    var textfield = document.getElementById("txt_text");
+    var image = document.getElementById("info_img");
+    var textfield_2 = document.getElementById("txt_text_2");
+    var image_2 = document.getElementById("info_img_2");
+    var image_container = document.getElementById("img_container");
+    var image_2_container = document.getElementById("img_container_2");
+    var image_fullscreen = document.getElementById("info_img_fullscreen");
+    var image_fullscreen_container = document.getElementById("img_container_fullscreen");
+    var logo = document.getElementById("logo_div");
+
+    // hide unused elements
+    image_2.src = '';
+    image_2_container.style.display = 'none';
+    image.src = '';
+    image_container.style.display = 'none';
+    textfield.style.display = 'none';
+    textfield_2.style.display = 'none';
+    headline.style.display = 'none';
+    logo.style.display = 'none';
+
+    // show page elements
+    image_fullscreen_container.style.display = 'inline';
+
+    ids = new Array()
+    ids['txt'] = "txt_text";
+    ids['img'] = "info_img_fullscreen";
+    ids['img_container'] = "img_container_fullscreen";
+    return ids;
 }
 
 function pageDuration(pageTxts){
@@ -157,26 +373,117 @@ function pageDuration(pageTxts){
     return duration;
 }
 
-function changeImage(images, index, duration){
-    if(index < images.length){
-        var img = images[index];
-        var image_div = document.getElementById("info_img");
-        image_div.src = img;
-        index++;
+function changeImage(images, index, duration, targetID, targetContainer, style, imageMode){
+    if(style == 2){
+        var image1 = document.getElementById(targetID[0]);
+        var image1Container = document.getElementById(targetContainer[0]);
+        var image2 = document.getElementById(targetID[1]);
+        var image2Container = document.getElementById(targetContainer[1]);
+        var targetIndex = index * 2;
+        if(targetIndex < images.length-1){
+            var img1 = images[targetIndex];
+            var img2 = images[targetIndex+1];
+            index++;
 
-        // only set timeout for image change if further images to show
+            image1.src = '';
+            image2.src = '';
+            image1.src = img1;
+            image2.src = img2;
+
+            image1.onload = function(e){
+                sizeImage(targetID[0], targetContainer[0], imageMode);
+            }
+
+            image2.onload = function(e){
+                sizeImage(targetID[1], targetContainer[1], imageMode);
+            }
+
+            // only set timeout if two more images are left to show
+            var newTargetIndex = index * 2;
+            if(newTargetIndex < images.length-1){
+                setTimeout(function(){
+                    changeImage(images, index, duration, targetID, targetContainer, style, imageMode)
+                }, duration);
+            }
+        }
+    }else{
         if(index < images.length){
-            setTimeout(function(){
-                changeImage(images, index, duration);
-            }, duration);
+            var img = images[index];
+            var image = document.getElementById(targetID);
+            index++;
+
+            // clear previous image and set new
+            image.src = '';
+            image.src = img;
+
+            image.onload = function(e){
+                sizeImage(targetID, targetContainer, imageMode);
+            }
+
+            // only set timeout for image change if further images to show
+            if(index < images.length){
+                setTimeout(function(){
+                    changeImage(images, index, duration, targetID, targetContainer, style, imageMode);
+                }, duration);
+            }
         }
     }
 }
 
-function changeText(texts, index, duration){
+function sizeImage(targetID, targetContainer, mode){
+    // default image sizing mode is fit if not set
+    mode = mode || 'image_crop';
+    var image = document.getElementById(targetID);
+    // reset margin and size properties
+    image.style.marginTop = '0px';
+    image.style.marginLeft = '0px';
+    image.style.height = "100%";
+    image.style.width = "auto";
+
+    // get size and ratio of image and container
+    var w = $( "#"+String(targetID) ).width();
+    var h = $( "#"+String(targetID) ).height();
+    var cW = $( "#"+String(targetContainer) ).width();
+    var cH = $( "#"+String(targetContainer) ).height();
+
+    var imgRatio = w/h;
+    var conRatio = cW/cH;
+
+    if(mode == "image_fit"){
+        // fit image in container preserving aspect ratio
+        if(imgRatio < conRatio){
+            image.style.height = "100%";
+            image.style.width = "auto";
+        }else{
+            image.style.width = "100%";
+            image.style.height = "auto";
+            // center image vertically in container
+            h = $( "#"+String(targetID) ).height();
+            image.style.height = h + 'px';
+            var offset = (cH - h) / 2;
+            image.style.marginTop = offset + 'px';
+        }
+    }else{ // image crop
+        // fill image container cropping and centering image preserving aspect ratio
+        if(imgRatio < conRatio){
+            image.style.width = "100%";
+            image.style.height = "auto";
+            // center image vertically in container
+            h = $( "#"+String(targetID) ).height();
+            image.style.height = h + 'px';
+            var offset = (h - cH) / 2;
+            image.style.marginTop = '-' + offset + 'px';
+        }else{
+            image.style.height = "100%";
+            image.style.width = "auto";
+        }
+    }
+}
+
+function changeText(texts, index, duration, targetID){
     if(index < texts.length){
         var txt = texts[index];
-        var txt_div = document.getElementById("txt_text");
+        var txt_div = document.getElementById(targetID);
         txt_div.innerHTML = txt;
         index++;
 
@@ -187,7 +494,7 @@ function changeText(texts, index, duration){
         // only set timeout for text change if further texts to show
         if(index < texts.length){
             setTimeout(function(){
-                changeText(texts, index, duration);
+                changeText(texts, index, duration, targetID);
             }, duration);
         }
     }
@@ -195,6 +502,7 @@ function changeText(texts, index, duration){
 
 function initTextSize(){
     elements = $('.text');
+    elements.push($('.text_2'));
     if (elements.length < 0) {
         return;
     }
@@ -203,11 +511,31 @@ function initTextSize(){
         el = elements[_i];
         $(el).css("font-size", "60px")
     }
+
+    elements = $('.headline');
+    if (elements.length < 0) {
+        return;
+    }
+    _results = [];
+    for (_i = 0, _len = elements.length; _i < _len; _i++) {
+        el = elements[_i];
+        $(el).css("font-size", "4em")
+    }
 }
 
 function resize(){
-    var el, elements, _i, _len, _results;
+    var elements;
+    elements = $('.headline');
+    resizeElements(elements);
     elements = $('.text');
+    resizeElements(elements);
+    elements = $('.text_2');
+    resizeElements(elements);
+    return true;
+}
+
+function resizeElements(elements){
+    var el, _i, _len, _results;
     if (elements.length < 0) {
         return;
     }
@@ -246,4 +574,65 @@ function loadPages(){
     var list = httpGet('infoscreen.php?T=PAGES');
     pages = list.split(";");
     numPages = pages.length;
+}
+
+function updateBackground(customBG){
+    if(customBG){
+        background = SITE_ROOT + 'pages/page' + pageNr + '/custom_bg.jpg'
+    }else{
+        background = SITE_ROOT + 'bg.jpg'
+    }
+    var bgImg = document.getElementById("bg_img");
+    bgImg.src = background;    
+}
+
+function updateTicker(ticker_txt, ticker_mov, enable_ticker){
+    ticker_enabled = enable_ticker
+    if(enable_ticker){
+        document.getElementById("ticker").style.display = 'inline'
+        if(ticker_txt != null && ticker_text != ticker_txt){
+            // message changed
+            ticker_text = ticker_txt;
+        }
+
+        if(ticker_mov != null){
+            var move = (!ticker_moving && ticker_mov);
+            ticker_moving = ticker_mov;
+            if(move){
+                // reset ticker position and trigger movement
+                tickerPos = 1850;
+                moveText();
+            }
+        }
+    }else{
+        document.getElementById("ticker").style.display = 'none'
+    }
+}
+
+function moveText(){
+    // document.getElementById("ticker_txt").style.visibility="visible";
+    var ticker = document.getElementById("ticker_txt");
+    ticker.innerHTML = ticker_text;
+    var tickerStyle = ticker.style;
+
+    tickerW = $( "#ticker_txt").width();
+
+    if(tickerPos > (tickerW * -1)){
+        tickerPos-=1;
+    } else {
+        tickerPos=1850;
+    }
+    tickerStyle.left = tickerPos+'px';
+    tickerLoop();
+}
+
+function tickerLoop() {
+    if(ticker_moving){
+        tickerInt = setTimeout("moveText()",20);
+    }else{
+        // stop ticker
+        tickerPos = 20;
+        document.getElementById("ticker_txt").style.left = tickerPos+'px';
+    }
+
 }

@@ -63,5 +63,17 @@ strings = {
 	"msg_delete_img": u"Ausgewähltes Bild von der Seite löschen?",
 	"adding_images": u"Füge Bilder zu Ihrem Kiosk hinzu...",
 	"delete_all": u"Alle Bilder löschen",
-	"msg_delete_all": "Alle Bilder der Seite löschen?"
+	"msg_delete_all": "Alle Bilder der Seite löschen?",
+	# KIOSK PAGES PANEL
+	"pages": "Kiosk Seiten",
+	"add_page": u"Seite hinzufügen",
+	"setup": "Seiten Einstellungen",
+	"ticker_setup": "Lauftext",
+	"custom_ticker_text": u"Eigener Text für Seite",
+	"ticker_enabled": "Lauftext aktivieren",
+	"ticker_moving": "Lauftext bewegt",
+	"site_style": "Seiten Layout",
+	"custom_bg": "Eigener Hintergrund",
+	"custom_bg_enabled": "Eigenen Hintergrund aktivieren",
+	"custom_bg_select": u"Eigenen Hintergrund auswählen"
 }

@@ -6,6 +6,10 @@ switch($target){
     case 'PAGES':
         $data = pages();
     break;
+    case 'STYLE':
+        $page = $_REQUEST['PAGE'];
+        $data = style($page);
+    break;
     case 'IMG':
         $page = $_REQUEST['PAGE'];
         $data = images($page);
@@ -47,6 +51,12 @@ function pages(){
                     //array_push($files, $filename);
                     $cnt = $cnt + 1;
     }
+    return $result;
+}
+
+function style($folder){
+    $dir="./pages/".$folder;
+    $result = file_get_contents($dir . "/style.txt");
     return $result;
 }
 

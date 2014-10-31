@@ -1,7 +1,7 @@
 import packages.rmutil as util
 from packages.rmgui import *
 from packages.lang.Localizer import *
-import os, sys, platform, ast, time, threading, shutil, copy, zipfile
+import os, sys, platform, ast, time, threading, shutil, copy, zipfile, json
 from os.path import expanduser
 from PIL import Image
 
@@ -403,6 +403,10 @@ class KioskMainPanel(wx.Panel):
                 os.mkdir(tmpPage)
                 # page headline
                 shutil.copyfile(pageDir + 'headline.txt', tmpPage + 'headline.txt')
+                # style file
+                shutil.copyfile(pageDir + 'style.txt', tmpPage + 'style.txt')
+                if os.path.isfile(pageDir + 'custom_bg.jpg'):
+                    shutil.copyfile(pageDir + 'custom_bg.jpg', tmpPage + 'custom_bg.jpg')
                 # page texts and images
                 for file in os.listdir(pageDir):
                     if file.startswith("Text") or file.startswith("image"):
@@ -417,6 +421,8 @@ class KioskMainPanel(wx.Panel):
                     images = []
                     txts = []
                     title = ""
+                    styleJSON = None
+                    customBG = None
                     for file in os.listdir(pageDir):
                         if file.startswith("Text"):
                             # page text
@@ -429,7 +435,12 @@ class KioskMainPanel(wx.Panel):
                             # page headline
                             with open(pageDir + file) as f:
                                 title = f.read().decode("utf-8")
-                    self.parent.AddKioskPage(title, txts, images)
+                        elif file == "style.txt":
+                            with open(pageDir + file) as f:
+                                styleJSON = json.load(f)
+                        elif file == "custom_bg.jpg":
+                            customBG = pageDir + file
+                    self.parent.AddKioskPage(title, txts, images,customBG,styleJSON)
             # set background and logo preview if applicable
             if not self.bg == None:
                 self._SetImagePreview(self.bg)
@@ -445,6 +456,7 @@ class KioskMainPanel(wx.Panel):
         self.mainSizer.Layout()
         self.parent.Show()
         self.parent.modified = True
+        self.parent.closed = False
         wx.CallAfter(Publisher.unsubscribe, self.LoadFromUSB, 'usb_connected')
         wx.CallAfter(Publisher.unsubscribe, self.LoadFromUSB, 'usb_search_timeout')
 
@@ -517,9 +529,9 @@ class KioskMainPanel(wx.Panel):
                     streamFile.write(self.streamAddr)
 
             # copy data for single pages to page directories in kiosk directory on USB
-            for i in range(1,self.parent.GetPageCount() - 1):
-                page = self.parent.GetPage(i)
-                pageDir = usbPath + '/page' + str(i) + '/'
+            cnt = 1
+            for page in self.parent.pages:
+                pageDir = usbPath + '/page' + str(cnt) + '/'
                 os.mkdir(pageDir)
                 # page headline
                 fileName = pageDir + "headline.txt"
@@ -545,6 +557,16 @@ class KioskMainPanel(wx.Panel):
                     shutil.copyfile(imgs[j], dstFile)
                     numFiles += 1
                     self.prgDialog.Update(numFiles, os.path.basename(dstFile))
+                # write style file
+                styleJSON = page.GetStyleJSONDefinition()
+                with open(pageDir + 'style.txt', 'w') as f:
+                    f.write(styleJSON)
+                # check for custom background
+                if page.customBgChk.IsChecked() and not page.customBG == None:
+                    srcFile = page.customBG
+                    dstFile = pageDir + 'custom_bg.jpg'
+                    shutil.copyfile(srcFile, dstFile)
+                cnt += 1
             if numFiles < totalFiles:
                 self.prgDialog.Update(totalFiles)
             if HOST_SYS == HOST_WIN:
@@ -619,9 +641,9 @@ class KioskMainPanel(wx.Panel):
                 streamFile.write(self.streamAddr)
 
         # copy data for single pages to page directories in kiosk directory on USB
-        for i in range(1,self.parent.GetPageCount() - 1):
-            page = self.parent.GetPage(i)
-            pageDir = tmpPath + '/page' + str(i) + '/'
+        cnt = 1
+        for page in self.parent.pages:
+            pageDir = tmpPath + '/page' + str(cnt) + '/'
             os.mkdir(pageDir)
             # page headline
             fileName = pageDir + "headline.txt"
@@ -643,6 +665,16 @@ class KioskMainPanel(wx.Panel):
                     ending = ".png"
                 dstFile = pageDir + '/image' + str(j) + ending
                 shutil.copyfile(imgs[j], dstFile)
+            # write style file
+            styleJSON = page.GetStyleJSONDefinition()
+            with open(pageDir + 'style.txt', 'w') as f:
+                f.write(styleJSON)
+            # check for custom background
+            if page.customBgChk.IsChecked() and not page.customBG == None:
+                srcFile = page.customBG
+                dstFile = pageDir + 'custom_bg.jpg'
+                shutil.copyfile(srcFile, dstFile)
+            cnt += 1
         self.make_zipfile(path, tmpPath)
         prgDlg.Update(100)
         if HOST_SYS == HOST_WIN:
@@ -660,6 +692,8 @@ class KioskMainPanel(wx.Panel):
         prgDialog.Update(100)
         if HOST_SYS == HOST_WIN:
             prgDialog.Destroy()
+        if len(self.parent.pages) > 0:
+            self.parent.configPage.pagesList.Select(0)
 
     def ImportPages(self, path):
         self.parent.Hide()
@@ -688,6 +722,8 @@ class KioskMainPanel(wx.Panel):
                 pageDir = tmpPath + dir + '/'
                 images = []
                 txts = []
+                customBG = None
+                styleJSON = None
                 title = ""
                 for file in os.listdir(pageDir):
                     if file.startswith("Text"):
@@ -701,7 +737,14 @@ class KioskMainPanel(wx.Panel):
                         # page headline
                         with open(pageDir + file) as f:
                             title = f.read().decode("utf-8")
-                self.parent.AddKioskPage(title, txts, images)
+                    elif file == "custom_bg.jpg":
+                        # custom background file
+                        customBG = pageDir + file
+                    elif file == "style.txt":
+                        with open(pageDir + file) as f:
+                            styleJSON = json.load(f)
+
+                self.parent.AddKioskPage(title, txts, images, customBG, styleJSON)
             elif dir.startswith("mp3") and include_main:
                 self.musicRadioBox.SetSelection(1)
                 mp3Dir = tmpPath + 'mp3/'

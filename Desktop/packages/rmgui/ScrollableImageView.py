@@ -149,9 +149,10 @@ class ScrollableImageView(scrolled.ScrolledPanel):
         self.mainSizer.Layout()
         self.FitInside()
 
-    def AddImage(self,imagePath):
+    def AddImage(self,imagePath,addToList=True):
         if imagePath.endswith((SUPPORTED_IMAGE_EXTENSIONS)):
-            self.images.append(imagePath)
+            if addToList:
+                self.images.append(imagePath)
             self.UpdateImages()
             self.dataSource.ImageAdded(imagePath)
 

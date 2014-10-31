@@ -4,7 +4,7 @@ from packages.rmgui import *
 import TextEditDialog as txtDlg
 import ScrollableImageView as siv
 from packages.lang.Localizer import *
-import os, sys, platform, ast, time, threading, shutil, copy
+import os, sys, platform, ast, time, threading, shutil, copy, json
 
 import webbrowser
 import wx
@@ -21,7 +21,7 @@ BASE_PATH = None
 # RASP MEDIA ALL PLAYERS PANEL #################################################
 ################################################################################
 class KioskEditorPanel(wx.Panel):
-    def __init__(self,parent,id,title,index,host_sys,texts=[],images=[],base_path=""):
+    def __init__(self,parent,id,title,index,host_sys,texts=[],images=[],base_path="",customBG=None,styleJSON=None):
         #wx.Panel.__init__(self,parent,id,title)
         wx.Panel.__init__(self,parent,-1)
         global HOST_SYS, BASE_PATH
@@ -32,9 +32,11 @@ class KioskEditorPanel(wx.Panel):
         self.index = index
         self.texts = texts
         self.images = images
+        self.customBG = customBG
         self.imgPath = self.DefaultPath()
+        self.style = 0
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        self.Initialize()
+        self.Initialize(styleJSON)
 
 
     def DefaultPath(self):
@@ -73,8 +75,7 @@ class KioskEditorPanel(wx.Panel):
             self.pageDataLoading = True
             self.LoadData()
 
-    def Initialize(self):
-
+    def Initialize(self,styleJSON):
         self.mainBox = wx.StaticBox(self,-1,tr("txt_img_box"))
         mainBoxSizer = wx.StaticBoxSizer(self.mainBox, wx.VERTICAL)
 
@@ -82,12 +83,12 @@ class KioskEditorPanel(wx.Panel):
         nameLabel = wx.StaticText(self,-1,label=tr("page_headline"))
         self.nameCtrl = wx.TextCtrl(self,-1,value=self.title,size=(350,22))
         # text definition
-        addText = wx.Button(self.mainBox,-1,label=tr("add_text"))
-        addText.SetName('add_txt')
-        self.textList = wx.ListCtrl(self.mainBox,-1,size=(200,350),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.addText = wx.Button(self.mainBox,-1,label=tr("add_text"))
+        self.addText.SetName('add_txt')
+        self.textList = wx.ListCtrl(self.mainBox,-1,size=(150,385),style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         self.textList.SetName('txt_list')
         self.textList.Show(True)
-        self.textList.InsertColumn(0,tr("added_texts"), width = 180)
+        self.textList.InsertColumn(0,tr("added_texts"), width = 140)
         cnt = 1
         for txt in self.texts:
             label = "Text " + str(cnt)
@@ -95,33 +96,90 @@ class KioskEditorPanel(wx.Panel):
             cnt += 1;
 
         # image definition
-        addImg = wx.Button(self.mainBox,-1,label=tr("add_image"))
+        self.addImg = wx.Button(self.mainBox,-1,label=tr("add_image"))
         self.delAll = wx.Button(self.mainBox, -1, label=tr("delete_all"))
         self.delAll.Disable()
-        self.imgPreview = siv.ScrollableImageView(self.mainBox,-1,size=(300,350),images=self.images,dataSource=self)
-        #for img in self.images:
-        #    self.imgPreview.AddImage(img)
+        self.imgPreview = siv.ScrollableImageView(self.mainBox,-1,size=(260,385),images=self.images,dataSource=self)
+        for img in self.images:
+            self.imgPreview.AddImage(img,addToList=False)
+
+        # ticker setup
+        tickerBox = wx.StaticBox(self,-1,tr("ticker_setup"))
+        tickerBoxSizer = wx.StaticBoxSizer(tickerBox, wx.VERTICAL)
+        tickerLabel = wx.StaticText(tickerBox,-1,label=tr("custom_ticker_text")+":")
+        self.tickerTxtCtrl = wx.TextCtrl(tickerBox,-1,size=(250,22))
+        self.tickerEnabledChk = wx.CheckBox(tickerBox,-1,label=tr("ticker_enabled"))
+        self.tickerMovingChk = wx.CheckBox(tickerBox,-1,label=tr("ticker_moving"))
+        self.tickerEnabledChk.SetValue(True)
+        self.tickerMovingChk.SetValue(True)
+        tickerTxtSizer = wx.BoxSizer()
+
+        tickerTxtSizer.Add(tickerLabel)
+        tickerTxtSizer.Add(self.tickerTxtCtrl)
+
+        tickerBoxSizer.Add(tickerTxtSizer)
+        tickerBoxSizer.Add(self.tickerEnabledChk)
+        tickerBoxSizer.Add(self.tickerMovingChk)
+
+        # style setup
+        styleBox = wx.StaticBox(self,-1,tr("site_style"))
+        styleBoxSizer = wx.StaticBoxSizer(styleBox)
+        emptyImg = wx.EmptyImage(250,200)
+        self.prevStyle = wx.Button(styleBox,-1,label="<",size=(25,25))
+        self.stylePreview = wx.StaticBitmap(styleBox, wx.ID_ANY, wx.BitmapFromImage(emptyImg))
+        self.nextStyle = wx.Button(styleBox,-1,label=">",size=(25,25))
+        self.style = 0
+        self.SetStylePreview()
+
+        styleBoxSizer.Add(self.prevStyle,flag=wx.ALIGN_CENTER_VERTICAL)
+        styleBoxSizer.Add(self.stylePreview,flag=wx.ALIGN_CENTER_VERTICAL)
+        styleBoxSizer.Add(self.nextStyle,flag=wx.ALIGN_CENTER_VERTICAL)
+
+        # custom page background setup
+        bgBox = wx.StaticBox(self,-1,tr("custom_bg"))
+        self.bgBoxSizer = wx.StaticBoxSizer(bgBox)
+        bgBoxLeftSizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.customBgChk = wx.CheckBox(bgBox,-1,label=tr("custom_bg_enabled"))
+        self.selectCustomBg = wx.Button(bgBox,-1,label=tr("custom_bg_select"))
+        emptyBg = wx.EmptyImage(160,110)
+        self.customBgCtrl = wx.StaticBitmap(bgBox,wx.ID_ANY, wx.BitmapFromImage(emptyBg))
+        if not self.customBG == None:
+            self.__SetBGPreview(self.customBG)
+
+        bgBoxLeftSizer.Add(self.customBgChk)
+        bgBoxLeftSizer.Add(self.selectCustomBg)
+
+        self.bgBoxSizer.Add(bgBoxLeftSizer)
+        self.bgBoxSizer.Add(self.customBgCtrl,flag=wx.LEFT|wx.RIGHT, border=10)
 
         # preview Button
         preview = wx.Button(self,-1,label=tr("preview"))
 
         # bind elements
         self.nameCtrl.Bind(wx.EVT_TEXT, self.UpdatePageName)
-        addText.Bind(wx.EVT_BUTTON, self.ShowTextEdit)
+        self.addText.Bind(wx.EVT_BUTTON, self.ShowTextEdit)
         self.textList.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.ShowTextEdit)
         self.textList.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.TextItemRightClicked)
-        addImg.Bind(wx.EVT_BUTTON, self.ShowImageSelection)
+        self.addImg.Bind(wx.EVT_BUTTON, self.ShowImageSelection)
         self.delAll.Bind(wx.EVT_BUTTON, self.imgPreview.ClearImageView)
         preview.Bind(wx.EVT_BUTTON, self.PreviewClicked)
+
+        self.nextStyle.Bind(wx.EVT_BUTTON, self.NextStyle)
+        self.prevStyle.Bind(wx.EVT_BUTTON, self.PrevStyle)
+
+        self.customBgChk.Bind(wx.EVT_CHECKBOX, self.CustomBgEnabledToggled)
+        self.CustomBgEnabledToggled(None)
+        self.selectCustomBg.Bind(wx.EVT_BUTTON, self.ShowBackgroundSelection)
 
         # create sizers, add content and add to main sizer
         contentSizer = wx.BoxSizer()
         txtSizer = wx.BoxSizer(wx.VERTICAL)
-        txtSizer.Add(addText,flag=wx.TOP|wx.LEFT,border=5)
+        txtSizer.Add(self.addText,flag=wx.TOP|wx.LEFT,border=5)
         txtSizer.Add(self.textList,flag=wx.TOP|wx.LEFT,border=5)
         imgSizer = wx.BoxSizer(wx.VERTICAL)
         imgBtnSizer = wx.BoxSizer()
-        imgBtnSizer.Add(addImg)
+        imgBtnSizer.Add(self.addImg)
         imgBtnSizer.Add(self.delAll)
         imgSizer.Add(imgBtnSizer, flag=wx.TOP|wx.LEFT,border=5)
         imgSizer.Add(self.imgPreview,flag=wx.TOP|wx.LEFT,border=5)
@@ -139,22 +197,174 @@ class KioskEditorPanel(wx.Panel):
         mainBoxSizer.Add(contentSizer,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.RIGHT|wx.BOTTOM, border=10)
         #mainBoxSizer.Add(preview,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
 
-        self.mainSizer.Add(headlineSizer,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.TOP, border = 10)
-        #self.mainSizer.Add(contentSizer,flag=wx.TOP|wx.ALIGN_CENTER_HORIZONTAL,border=20)
-        self.mainSizer.Add(mainBoxSizer,flag=wx.TOP|wx.ALIGN_CENTER_HORIZONTAL,border=20)
+        mainContentSizer = wx.BoxSizer()
+        leftContentSizer = wx.BoxSizer(wx.VERTICAL)
+        rightContentSizer = wx.BoxSizer(wx.VERTICAL)
+
+        leftContentSizer.Add(mainBoxSizer,flag=wx.TOP|wx.ALIGN_CENTER_HORIZONTAL,border=20)
+
+        rightContentSizer.Add(tickerBoxSizer,flag=wx.TOP,border=20)
+        rightContentSizer.Add(styleBoxSizer)
+        rightContentSizer.Add(self.bgBoxSizer)
+
+        mainContentSizer.Add(leftContentSizer)
+        mainContentSizer.Add(rightContentSizer)
+
+        self.mainSizer.Add(headlineSizer,flag=wx.TOP, border = 10)
+        self.mainSizer.Add(mainContentSizer)
         self.mainSizer.Add(preview,flag=wx.ALIGN_CENTER_HORIZONTAL|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
+
+        # load style info from style JSON if available
+        if not styleJSON == None:
+            if 'ticker_text' in styleJSON:
+                self.tickerTxtCtrl.SetValue(str(styleJSON['ticker_text']))
+            if 'ticker_enabled' in styleJSON:
+                self.tickerEnabledChk.SetValue(int(styleJSON['ticker_enabled']))
+            if 'ticker_moving' in styleJSON:
+                self.tickerMovingChk.SetValue(int(styleJSON['ticker_moving']))
+            if 'custom_bg' in styleJSON:
+                self.customBgChk.SetValue(int(styleJSON['custom_bg']))
+            if 'style' in styleJSON:
+                self.style = int(styleJSON['style'])
+                self.SetStylePreview()
+                self.SetUIForStyle()
 
         self.SetSizerAndFit(self.mainSizer)
         #self.LayoutAndFit()
         self.Show(True)
 
+    def GetStyleJSONDefinition(self):
+        # {"style": 1, "img_mode": "image_fit", "ticker_text": "grafenwoerth.senecura.at", "ticker_moving": "0", "custom_bg": "page1/nature.jpg"}
+        style = {}
+        style['style'] = self.style
+        if len(self.tickerTxtCtrl.GetValue()) > 0:
+            style['ticker_text'] = self.tickerTxtCtrl.GetValue()
+        if self.tickerEnabledChk.IsChecked():
+            style['ticker_enabled'] = "1"
+        else:
+            style['ticker_enabled'] = "0"
+        if self.tickerMovingChk.IsChecked():
+            style['ticker_moving'] = "1"
+        else:
+            style['ticker_moving'] = "0"
+        if self.customBgChk.IsChecked() and not self.customBG == None:
+            style['custom_bg'] = "1"
+        else:
+            style['custom_bg'] = "0"
+        return json.dumps(style)
+
+    def NextStyle(self, event):
+        self.style += 1
+        self.SetStylePreview()
+        self.SetUIForStyle()
+
+    def PrevStyle(self, event):
+        self.style -= 1
+        self.SetStylePreview()
+        self.SetUIForStyle()
+
+    def SetUIForStyle(self):
+        if self.style == 0:
+            self.ToggleTextInputs(True)
+            self.addImg.Enable()
+        elif self.style == 1:
+            self.ToggleTextInputs(True)
+            self.addImg.Enable()
+        elif self.style == 2:
+            # double image style
+            self.ToggleTextInputs(False)
+            self.addImg.Enable()
+        elif self.style == 3:
+            # text only style
+            self.addImg.Disable()
+            self.ToggleTextInputs(True)
+        elif self.style == 4:
+            # single image style
+            self.addImg.Enable()
+            self.ToggleTextInputs(False)
+        elif self.style == 5:
+            # single image fullscreen style
+            self.addImg.Enable()
+            self.ToggleTextInputs(False)
+            pass
+
+    def ToggleTextInputs(self, enabled):
+        if enabled:
+            self.addText.Enable()
+            self.textList.Enable()
+        else:
+            self.addText.Disable()
+            self.textList.Disable()
+
+    def SetStylePreview(self):
+        if self.style == 5:
+            self.nextStyle.Disable()
+        elif self.style == 0:
+            self.prevStyle.Disable()
+        else:
+            self.prevStyle.Enable()
+            self.nextStyle.Enable()
+
+        path = resource_path("img/style"+str(self.style)+".png")
+        img = wx.Image(path)
+        # scale the image, preserving the aspect ratio
+        W = img.GetWidth()
+        H = img.GetHeight()
+
+        maxSize = 340
+
+        if W > H:
+            NewW = maxSize
+            NewH = maxSize * H / W
+        else:
+            NewH = maxSize
+            NewW = maxSize * W / H
+        img = img.Scale(NewW,NewH,quality=wx.IMAGE_QUALITY_HIGH)
+
+        self.stylePreview.SetBitmap(wx.BitmapFromImage(img))
+
+    def CustomBgEnabledToggled(self, event):
+        if self.customBgChk.IsChecked():
+            self.selectCustomBg.Enable()
+            self.customBgCtrl.Enable()
+        else:
+            self.selectCustomBg.Disable()
+            self.customBgCtrl.Disable()
+
+    def __SetBGPreview(self, imagePath):
+        img = wx.Image(imagePath)
+        # scale the image, preserving the aspect ratio
+        W = img.GetWidth()
+        H = img.GetHeight()
+
+        NewW = 190
+        NewH = 190 * H / W
+        
+        img = img.Scale(NewW,NewH,quality=wx.IMAGE_QUALITY_HIGH)
+
+        self.customBgCtrl.SetBitmap(wx.BitmapFromImage(img))
+        self.mainSizer.Layout()
+
+    def ShowBackgroundSelection(self, event=None):
+        dlg = imagebrowser.ImageDialog(None,self.imgPath)
+
+        if dlg.ShowModal() == wx.ID_OK:
+            file = dlg.GetFile()
+            self.__SetBGPreview(file)
+            self.customBG = file
+            # save image path of previed image
+            head, tail = os.path.split(file)
+            self.imgPath = head
+        if HOST_SYS == HOST_WIN:
+            dlg.Destroy()
 
     def LayoutAndFit(self):
         self.mainSizer.Layout()
         self.Fit()
         self.parent.Fit()
         self.parent.parent.Fit()
-        self.parent.parent.Center()
+        self.parent.parent.parent.Fit()
+        #self.parent.parent.parent.Center()
 
     def UpdatePageName(self, event=None):
         oldName = self.title
