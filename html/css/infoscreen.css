@@ -70,7 +70,7 @@ html, body {
     width: 48%;
     height: 64%;
     right: 0%;
-    margin-top: 10%;
+    margin-top: 13%;
     margin-right: 1%;
     border-style: solid;
     border-width: 5px;
@@ -87,7 +87,7 @@ html, body {
     width: 48%;
     height: 64%;
     overflow: hidden;
-    margin-top: 10%;
+    margin-top: 13%;
     margin-left: 1%;
     border-style: solid;
     border-width: 5px;
@@ -177,7 +177,7 @@ html, body {
     height: 64%;
     padding: 13px;
     overflow: hidden;
-    margin-top: 10%;
+    margin-top: 13%;
     margin-left: 1%;
     font-size: 60px;
     font-weight: bolder;
@@ -200,7 +200,7 @@ html, body {
     height: 64%;
     padding: 13px;
     right: 0%;
-    margin-top: 10%;
+    margin-top: 13%;
     margin-right: 1%;
     font-size: 60px;
     font-weight: bolder;

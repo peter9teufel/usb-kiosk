@@ -76,7 +76,7 @@ def USBPagesValid():
         # check if at least one image and a txt with info text is present
         for file in os.listdir(USB_KIOSK_PATH + '/' + page):
             if not file.startswith("."):
-                WriteLog("USB - kiosk | page: %s File: %s" % (page,file))
+                #WriteLog("USB - kiosk | page: %s File: %s" % (page,file))
                 if file.endswith((IMAGE_EXTENSION)):
                     jpgPresent = True
                 elif file.endswith((TEXT_EXTENSION)):
@@ -92,12 +92,10 @@ def USBPagesValid():
 
 
 def UpdateKioskFiles():
-    
     # backup current files from player on USB stick
-    if not os.path.isdir(USB_BACKUP_PATH):
-        os.mkdir(USB_BACKUP_PATH, 755)
-    BackupKioskFilesFromPlayer(USB_BACKUP_PATH)
-    
+    if os.path.isdir(USB_BACKUP_PATH):
+        WriteLog("Found backup directory, backing up current files from player to your USB drive...")
+        BackupKioskFilesFromPlayer(USB_BACKUP_PATH)
 
     # remove old files from player
     DeleteAllFilesInDir(KIOSK_PAGES_PATH)
@@ -127,8 +125,10 @@ def UpdateKioskFiles():
                         # fileName, basePath, destPath
                         OptimizeAndCopyImage(file, USB_KIOSK_PATH + '/' + page, KIOSK_PAGES_PATH + '/' + page + '/img')
                     elif file == "custom_bg.jpg":
+                        WriteLog("Optimizing and copying custom background...")
                         _optimizeCrop(file, USB_KIOSK_PATH + '/' + page, KIOSK_PAGES_PATH + '/' + page, 1920, 1080)
                 elif not file.startswith(".") and file.endswith((TEXT_EXTENSION)):
+                        WriteLog("Copying text file %s" % file)
                     if file.startswith("Text") or file == "headline.txt":
                         dstFile = KIOSK_PAGES_PATH + '/' + page + '/txt/' + file
                         shutil.copyfile(srcFile, dstFile)
@@ -205,7 +205,7 @@ def CheckForBackgroundUpdate():
                 WriteLog("New background found on USB drive, copying to kiosk player")
                 _optimizeCrop(file, USB_KIOSK_PATH, HTML_ROOT_PATH, 1920, 1080)
 
-def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1920, maxH=1080, minW=400, minH=400):
+def OptimizeAndCopyImage(fileName, basePath, destPath, maxW=1280, maxH=720, minW=400, minH=400):
     filePath = basePath + '/' + fileName
     destFilePath = destPath + '/' + fileName
     if filePath.endswith((IMAGE_EXTENSION)):
@@ -345,8 +345,9 @@ def StartupRoutine():
             UpdateKioskFiles()
         else:
             WriteLog("No kiosk files found on USB device")
-            WriteLog("Backing up current files from player on USB device")
-            BackupKioskFilesFromPlayer(USB_KIOSK_PATH)
+            if os.path.isdir(USB_BACKUP_PATH):
+                WriteLog("Backing up current files from player on USB device")
+                BackupKioskFilesFromPlayer(USB_KIOSK_PATH)
 
         # check and update logo and background
         CheckForLogoUpdate()
