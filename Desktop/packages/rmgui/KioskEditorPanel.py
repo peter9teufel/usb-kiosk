@@ -229,7 +229,7 @@ class KioskEditorPanel(wx.Panel):
                 self.SetStylePreview()
                 self.SetUIForStyle()
 
-        self.SetSizerAndFit(self.mainSizer)
+        self.SetSizer(self.mainSizer)
         #self.LayoutAndFit()
         self.Show(True)
 

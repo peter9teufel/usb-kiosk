@@ -77,7 +77,7 @@ class KioskNotebook(wx.Notebook):
 
     def LoadPagesConfigPage(self):
         self.configPage = pagesPanel.KioskPagesPanel(self,-1,tr("pages"),self.GetPageCount(),HOST_SYS,self.base_path)
-        self.AddPage(self.configPage, "Pages")
+        self.AddPage(self.configPage, tr("pages"))
 
     def AddNewPage(self, event=None):
         if not self.closed:
@@ -171,22 +171,17 @@ class KioskNotebook(wx.Notebook):
                 self.mainPage.ImportPages(open_path)
 
     def EditPageOrder(self, event=None):
-        '''
         dlg = poDlg.PageOrderDialog(self,-1,self.pages,self.base_path)
         if dlg.ShowModal() == wx.ID_OK:
-            self.SetSelection(0)
+            self.configPage.pagesList.Select(0)
             self.pages = dlg.pages
-            while self.GetPageCount() > 2:
-                self.RemovePage(1)
-            for i in range(1,len(self.pages)):
-                page = self.pages[i]
-                page.index = i+1
-                tabTitle = page.title
-                if len(tabTitle) > 11:
-                    tabTitle = tabTitle[:12] + "..."
-                self.InsertPage(self.GetPageCount()-1, page, tabTitle)
+            while self.configPage.pagesList.GetItemCount() > 0:
+                self.configPage.pagesList.DeleteItem(0)
+            
+            for page in self.pages:
+                self.configPage.pagesList.InsertStringItem(self.configPage.pagesList.GetItemCount(), page.title)
+            
             self.modified = True
-        '''
 
     def NumberOfFiles(self):
         total = 0

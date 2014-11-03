@@ -3,6 +3,8 @@ strings = {
 	# COMMON
 	"cancel": "Abbrechen",
 	"loading": "Lädt...",
+	"from": "von",
+	"to": "bis",
 	# MENU ITEMS
 	"file": "Datei",
 	"edit": "Bearbeiten",
@@ -54,6 +56,8 @@ strings = {
 	"msg_opening": "Lade Daten aus Kiosk Datei...",
 	"title_usb_no_space": "Zu wenig Speicherplatz",
 	"msg_usb_no_space": u"Auf dem USB-Stick ist nicht genügend Speicher frei.\nFreier Speicher: %s\nBenötigter Speicher: ca. %s",
+	"active_time": u"Zeitsteuerung (benötigt Netzwerkverbindung!)",
+	"active_always": "Player immer aktiv",
 	# KIOSK NOTEBOOK
 	"new_page": "Neue Seite",
 	"save_selection": u"Ordner und Datei zum Speichern auswählen",
@@ -69,6 +73,7 @@ strings = {
 	"add_page": u"Seite hinzufügen",
 	"setup": "Seiten Einstellungen",
 	"ticker_setup": "Lauftext",
+	"ticker_text": "Lauftext",
 	"custom_ticker_text": u"Eigener Text für Seite",
 	"ticker_enabled": "Lauftext aktivieren",
 	"ticker_moving": "Lauftext bewegt",

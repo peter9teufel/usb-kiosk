@@ -3,6 +3,8 @@ strings = {
 	# COMMON
 	"cancel": "Cancel",
 	"loading": "Loading...",
+	"from": "from",
+	"to": "to",
 	# MENU ITEMS
 	"file": "File",
 	"edit": "Edit",
@@ -54,6 +56,8 @@ strings = {
 	"msg_opening": "Loading data from Kiosk file...",
 	"title_usb_no_space": "Not enough space on USB",
 	"msg_usb_no_space": "Not enough free space on your USB-Stick to store the Kiosk files.\Free Space: %s\Needed Space: approx. %s",
+	"active_time": "Timing control (needs active internet connection!)",
+	"active_always": "Always active",
 	# KIOSK NOTEBOOK
 	"new_page": "New Page",
 	"save_selection": "Select folder and filename for saving",
@@ -69,6 +73,7 @@ strings = {
 	"add_page": "Add Page",
 	"setup": "Page Settings",
 	"ticker_setup": "Ticker Settings",
+	"ticker_text": "Ticker text",
 	"custom_ticker_text": "Custom ticker text for page",
 	"ticker_enabled": "Ticker enabled",
 	"ticker_moving": "Ticker moving",

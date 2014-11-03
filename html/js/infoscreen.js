@@ -24,10 +24,21 @@ function switchPage(){
         }
 
         var headline = document.getElementById("txt_headline");
+        var pageNrStr = "";
+        var curNum = pageNr + 1;
+        if(curNum < 10){
+            pageNrStr = "000" + String(curNum);
+        }else if(curNum < 100){
+            pageNrStr = "00" + String(curNum);
+        }else if(curNum < 1000){
+            pageNrStr = "0" + String(curNum);
+        }else{
+            pageNrStr = String(curNum);
+        }
 
-        var infotexts = httpGet('infoscreen.php?T=TXT&PAGE=page'+(pageNr+1));
+        var infotexts = httpGet('infoscreen.php?T=TXT&PAGE=page'+(pageNrStr));
 
-        var styleStr = httpGet('infoscreen.php?T=STYLE&PAGE=page'+(pageNr+1));
+        var styleStr = httpGet('infoscreen.php?T=STYLE&PAGE=page'+(pageNrStr));
         var styleJSON = JSON.parse(styleStr);
         var style = 'style' in styleJSON ? parseInt(styleJSON['style']) : 0;
         var imageMode = 'img_mode' in styleJSON ? styleJSON['img_mode'] : 'image_fit';
@@ -42,7 +53,7 @@ function switchPage(){
         var infoJSON = JSON.parse(infotexts);
 
         var infotext = infoJSON[0];
-        var imgList = httpGet('infoscreen.php?T=IMG&PAGE=page'+(pageNr+1));
+        var imgList = httpGet('infoscreen.php?T=IMG&PAGE=page'+(pageNrStr));
 
         // split the result and sort --> provides multiple images
         var images = imgList.split(";");
@@ -560,7 +571,18 @@ function loadPages(){
 
 function updateBackground(customBG){
     if(customBG){
-        background = SITE_ROOT + 'pages/page' + String(pageNr+1) + '/custom_bg.jpg'
+        var pageNrStr = "";
+        var curNum = pageNr + 1;
+        if(curNum < 10){
+            pageNrStr = "000" + String(curNum);
+        }else if(curNum < 100){
+            pageNrStr = "00" + String(curNum);
+        }else if(curNum < 1000){
+            pageNrStr = "0" + String(curNum);
+        }else{
+            pageNrStr = String(curNum);
+        }
+        background = SITE_ROOT + 'pages/page' + String(pageNrStr) + '/custom_bg.jpg'
     }else{
         background = SITE_ROOT + 'bg.jpg'
     }

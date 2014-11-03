@@ -82,7 +82,8 @@ class PageOrderDialog(wx.Dialog):
                 newIndex = 0
             else:
                 newIndex = oldIndex + 1
-            self.pages.insert(newIndex + 1, self.pages.pop(oldIndex + 1))
+            item = self.pages.pop(oldIndex)
+            self.pages.insert(newIndex, item)
             self.UpdateList(select=newIndex)
 
     def MoveSelectedItemUp(self, event=None):
@@ -92,14 +93,15 @@ class PageOrderDialog(wx.Dialog):
                 newIndex = self.list.GetItemCount() - 1
             else:
                 newIndex = oldIndex - 1
-            self.pages.insert(newIndex + 1, self.pages.pop(oldIndex + 1))
+            item = self.pages.pop(oldIndex)
+            self.pages.insert(newIndex, item)
             self.UpdateList(select=newIndex)
 
     def UpdateList(self, select=-1):
         while self.list.GetItemCount() > 0:
             self.list.DeleteItem(0)
-        for i in range(1,len(self.pages)):
-            self.list.InsertStringItem(self.list.GetItemCount(), self.pages[i].title)
+        for page in self.pages:
+            self.list.InsertStringItem(self.list.GetItemCount(), page.title)
         if not select == -1:
             self.list.Select(select)
 

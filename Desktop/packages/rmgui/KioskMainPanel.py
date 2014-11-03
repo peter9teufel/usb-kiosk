@@ -110,6 +110,47 @@ class KioskMainPanel(wx.Panel):
         self.logoCtrl.SetDropTarget(logoDrop)
         self._SetImagePreview('img/preview.png',logo=True)
 
+        '''
+        # ticker setup
+        tickerBox = wx.StaticBox(self,-1,tr("ticker_setup"),size=(523,50))
+        tickerBoxSizer = wx.StaticBoxSizer(tickerBox)
+        tickerLabel = wx.StaticText(tickerBox,-1,label=tr("ticker_text")+":")
+        self.tickerTxtCtrl = wx.TextCtrl(tickerBox,-1,size=(250,22))
+
+        tickerBoxSizer.Add(tickerLabel)
+        tickerBoxSizer.Add(self.tickerTxtCtrl)
+
+        # setup player active time
+        activeBox = wx.StaticBox(self,-1,tr("active_time"), size=(523,50))
+        activeBoxSizer = wx.StaticBoxSizer(activeBox)
+        self.activeChk = wx.CheckBox(activeBox,-1,label=tr("active_always"))
+        hours = []
+        for i in range(24):
+            hours.append(self.FormatNumber(i,2))
+        minutes = ['00','15','30','45']
+        self.activeFromH = wx.ComboBox(activeBox,choices=hours,size=(50,26))
+        self.activeFromM = wx.ComboBox(activeBox,choices=minutes,size=(50,26))
+        fromLabel = wx.StaticText(activeBox,-1,label=tr("from"))
+        toLabel = wx.StaticText(activeBox,-1,label=tr("to"))
+        colLabel1 = wx.StaticText(activeBox,-1,label=":")
+        colLabel2 = wx.StaticText(activeBox,-1,label=":")
+        self.activeToH = wx.ComboBox(activeBox,choices=hours,size=(50,26))
+        self.activeToM = wx.ComboBox(activeBox,choices=minutes,size=(50,26))
+
+        activeBoxSizer.Add(self.activeChk,flag=wx.ALIGN_CENTER_VERTICAL)
+        activeBoxSizer.Add(fromLabel,flag=wx.ALIGN_CENTER_VERTICAL|wx.LEFT,border=45)
+        activeBoxSizer.Add(self.activeFromH,flag=wx.ALIGN_CENTER_VERTICAL)
+        activeBoxSizer.Add(colLabel1,flag=wx.ALIGN_CENTER_VERTICAL)
+        activeBoxSizer.Add(self.activeFromM,flag=wx.ALIGN_CENTER_VERTICAL)
+        activeBoxSizer.Add(toLabel,flag=wx.ALIGN_CENTER_VERTICAL)
+        activeBoxSizer.Add(self.activeToH,flag=wx.ALIGN_CENTER_VERTICAL)
+        activeBoxSizer.Add(colLabel2,flag=wx.ALIGN_CENTER_VERTICAL)
+        activeBoxSizer.Add(self.activeToM,flag=wx.ALIGN_CENTER_VERTICAL)
+
+        self.activeChk.SetValue(True)
+        self.ActiveCheckToggled(None)
+        '''
+
         # background music
         self.musicRadioBox = wx.RadioBox(self.audioBox,-1,choices=[tr("no_music"), tr("mp3_files"), tr("webradio_stream")],size=(490,42))
         self.addSong = wx.Button(self.audioBox,-1,label=tr("add_songs"))
@@ -123,6 +164,7 @@ class KioskMainPanel(wx.Panel):
         # Bind elements
         bg.Bind(wx.EVT_BUTTON, self.ShowBackgroundSelection)
         logo.Bind(wx.EVT_BUTTON, self.ShowLogoSelection)
+        #!!!!! self.activeChk.Bind(wx.EVT_CHECKBOX, self.ActiveCheckToggled)
         self.songList.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.SongItemRightClicked)
         self.musicRadioBox.Bind(wx.EVT_RADIOBUTTON, self.MusicRadioBoxChanged)
         self.musicRadioBox.Bind(wx.EVT_RADIOBOX, self.MusicRadioBoxChanged)
@@ -142,7 +184,7 @@ class KioskMainPanel(wx.Panel):
         imgSizer.Add(logoSizer, 1, flag=wx.EXPAND)
         # Sizer for AUDIO selection
         self.audioSizer.Add(self.musicRadioBox,flag=wx.RIGHT|wx.BOTTOM,border=10)
-        self.audioSizer.Add(self.streamCombo,flag=wx.RIGHT|wx.BOTTOM|wx.ALIGN_CENTER_HORIZONTAL,border=10)
+        self.audioSizer.Add(self.streamCombo,flag=wx.RIGHT|wx.BOTTOM,border=10)
         self.audioSizer.Add(self.addSong,flag=wx.RIGHT,border=10)
         self.audioSizer.Add(self.songList,flag=wx.RIGHT|wx.BOTTOM,border=10)
 
@@ -152,10 +194,25 @@ class KioskMainPanel(wx.Panel):
         # add to main sizer
         contentSizer = wx.BoxSizer(wx.VERTICAL)
         contentSizer.Add(imgSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
+        #!!!!! contentSizer.Add(activeBoxSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
+        #!!!!! contentSizer.Add(tickerBoxSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
         contentSizer.Add(self.audioSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=2)
         self.mainSizer.Add(contentSizer,flag=wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,border=5)
 
         self.SetSizer(self.mainSizer)
+
+    def ActiveCheckToggled(self,event):
+        if self.activeChk.IsChecked():
+            self.activeFromH.Disable()
+            self.activeFromM.Disable()
+            self.activeToH.Disable()
+            self.activeToM.Disable()
+        else:
+            self.activeFromH.Enable()
+            self.activeFromM.Enable()
+            self.activeToH.Enable()
+            self.activeToM.Enable()
+
 
     def MusicRadioBoxChanged(self, event=None):
         sel = self.musicRadioBox.GetSelection()
@@ -268,6 +325,9 @@ class KioskMainPanel(wx.Panel):
         H = img.GetHeight()
 
         maxSize = 200
+
+        if imagePath == 'img/preview.png':
+            maxSize=100
 
         if W > H:
             NewW = maxSize
@@ -510,13 +570,7 @@ class KioskMainPanel(wx.Panel):
                 fileNames = open(mp3Path + 'filenames.bak', 'w')
                 cnt = 0
                 for mp3 in self.songs:
-                    nr = ""
-                    if cnt < 100:
-                        if cnt < 10:
-                            nr = "00"
-                        else:
-                            nr = "0"
-                        nr += str(cnt)
+                    nr = self.FormatNumber(cnt)
                     fileNames.write(os.path.basename(mp3).encode("utf-8") + "\n")
                     shutil.copyfile(mp3, mp3Path + 'BG_Music_Title_' + nr + '.mp3')
                     numFiles += 1
@@ -531,7 +585,7 @@ class KioskMainPanel(wx.Panel):
             # copy data for single pages to page directories in kiosk directory on USB
             cnt = 1
             for page in self.parent.pages:
-                pageDir = usbPath + '/page' + str(cnt) + '/'
+                pageDir = usbPath + '/page' + self.FormatNumber(cnt) + '/'
                 os.mkdir(pageDir)
                 # page headline
                 fileName = pageDir + "headline.txt"
@@ -541,7 +595,7 @@ class KioskMainPanel(wx.Panel):
                 # page texts
                 texts = page.texts
                 for j in range(len(texts)):
-                    fileName = pageDir + "Text" + str(j+1) + ".txt"
+                    fileName = pageDir + "Text" + self.FormatNumber(j+1) + ".txt"
                     f = open(fileName, 'w')
                     f.write(texts[j].encode("utf-8"))
                     f.close()
@@ -553,7 +607,7 @@ class KioskMainPanel(wx.Panel):
                     ending = ".jpg"
                     if imgs[j].endswith(".png") or imgs[j].endswith(".PNG"):
                         ending = ".png"
-                    dstFile = pageDir + '/image' + str(j) + ending
+                    dstFile = pageDir + '/image' + self.FormatNumber(j) + ending
                     shutil.copyfile(imgs[j], dstFile)
                     numFiles += 1
                     self.prgDialog.Update(numFiles, os.path.basename(dstFile))
@@ -624,13 +678,7 @@ class KioskMainPanel(wx.Panel):
             fileNames = open(mp3Path + 'filenames.bak', 'w')
             cnt = 0
             for mp3 in self.songs:
-                nr = ""
-                if cnt < 100:
-                    if cnt < 10:
-                        nr = "00"
-                    else:
-                        nr = 0
-                    nr += str(cnt)
+                nr = self.FormatNumber(cnt)
                 fileNames.write(os.path.basename(mp3).encode("utf-8") + "\n")
                 shutil.copyfile(mp3, mp3Path + 'BG_Music_Title_' + nr + '.mp3')
                 cnt += 1
@@ -643,7 +691,7 @@ class KioskMainPanel(wx.Panel):
         # copy data for single pages to page directories in kiosk directory on USB
         cnt = 1
         for page in self.parent.pages:
-            pageDir = tmpPath + '/page' + str(cnt) + '/'
+            pageDir = tmpPath + '/page' + self.FormatNumber(cnt) + '/'
             os.mkdir(pageDir)
             # page headline
             fileName = pageDir + "headline.txt"
@@ -653,7 +701,7 @@ class KioskMainPanel(wx.Panel):
             # page texts
             texts = page.texts
             for j in range(len(texts)):
-                fileName = pageDir + "Text" + str(j+1) + ".txt"
+                fileName = pageDir + "Text" + self.FormatNumber(j+1) + ".txt"
                 f = open(fileName, 'w')
                 f.write(texts[j].encode("utf-8"))
                 f.close()
@@ -663,7 +711,7 @@ class KioskMainPanel(wx.Panel):
                 ending = ".jpg"
                 if imgs[j].endswith(".png") or imgs[j].endswith(".PNG"):
                     ending = ".png"
-                dstFile = pageDir + '/image' + str(j) + ending
+                dstFile = pageDir + '/image' + self.FormatNumber(j) + ending
                 shutil.copyfile(imgs[j], dstFile)
             # write style file
             styleJSON = page.GetStyleJSONDefinition()
@@ -716,8 +764,9 @@ class KioskMainPanel(wx.Panel):
     def LoadPagesFromTempData(self, tmpPath, include_main=True):
         # self.musicRadioBox.SetSelection(0)
         # parse loaded data, create pages and update UI
-        for dir in os.listdir(tmpPath):
+        for dir in sorted(os.listdir(tmpPath)):
             if dir.startswith("page"):
+                print "Loading page directory from temp data: ", dir
                 # page directory
                 pageDir = tmpPath + dir + '/'
                 images = []
@@ -858,6 +907,11 @@ class KioskMainPanel(wx.Panel):
                         arcname = os.path.join(os.path.relpath(root, relroot), file)
                         zip.write(filename, arcname)
 
+    def FormatNumber(self,number,length=4):
+        numStr = str(number)
+        while len(numStr)<length:
+            numStr = "0" + numStr
+        return numStr
 
 class ImageCtrlDropTarget(wx.FileDropTarget):
     def __init__(self, window, target, logo=False):
