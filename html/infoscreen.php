@@ -33,21 +33,25 @@ function pages(){
     $texts = array();
     $folders = array();
     $pagedirs = array();
+    $cnt = 0;
     if ($dir_list = opendir($dir)){
         while(($filename = readdir($dir_list)) !== false){
             // check for '.' '..''.htaccess'
             if(!startsWith($filename, ".") && $filename != "." && $filename != ".." && $filename != ".htaccess"){
                 if(is_dir($dir . '/' . $filename)){
                     // page directory --> store page dir path
-                    $pagedirs[] = $dir . '/' . $filename;
-                    $folders[] = $filename;
+                    //$pagedirs[$cnt] = $dir . '/' . $filename;
+                    //$folders[$cnt] = $filename;
+		    array_push($pagedirs, $dir . '/' . $filename);
+		    array_push($folders, $filename);
+		    $cnt = $cnt + 1;
                 }
             }
         }
     }
     // sort page directory paths
-    natsort($pagedirs);
-    ksort($folders);
+    sort($pagedirs);
+    sort($folders);
 
     // build result data
     $cnt=0;
@@ -67,7 +71,6 @@ function pages(){
     $pages['page_styles'] = $styles;
     $pages['page_images'] = $images;
     $pages['page_texts'] = $texts;
-
     $data = json_encode($pages);
     return $data;
 }
