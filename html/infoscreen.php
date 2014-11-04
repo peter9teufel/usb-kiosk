@@ -26,7 +26,12 @@ function pages(){
     $dir="./pages";
     $files = array();
     $cnt = 0;
-    $result = "";
+    $pages = array();
+    $headlines = "";
+    $styles = array();
+    $images = array();
+    $texts = array();
+    $folders = array();
     $pagedirs = array();
     if ($dir_list = opendir($dir)){
         while(($filename = readdir($dir_list)) !== false){
@@ -35,6 +40,7 @@ function pages(){
                 if(is_dir($dir . '/' . $filename)){
                     // page directory --> store page dir path
                     $pagedirs[] = $dir . '/' . $filename;
+                    $folders[] = $filename;
                 }
             }
         }
@@ -42,16 +48,25 @@ function pages(){
     // sort page directory paths
     natsort($pagedirs);
     // build result data
+    $cnt=0;
     foreach($pagedirs as $pagedir){
         $text = file_get_contents($pagedir . "/txt/headline.txt");
                     if($cnt > 0){
-                        $result .= ";";
+                        $headlines .= ";";
                     }
-                    $result .= $text;
-                    //array_push($files, $filename);
+                    $headlines .= $text;
+                    $styles[] = style($folders[$cnt]);
+                    $images[] = images($folders[$cnt]);
+                    $texts[] = infotext($folders[$cnt]);
                     $cnt = $cnt + 1;
     }
-    return $result;
+    $pages['page_headlines'] = $headlines;
+    $pages['page_styles'] = $styles;
+    $pages['page_images'] = $images;
+    $pages['page_texts'] = $texts;
+
+    $data = json_encode($pages);
+    return $data;
 }
 
 function style($folder){

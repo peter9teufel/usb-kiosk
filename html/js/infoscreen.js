@@ -1,5 +1,7 @@
 var SITE_ROOT = "http://localhost/usb-kiosk/";
 var pageNr=0;
+var pageData = [];
+var cachedImgs = [];
 var numPages = 0;
 var pages = [];
 var timeout;
@@ -23,24 +25,11 @@ function switchPage(){
             pageNr = 0;
         }
 
-        $("#ticker_txt").fadeOut();
-
         var headline = document.getElementById("txt_headline");
-        var pageNrStr = "";
-        var curNum = pageNr + 1;
-        if(curNum < 10){
-            pageNrStr = "000" + String(curNum);
-        }else if(curNum < 100){
-            pageNrStr = "00" + String(curNum);
-        }else if(curNum < 1000){
-            pageNrStr = "0" + String(curNum);
-        }else{
-            pageNrStr = String(curNum);
-        }
 
-        var infotexts = httpGet('infoscreen.php?T=TXT&PAGE=page'+(pageNrStr));
+        var infotexts = pageData['page_texts'][pageNr];
 
-        var styleStr = httpGet('infoscreen.php?T=STYLE&PAGE=page'+(pageNrStr));
+        var styleStr = pageData['page_styles'][pageNr];
         var styleJSON = JSON.parse(styleStr);
         var style = 'style' in styleJSON ? parseInt(styleJSON['style']) : 0;
         var imageMode = 'img_mode' in styleJSON ? styleJSON['img_mode'] : 'image_fit';
@@ -55,10 +44,9 @@ function switchPage(){
         var infoJSON = JSON.parse(infotexts);
 
         var infotext = infoJSON[0];
-        var imgList = httpGet('infoscreen.php?T=IMG&PAGE=page'+(pageNrStr));
 
         // split the result and sort --> provides multiple images
-        var images = imgList.split(";");
+        var images = cachedImgs[pageNr];
         images.sort();
         var img = images[0];
 
@@ -174,8 +162,6 @@ function switchPage(){
         // auto size text to avoid overflow
         initTextSize()
         resize()
-
-        $("#ticker_txt").fadeIn()
     }
 }
 
@@ -572,9 +558,22 @@ function httpGet(theUrl)
 }
 
 function loadPages(){
-    var list = httpGet('infoscreen.php?T=PAGES');
-    pages = list.split(";");
+    var data = httpGet('infoscreen.php?T=PAGES');
+    pageData = JSON.parse(data)
+    pages = pageData['page_headlines'].split(";");
     numPages = pages.length;
+    for(var i = 0; i < pageData['page_images'].length; i++){
+        var curList = pageData['page_images'][i];
+        var curImgs = curList.split(";");
+        var pageImgs = new Array();
+        for(var j = 0; j < curImgs.length; j++){
+            // preload images
+            var cImg = new Image();
+            cImg.src = curImgs[j];
+            pageImgs[j] = cImg.src;
+        }
+        cachedImgs[i] = pageImgs;
+    }
 }
 
 function updateBackground(customBG){
