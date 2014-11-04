@@ -23,7 +23,7 @@ class AppFrame(wx.Frame):
         self.notebook = kNotebook.KioskNotebook(self,-1,None,base_path)
         self.mainSizer.Add(self.notebook, 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
         self.SetSizerAndFit(self.mainSizer)
-        self.SetSize((1180,650))
+        #self.SetSize((1180,650))
         # Create an accelerator table for keyboard shortcuts
         sc_new = wx.NewId()
         sc_open = wx.NewId()

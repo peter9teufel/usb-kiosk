@@ -306,7 +306,7 @@ class KioskMainPanel(wx.Panel):
         self.mainSizer.Layout()
         self.Fit()
         self.parent.Fit()
-        self.parent.parent.Fit()
+        #self.parent.parent.Fit()
         self.parent.parent.Center()
 
     def _SetImagePreview(self, imagePath, logo=False):

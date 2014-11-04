@@ -14,7 +14,7 @@ var background = "";
 function load(){
     loadPages();
     switchPage();
-    moveText();
+    //moveText();
 }
 
 function switchPage(){
@@ -599,7 +599,8 @@ function updateTicker(ticker_txt, ticker_mov, enable_ticker){
             // message changed
             ticker_text = ticker_txt;
         }
-
+        document.getElementById("ticker_txt").innerHTML = ticker_text;
+        /*
         if(ticker_mov != null){
             var move = (!ticker_moving && ticker_mov);
             ticker_moving = ticker_mov;
@@ -610,6 +611,7 @@ function updateTicker(ticker_txt, ticker_mov, enable_ticker){
                 moveText();
             }
         }
+        */
     }else{
         document.getElementById("logo_div").style.display = 'none'
         document.getElementById("ticker").style.display = 'none'
