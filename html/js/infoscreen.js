@@ -419,7 +419,8 @@ function changeImage(images, index, duration, targetID, targetContainer, style, 
 
 function sizeImage(targetID, targetContainer, mode){
     // default image sizing mode is fit if not set
-    mode = mode || 'image_crop';
+    //mode = mode || 'image_crop';
+    mode = 'image_crop';
     var image = document.getElementById(targetID);
     // reset margin and size properties
     image.style.marginTop = '0px';
