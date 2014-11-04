@@ -47,10 +47,12 @@ function pages(){
     }
     // sort page directory paths
     natsort($pagedirs);
+    ksort($folders);
+
     // build result data
     $cnt=0;
-    foreach($pagedirs as $pagedir){
-        $text = file_get_contents($pagedir . "/txt/headline.txt");
+    for($i = 0; $i  < count($pagedirs); $i++){
+        $text = file_get_contents($pagedirs[$i] . "/txt/headline.txt");
                     if($cnt > 0){
                         $headlines .= ";";
                     }
