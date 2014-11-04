@@ -55,9 +55,10 @@ function pages(){
                         $headlines .= ";";
                     }
                     $headlines .= $text;
-                    $styles[] = style($folders[$cnt]);
-                    $images[] = images($folders[$cnt]);
-                    $texts[] = infotext($folders[$cnt]);
+                    $styles[$cnt] = style($folders[$cnt]);
+                    array_push($images, images($folders[$cnt]));
+                    // $images[$cnt] = images($folders[$cnt]);
+                    $texts[$cnt] = infotext($folders[$cnt]);
                     $cnt = $cnt + 1;
     }
     $pages['page_headlines'] = $headlines;
