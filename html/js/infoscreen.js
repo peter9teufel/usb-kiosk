@@ -121,7 +121,10 @@ function switchPage(){
             if(style == 2){
                 imgDuration = 11000;
                 duration = (images.length / 2) * 11700
-            }
+            }else if(style == 5){
+		duration = 11700;
+		imgDuration = 11000;
+	    }
         }
         // calculate duration for each text
         var txtDuration = (duration / infoJSON.length);

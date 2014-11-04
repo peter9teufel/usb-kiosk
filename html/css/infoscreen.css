@@ -65,7 +65,7 @@ html, body {
 .img_div {
     text-align: center;
     position: absolute;
-    background-color:rgba(250,250,250,0.8);
+    background-color:rgba(250,250,250,0.65);
     overflow: hidden;
     width: 48%;
     height: 71%;
@@ -83,7 +83,7 @@ html, body {
 .img_div_2{
     text-align: center;
     position: absolute;
-    background-color:rgba(250,250,250,0.8);
+    background-color:rgba(250,250,250,0.65);
     width: 48%;
     height: 71%;
     overflow: hidden;
@@ -100,7 +100,7 @@ html, body {
 .img_div_fullscreen{
     text-align: center;
     position: absolute;
-    background-color:rgba(250,250,250,0.8);
+    background-color:rgba(250,250,250,0.65);
     width: 98%;
     height: 95%;
     overflow: hidden;
@@ -118,7 +118,7 @@ html, body {
     position: absolute;
     text-align: center;
     color: #333333;
-    background-color:rgba(250,250,250,0.85);
+    background-color:rgba(250,250,250,0.65);
     height: 10%;
     width: 98%;
     padding: 10px;
@@ -172,7 +172,7 @@ html, body {
 .text {
     position: absolute;
     color: #333333;
-    background-color:rgba(250,250,250,0.85);
+    background-color:rgba(250,250,250,0.65);
     width: 48%;
     height: 71%;
     padding: 13px;
@@ -194,7 +194,7 @@ html, body {
 .text_2{
     position: absolute;
     color: #333333;
-    background-color:rgba(250,250,250,0.85);
+    background-color:rgba(250,250,250,0.65);
     overflow: hidden;
     width: 48%;
     height: 71%;
