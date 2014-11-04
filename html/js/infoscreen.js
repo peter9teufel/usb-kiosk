@@ -23,6 +23,8 @@ function switchPage(){
             pageNr = 0;
         }
 
+        $("#ticker_txt").fadeOut();
+
         var headline = document.getElementById("txt_headline");
         var pageNrStr = "";
         var curNum = pageNr + 1;
@@ -128,6 +130,10 @@ function switchPage(){
             imgDuration = 8000;
             // adjust complete duration --> duration for each image plus some loading time
             duration = (images.length * 8700);
+            if(style == 2){
+                imgDuration = 11000;
+                duration = (images.length / 2) * 11700
+            }
         }
         // calculate duration for each text
         var txtDuration = (duration / infoJSON.length);
@@ -168,6 +174,8 @@ function switchPage(){
         // auto size text to avoid overflow
         initTextSize()
         resize()
+
+        $("#ticker_txt").fadeIn()
     }
 }
 
