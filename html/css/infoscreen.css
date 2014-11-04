@@ -54,11 +54,12 @@ html, body {
 }
 
 #ticker_txt{
-    width: 98%;
+    position: absolute;
     margin-bottom: 1%;
-    margin-left: 1%;
-    margin-right: 1%;
+    overflow: hidden;
+    white-space: nowrap;
     bottom: 2%;
+    left: 1850px;
 }
 
 .img_div {
