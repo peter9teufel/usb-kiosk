@@ -22,9 +22,7 @@ function switchPage(){
         if(pageNr == numPages){
             pageNr = 0;
         }
-
-        $("#ticker_txt").fadeOut();
-
+	$("#ticker").fadeOut();
         var headline = document.getElementById("txt_headline");
         var pageNrStr = "";
         var curNum = pageNr + 1;
@@ -174,8 +172,7 @@ function switchPage(){
         // auto size text to avoid overflow
         initTextSize()
         resize()
-
-        $("#ticker_txt").fadeIn()
+	$("#ticker").fadeIn()
     }
 }
 
@@ -601,6 +598,7 @@ function updateBackground(customBG){
 function updateTicker(ticker_txt, ticker_mov, enable_ticker){
     ticker_enabled = enable_ticker
     if(enable_ticker){
+	$("#ticker").fadeIn()
         document.getElementById("ticker").style.display = 'inline'
         document.getElementById("logo_div").style.display = 'inline'
         if(ticker_txt != null && ticker_text != ticker_txt){
@@ -619,6 +617,7 @@ function updateTicker(ticker_txt, ticker_mov, enable_ticker){
             }
         }
     }else{
+	$("#ticker").fadeOut();
         document.getElementById("logo_div").style.display = 'none'
         document.getElementById("ticker").style.display = 'none'
     }
