@@ -766,7 +766,6 @@ class KioskMainPanel(wx.Panel):
         # parse loaded data, create pages and update UI
         for dir in sorted(os.listdir(tmpPath)):
             if dir.startswith("page"):
-                print "Loading page directory from temp data: ", dir
                 # page directory
                 pageDir = tmpPath + dir + '/'
                 images = []
