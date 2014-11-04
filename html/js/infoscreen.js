@@ -600,6 +600,7 @@ function updateBackground(customBG){
 function updateTicker(ticker_txt, ticker_mov, enable_ticker){
     ticker_enabled = enable_ticker
     if(enable_ticker){
+	$("#ticker").fadeIn()
         document.getElementById("ticker").style.display = 'inline'
         document.getElementById("logo_div").style.display = 'inline'
         if(ticker_txt != null && ticker_text != ticker_txt){
@@ -618,6 +619,7 @@ function updateTicker(ticker_txt, ticker_mov, enable_ticker){
             }
         }
     }else{
+	$("#ticker").fadeOut();
         document.getElementById("logo_div").style.display = 'none'
         document.getElementById("ticker").style.display = 'none'
     }
