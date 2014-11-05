@@ -25,9 +25,6 @@ function switchPage(){
             pageNr = 0;
         }
 
-        // move text out of screen to avoid seeing text lag on loading
-        moveTextOutOfScreen()
-
         var headline = document.getElementById("txt_headline");
 
         var infotexts = pageData['page_texts'][pageNr];
@@ -371,8 +368,6 @@ function pageDuration(pageTxts){
 }
 
 function changeImage(images, index, duration, targetID, targetContainer, style, imageMode){
-    // move text out of screen to avoid seeing text lag on image loading
-    moveTextOutOfScreen();
     if(style == 2){
         var image1 = document.getElementById(targetID[0]);
         var image1Container = document.getElementById(targetContainer[0]);
@@ -661,10 +656,15 @@ function moveTextOutOfScreen(){
 
     tickerW = $( "#ticker_txt").width();
 
-    while(tickerPos > (tickerW * -1)){
-        tickerPos -= 1;
-        tickerStyle.left = tickerPos+'px';
+    if(tickerPos > (tickerW * -1)){
+        tickerPos-=1;
+    } else {
+        // reset ticker position to right
+        tWidth = $("#ticker").width()
+        tickerPos = tWidth;
     }
+    tickerStyle.left = tickerPos+'px';
+
 }
 
 function tickerLoop() {
