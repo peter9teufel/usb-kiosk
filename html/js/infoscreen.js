@@ -669,18 +669,23 @@ function moveText(){
 
     if(tickerPos > (tickerW * -1) - 10){
         tickerPos-=1;
+        tickerStyle.left = tickerPos+'px';
+        tickerLoop();
     } else {
         // reset ticker position to right
         tWidth = $("#ticker").width()
         tickerPos = tWidth;
+        tickerStyle.left = tickerPos+'px';
+        // little timeout before ticker scrolls for the next time
+        setTimeout("tickerLoop()",3000);
     }
-    tickerStyle.left = tickerPos+'px';
-    tickerLoop();
+    
 }
 
 function tickerOffScreen(){
     var tickerW = $( "#ticker_txt").width();
-    return (tickerPos < (tickerW * -1));
+    tWidth = $("#ticker").width()
+    return (tickerPos < (tickerW * -1) || tickerPos == tWidth);
 }
 
 function timeUntilTickerOffScreen(){
