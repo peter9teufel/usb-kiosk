@@ -632,10 +632,17 @@ function updateBackground(customBG){
 }
 
 function updateTicker(ticker_txt, ticker_mov, enable_ticker){
-    ticker_enabled = enable_ticker
     if(enable_ticker){
+	if(document.getElementById("ticker").style.display == 'none'){
+	    // ticker previously not enabled
+	    var tWidth = $("#ticker").width();
+	    tickerPos = tWidth;
+	}
+	ticker_enabled = enable_ticker
         document.getElementById("ticker").style.display = 'inline'
         document.getElementById("logo_div").style.display = 'inline'
+	document.getElementById("ticker_background").style.display = 'inline'
+        document.getElementById("ticker_background_2").style.display = 'inline'
         if(ticker_txt != null && ticker_text != ticker_txt){
             // message changed
             ticker_text = ticker_txt;
@@ -656,6 +663,8 @@ function updateTicker(ticker_txt, ticker_mov, enable_ticker){
     }else{
         document.getElementById("logo_div").style.display = 'none'
         document.getElementById("ticker").style.display = 'none'
+	document.getElementById("ticker_background").style.display = 'none'
+        document.getElementById("ticker_background_2").style.display = 'none'
     }
 }
 
