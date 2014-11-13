@@ -1,4 +1,6 @@
 var SITE_ROOT = "http://localhost/usb-kiosk/";
+var TICKER_INTERVAL = 15; // ms
+var init_load = true;
 var pageNr=0;
 var pageData = [];
 var cachedImgs = [];
@@ -12,159 +14,178 @@ var ticker_text = "";
 var ticker_moving = true;
 var ticker_enabled = true;
 var background = "";
+var duration_offset = 0;
 
 function load(){
     loadPages();
+    // set initial ticker position
+    var tWidth = $("#ticker").width()
+    tickerPos = tWidth;
     switchPage();
     moveText();
 }
 
 function switchPage(){
-    if(numPages > 0 && pages[0] != ""){
-        if(pageNr == numPages){
-            pageNr = 0;
-        }
+    if(duration_offset == 0){
+        if(init_load || !ticker_moving || tickerOffScreen()){
+            if(numPages > 0 && pages[0] != ""){
+                if(pageNr == numPages){
+                    pageNr = 0;
+                }
 
-        var headline = document.getElementById("txt_headline");
+                var headline = document.getElementById("txt_headline");
 
-        var infotexts = pageData['page_texts'][pageNr];
+                var infotexts = pageData['page_texts'][pageNr];
 
-        var styleStr = pageData['page_styles'][pageNr];
-        var styleJSON = JSON.parse(styleStr);
-        var style = 'style' in styleJSON ? parseInt(styleJSON['style']) : 0;
-        var imageMode = 'img_mode' in styleJSON ? styleJSON['img_mode'] : 'image_fit';
-        var ticker_txt = 'ticker_text' in styleJSON ? styleJSON['ticker_text'] : null;
-        var enable_ticker = 'ticker_enabled' in styleJSON ? styleJSON['ticker_enabled'] == "1" : true;
-        var ticker_mov = 'ticker_moving' in styleJSON ? styleJSON['ticker_moving'] == 1 : null;
-        var fontFam = 'font_family' in styleJSON ? styleJSON['font_family'] : null;
-        var customBg = 'custom_bg' in styleJSON ? styleJSON['custom_bg'] == "1" : false;
-        updateBackground(customBg);
-        updateTicker(ticker_txt, ticker_mov, enable_ticker);
+                var styleStr = pageData['page_styles'][pageNr];
+                var styleJSON = JSON.parse(styleStr);
+                var style = 'style' in styleJSON ? parseInt(styleJSON['style']) : 0;
+                var imageMode = 'img_mode' in styleJSON ? styleJSON['img_mode'] : 'image_fit';
+                var ticker_txt = 'ticker_text' in styleJSON ? styleJSON['ticker_text'] : null;
+                var enable_ticker = 'ticker_enabled' in styleJSON ? styleJSON['ticker_enabled'] == "1" : true;
+                var ticker_mov = 'ticker_moving' in styleJSON ? styleJSON['ticker_moving'] == 1 : null;
+                var fontFam = 'font_family' in styleJSON ? styleJSON['font_family'] : null;
+                var customBg = 'custom_bg' in styleJSON ? styleJSON['custom_bg'] == "1" : false;
+                updateBackground(customBg);
+                updateTicker(ticker_txt, ticker_mov, enable_ticker);
 
-        var infoJSON = JSON.parse(infotexts);
+                var infoJSON = JSON.parse(infotexts);
 
-        var infotext = infoJSON[0];
+                var infotext = infoJSON[0];
 
-        // split the result and sort --> provides multiple images
-        var images = cachedImgs[pageNr];
-        images.sort();
-        var img = images[0];
+                // split the result and sort --> provides multiple images
+                var images = cachedImgs[pageNr];
+                images.sort();
+                var img = images[0];
 
-        var ids = new Array()
-        switch(style){
-            case 0: // HL, Ticker, IMG left, TXT right
-                ids = setupDefaultPage();
-                break;
-            case 1:
-                ids = setupDefaultPageFlipped();
-                break;
-            case 2:
-                ids = setupDoubleImagePage();
-                break;
-            case 3:
-                ids = setupTextOnlyPage();
-                break;
-            case 4:
-                ids = setupImageOnlyPage();
-                break;
-            case 5:
-                ids = setupFullscreenImagePage();
-                break;
-        }
+                var ids = new Array()
+                switch(style){
+                    case 0: // HL, Ticker, IMG left, TXT right
+                        ids = setupDefaultPage();
+                        break;
+                    case 1:
+                        ids = setupDefaultPageFlipped();
+                        break;
+                    case 2:
+                        ids = setupDoubleImagePage();
+                        break;
+                    case 3:
+                        ids = setupTextOnlyPage();
+                        break;
+                    case 4:
+                        ids = setupImageOnlyPage();
+                        break;
+                    case 5:
+                        ids = setupFullscreenImagePage();
+                        break;
+                }
 
-        var textfield = document.getElementById(ids['txt']);
+                var textfield = document.getElementById(ids['txt']);
 
-        // set new content
-        headline.innerHTML =  pages[pageNr];
-        textfield.innerHTML = infotext;
+                // set new content
+                headline.innerHTML =  pages[pageNr];
+                textfield.innerHTML = infotext;
 
-        if(style == 2){
-            var image1 = document.getElementById(ids['img'][0]);
-            var image2 = document.getElementById(ids['img'][1]);
-            image1.src = images[0];
-            image2.src = images[1];
+                if(style == 2){
+                    var image1 = document.getElementById(ids['img'][0]);
+                    var image2 = document.getElementById(ids['img'][1]);
+                    image1.src = images[0];
+                    image2.src = images[1];
 
-            image1.onload = function(e){
-                sizeImage(ids['img'][0], ids['img_container'][0], imageMode)
+                    image1.onload = function(e){
+                        sizeImage(ids['img'][0], ids['img_container'][0], imageMode)
+                    }
+                    image2.onload = function(e){
+                        sizeImage(ids['img'][1], ids['img_container'][1], imageMode)
+                    }
+                }else{
+                    var image = document.getElementById(ids['img']);
+                    image.src = img;
+                    image.onload = function(e){
+                        sizeImage(ids['img'], ids['img_container'], imageMode);
+                    }
+                }
+
+                // auto size text to avoid overflow
+                initTextSize();
+                resize();
+
+                // increment pageNr and set timeout for next page switch
+                pageNr++;
+
+                // calculate page duration --> get minimum duration needed for texts
+                var duration = pageDuration(infoJSON);
+                // split available duration for images
+                var imgDuration = (duration / images.length) * 0.95;
+                if(style == 2){
+                    // two images at once
+                    imgDuration *= 2;
+                }
+                // each image should be visible at least for 5 seconds
+                if(duration == 0 || imgDuration < 8000){
+                    imgDuration = 8000;
+                    // adjust complete duration --> duration for each image plus some loading time
+                    duration = (images.length * 8700);
+                    if(style == 2){
+                        imgDuration = 11000;
+                        duration = (images.length / 2) * 11700
+                    }else if(style == 5){
+        		duration = 11700;
+        		imgDuration = 11000;
+        	    }
+                }
+                // calculate duration for each text
+                var txtDuration = (duration / infoJSON.length);
+
+                // set timeouts for page switch, image change and text change
+                setTimeout("switchPage()", duration);
+                setTimeout(function(){
+                    changeImage(images, 1, imgDuration, ids['img'], ids['img_container'], style, imageMode);
+                }, imgDuration);
+                setTimeout(function(){
+                    changeText(infoJSON, 1, txtDuration, ids['txt']);
+                }, txtDuration);
+            } else {
+                // no pages on player show demo page with description
+                headline = document.getElementById("txt_headline");
+                textfield = document.getElementById("txt_text");
+                image = document.getElementById("info_img");
+                image.style.display = 'none';
+                noImg = true;
+                textfield.style.width = '96.5%';
+                textfield.style.height = '62%';
+
+                var title = "Welcome to your USB-Kiosk!";
+                var msg = "How to get started:<br>";
+                msg += " - Open the \"Kiosk Editor\" desktop application to setup your kiosk pages, background, logo and background music.<br>";
+                msg += " - Kiosk Editor allows you to save your kiosk configuration in one single file to share it or edit it again.<br>";
+                msg += " - Once you have all your pages setup, click on \"File - Create Kiosk USB-Stick\"<br>";
+                msg += " - You will be prompted to connect a USB Stick and your pages will be copied as soon as you do so.<br>";
+                msg += " - Connect the prepared USB Stick to the Kiosk player and power it on.<br>";
+                msg += "<br>";
+                msg += "THAT'S IT! Your data is copied to the player and the player starts the kiosk mode.<br>";
+                msg += "<br>";
+                msg += "For more information checkout the ReadMe at http://bit.do/usb-kiosk-readme";
+
+                headline.innerHTML = title
+                textfield.innerHTML = msg
+
+                // auto size text to avoid overflow
+                initTextSize()
+                resize()
             }
-            image2.onload = function(e){
-                sizeImage(ids['img'][1], ids['img_container'][1], imageMode)
+            if(init_load){
+                init_load = false;
             }
         }else{
-            var image = document.getElementById(ids['img']);
-            image.src = img;
-            image.onload = function(e){
-                sizeImage(ids['img'], ids['img_container'], imageMode);
-            }
+            // wait for ticker to go offscreen before switching page
+            var delay = timeUntilTickerOffScreen();
+            setTimeout("switchPage()", delay/4);
         }
-
-        // auto size text to avoid overflow
-        initTextSize();
-        resize();
-
-        // increment pageNr and set timeout for next page switch
-        pageNr++;
-
-        // calculate page duration --> get minimum duration needed for texts
-        var duration = pageDuration(infoJSON);
-        // split available duration for images
-        var imgDuration = (duration / images.length) * 0.95;
-        if(style == 2){
-            // two images at once
-            imgDuration *= 2;
-        }
-        // each image should be visible at least for 5 seconds
-        if(duration == 0 || imgDuration < 8000){
-            imgDuration = 8000;
-            // adjust complete duration --> duration for each image plus some loading time
-            duration = (images.length * 8700);
-            if(style == 2){
-                imgDuration = 11000;
-                duration = (images.length / 2) * 11700
-            }else if(style == 5){
-		duration = 11700;
-		imgDuration = 11000;
-	    }
-        }
-        // calculate duration for each text
-        var txtDuration = (duration / infoJSON.length);
-
-        // set timeouts for page switch, image change and text change
-        setTimeout("switchPage()", duration);
-        setTimeout(function(){
-            changeImage(images, 1, imgDuration, ids['img'], ids['img_container'], style, imageMode);
-        }, imgDuration);
-        setTimeout(function(){
-            changeText(infoJSON, 1, txtDuration, ids['txt']);
-        }, txtDuration);
-    } else {
-        // no pages on player show demo page with description
-        headline = document.getElementById("txt_headline");
-        textfield = document.getElementById("txt_text");
-        image = document.getElementById("info_img");
-        image.style.display = 'none';
-        noImg = true;
-        textfield.style.width = '96.5%';
-        textfield.style.height = '62%';
-
-        var title = "Welcome to your USB-Kiosk!";
-        var msg = "How to get started:<br>";
-        msg += " - Open the \"Kiosk Editor\" desktop application to setup your kiosk pages, background, logo and background music.<br>";
-        msg += " - Kiosk Editor allows you to save your kiosk configuration in one single file to share it or edit it again.<br>";
-        msg += " - Once you have all your pages setup, click on \"File - Create Kiosk USB-Stick\"<br>";
-        msg += " - You will be prompted to connect a USB Stick and your pages will be copied as soon as you do so.<br>";
-        msg += " - Connect the prepared USB Stick to the Kiosk player and power it on.<br>";
-        msg += "<br>";
-        msg += "THAT'S IT! Your data is copied to the player and the player starts the kiosk mode.<br>";
-        msg += "<br>";
-        msg += "For more information checkout the ReadMe at http://bit.do/usb-kiosk-readme";
-
-        headline.innerHTML = title
-        textfield.innerHTML = msg
-
-        // auto size text to avoid overflow
-        initTextSize()
-        resize()
+    }else{
+        // page duration has offset due to waiting for ticker for image changes, wait that offset before changing and reset offset
+        setTimeout("switchPage()", duration_offset);
+        duration_offset = 0;
     }
 }
 
@@ -368,55 +389,64 @@ function pageDuration(pageTxts){
 }
 
 function changeImage(images, index, duration, targetID, targetContainer, style, imageMode){
-    if(style == 2){
-        var image1 = document.getElementById(targetID[0]);
-        var image1Container = document.getElementById(targetContainer[0]);
-        var image2 = document.getElementById(targetID[1]);
-        var image2Container = document.getElementById(targetContainer[1]);
-        var targetIndex = index * 2;
-        if(targetIndex < images.length-1){
-            var img1 = images[targetIndex];
-            var img2 = images[targetIndex+1];
-            index++;
+    if(!ticker_moving || tickerOffScreen()){
+        if(style == 2){
+            var image1 = document.getElementById(targetID[0]);
+            var image1Container = document.getElementById(targetContainer[0]);
+            var image2 = document.getElementById(targetID[1]);
+            var image2Container = document.getElementById(targetContainer[1]);
+            var targetIndex = index * 2;
+            if(targetIndex < images.length-1){
+                var img1 = images[targetIndex];
+                var img2 = images[targetIndex+1];
+                index++;
 
-            image1.src = img1;
-            image2.src = img2;
+                image1.src = img1;
+                image2.src = img2;
 
-            image1.onload = function(e){
-                sizeImage(targetID[0], targetContainer[0], imageMode);
+                image1.onload = function(e){
+                    sizeImage(targetID[0], targetContainer[0], imageMode);
+                }
+
+                image2.onload = function(e){
+                    sizeImage(targetID[1], targetContainer[1], imageMode);
+                }
+
+                // only set timeout if two more images are left to show
+                var newTargetIndex = index * 2;
+                if(newTargetIndex < images.length-1){
+                    setTimeout(function(){
+                        changeImage(images, index, duration, targetID, targetContainer, style, imageMode)
+                    }, duration);
+                }
             }
-
-            image2.onload = function(e){
-                sizeImage(targetID[1], targetContainer[1], imageMode);
-            }
-
-            // only set timeout if two more images are left to show
-            var newTargetIndex = index * 2;
-            if(newTargetIndex < images.length-1){
-                setTimeout(function(){
-                    changeImage(images, index, duration, targetID, targetContainer, style, imageMode)
-                }, duration);
-            }
-        }
-    }else{
-        if(index < images.length){
-            var img = images[index];
-            var image = document.getElementById(targetID);
-            index++;
-
-            image.src = img;
-
-            image.onload = function(e){
-                sizeImage(targetID, targetContainer, imageMode);
-            }
-
-            // only set timeout for image change if further images to show
+        }else{
             if(index < images.length){
-                setTimeout(function(){
-                    changeImage(images, index, duration, targetID, targetContainer, style, imageMode);
-                }, duration);
+                var img = images[index];
+                var image = document.getElementById(targetID);
+                index++;
+
+                image.src = img;
+
+                image.onload = function(e){
+                    sizeImage(targetID, targetContainer, imageMode);
+                }
+
+                // only set timeout for image change if further images to show
+                if(index < images.length){
+                    setTimeout(function(){
+                        changeImage(images, index, duration, targetID, targetContainer, style, imageMode);
+                    }, duration);
+                }
             }
         }
+    } else {
+        var delay = timeUntilTickerOffScreen();
+        duration_offset += delay/4;
+        // wait time to let ticker go off screen before changing images
+        setTimeout(function(){
+            changeImage(images, index, duration, targetID, targetContainer, style, imageMode);
+        }, delay/4);
     }
 }
 
@@ -637,7 +667,7 @@ function moveText(){
 
     tickerW = $( "#ticker_txt").width();
 
-    if(tickerPos > (tickerW * -1)){
+    if(tickerPos > (tickerW * -1) - 10){
         tickerPos-=1;
     } else {
         // reset ticker position to right
@@ -646,6 +676,18 @@ function moveText(){
     }
     tickerStyle.left = tickerPos+'px';
     tickerLoop();
+}
+
+function tickerOffScreen(){
+    var tickerW = $( "#ticker_txt").width();
+    return (tickerPos < (tickerW * -1));
+}
+
+function timeUntilTickerOffScreen(){
+    var tickerW = $( "#ticker_txt").width();
+    var diff = tickerPos + tickerW;
+    var time = diff * TICKER_INTERVAL; // interval time for each pixel
+    return time;
 }
 
 function moveTextOutOfScreen(){
@@ -664,12 +706,11 @@ function moveTextOutOfScreen(){
         tickerPos = tWidth;
     }
     tickerStyle.left = tickerPos+'px';
-
 }
 
 function tickerLoop() {
     if(ticker_moving){
-        tickerInt = setTimeout("moveText()",20);
+        tickerInt = setTimeout("moveText()",TICKER_INTERVAL);
     }else{
         // stop ticker
         tickerPos = 20;
