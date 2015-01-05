@@ -63,6 +63,11 @@ sudo echo '@xset s off' > /etc/xdg/lxsession/LXDE/autostart;
 sudo echo '@xset -dpms' >> /etc/xdg/lxsession/LXDE/autostart;
 sudo echo '@xset s noblank' >> /etc/xdg/lxsession/LXDE/autostart;
 sudo echo '@chromium --kiosk --incognito --disable-translate http://127.0.0.1/usb-kiosk/infoscreen.html' >> /etc/xdg/lxsession/LXDE/autostart
+# write autostart for pi user specific as well, seems to be necessary with newest wheezy release
+sudo echo '@xset s off' > /etc/xdg/lxsession/LXDE-pi/autostart;
+sudo echo '@xset -dpms' >> /etc/xdg/lxsession/LXDE-pi/autostart;
+sudo echo '@xset s noblank' >> /etc/xdg/lxsession/LXDE-pi/autostart;
+sudo echo '@chromium --kiosk --incognito --disable-translate http://127.0.0.1/usb-kiosk/infoscreen.html' >> /etc/xdg/lxsession/LXDE-pi/autostart
 
 echo 'Setup complete!';
 echo 'Rebooting now...';
