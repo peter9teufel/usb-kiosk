@@ -451,9 +451,6 @@ function changeImage(images, index, duration, targetID, targetContainer, style, 
 }
 
 function sizeImage(targetID, targetContainer, mode){
-    // default image sizing mode is fit if not set
-    //mode = mode || 'image_crop';
-    mode = 'image_crop';
     var image = document.getElementById(targetID);
     // reset margin and size properties
     image.style.marginTop = '0px';
@@ -694,7 +691,9 @@ function moveText(){
 function tickerOffScreen(){
     var tickerW = $( "#ticker_txt").width();
     tWidth = $("#ticker").width()
-    return (tickerPos < (tickerW * -1) || tickerPos == tWidth);
+    //return (tickerPos < (tickerW * -1) || tickerPos == tWidth);
+    // return TRUE by now for testing purposes
+    return true;
 }
 
 function timeUntilTickerOffScreen(){
