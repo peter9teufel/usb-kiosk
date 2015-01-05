@@ -1,5 +1,5 @@
 var SITE_ROOT = "http://localhost/usb-kiosk/";
-var TICKER_INTERVAL = 15; // ms
+var TICKER_INTERVAL = 9; // ms
 var init_load = true;
 var pageNr=0;
 var pageData = [];
