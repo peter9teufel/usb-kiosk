@@ -1,5 +1,5 @@
 var SITE_ROOT = "http://localhost/usb-kiosk/";
-var TICKER_INTERVAL = 9; // ms
+var TICKER_INTERVAL = 60; // ms
 var init_load = true;
 var pageNr=0;
 var pageData = [];
@@ -638,7 +638,6 @@ function updateTicker(ticker_txt, ticker_mov, enable_ticker){
 	ticker_enabled = enable_ticker
         document.getElementById("ticker").style.display = 'inline'
         document.getElementById("logo_div").style.display = 'inline'
-	document.getElementById("ticker_background").style.display = 'inline'
         document.getElementById("ticker_background_2").style.display = 'inline'
         if(ticker_txt != null && ticker_text != ticker_txt){
             // message changed
@@ -660,7 +659,6 @@ function updateTicker(ticker_txt, ticker_mov, enable_ticker){
     }else{
         document.getElementById("logo_div").style.display = 'none'
         document.getElementById("ticker").style.display = 'none'
-	document.getElementById("ticker_background").style.display = 'none'
         document.getElementById("ticker_background_2").style.display = 'none'
     }
 }
@@ -726,7 +724,9 @@ function tickerLoop() {
         tickerInt = setTimeout("moveText()",TICKER_INTERVAL);
     }else{
         // stop ticker
-        tickerPos = 20;
+	var bgW = $("#ticker_background_2").width();
+        var logoW = $("#logo").width();
+	tickerPos = bgW - logoW - tickerW - 20;
         document.getElementById("ticker_txt").style.left = tickerPos+'px';
     }
 
